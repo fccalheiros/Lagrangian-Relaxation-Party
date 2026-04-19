@@ -17,6 +17,7 @@ using namespace std;
 #include "Constraint.h"
 #include "RGPCut.h"
 #include "algoritmo.h"
+#include "SortThreadPool.h"
 
 typedef vector<Variable*>::iterator VariableIterator;
 typedef vector<Constraint*>::iterator ConstraintIterator;
@@ -79,6 +80,7 @@ protected:
 
     char _direction;
     Configuration* _config;
+    SortThreadPool _pool;
 
 private:
 
@@ -211,8 +213,19 @@ public:
         //if ( ! is_sorted(inicio, fim ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
 
+    template <class StrictWeakOrdering> void Ordena3(StrictWeakOrdering comp) {
+        VariableIterator inicio = _variables.begin();
+        VariableIterator fim = _end;
+        ThreadMergeSort(_pool, comp, inicio, fim, 0);
+        //if ( ! is_sorted(inicio, fim ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
+    }
+
+    // parâmetros configuráveis
+    int max_sort_size_thread = 500; // mínimo para criar nova thread
+    int max_sort_size = 64;  // mínimo para usar std::sort
+
     template <class StrictWeakOrdering> void OrdenaRecursivo(StrictWeakOrdering comp, VariableIterator inicio, VariableIterator fim, int profundidade) {
-        if ( ( profundidade < 15 ) && ( (fim-inicio) > 200 ) ) {
+        if ( ( profundidade < 15 ) && ( (fim-inicio) > max_sort_size ) ) {
             int meio =  (int)((fim - inicio)/2);
             OrdenaRecursivo(comp, inicio, inicio+meio+1, profundidade+1);
             OrdenaRecursivo(comp, inicio+meio+1, fim, profundidade+1);
@@ -221,6 +234,39 @@ public:
         }
         else sort (inicio, fim, comp);
     };
+   
+    template <class StrictWeakOrdering>
+    void ThreadMergeSort(SortThreadPool& pool, StrictWeakOrdering comp,
+        VariableIterator inicio, VariableIterator fim, int profundidade) {
+        auto tamanho = fim - inicio;
+        if (tamanho <= max_sort_size) {
+            std::sort(inicio, fim, comp);
+            return;
+        }
+
+        VariableIterator meio = inicio + tamanho / 2;
+
+        if (tamanho > max_sort_size_thread) {
+            // primeira metade em nova thread
+            auto fut = pool.enqueue([this, &pool, comp, inicio, meio, profundidade] {
+                ThreadMergeSort(pool, comp, inicio, meio, profundidade + 1);
+                });
+
+            // segunda metade na thread atual
+            ThreadMergeSort(pool, comp, meio, fim, profundidade + 1);
+
+            fut.get(); // espera thread terminar
+        }
+        else {
+            // recursão sequencial
+            OrdenaRecursivo(comp, inicio, meio, profundidade + 1);
+            OrdenaRecursivo(comp, meio, fim, profundidade + 1);
+        }
+
+        // otimização com lower_bound
+        VariableIterator it = std::lower_bound(inicio, meio, *meio, comp);
+        std::inplace_merge(it, meio, fim, comp);
+    }
 
     template <class RandomAccessIterator, class StrictWeakOrdering> void retira_heap(RandomAccessIterator last,StrictWeakOrdering comp) {
         pop_heap(_variables.begin(),last,comp);

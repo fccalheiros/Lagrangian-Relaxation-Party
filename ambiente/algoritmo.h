@@ -50,7 +50,7 @@ class Algoritmo {
 
 };
 
-template <class T = Variable*> struct  CompareLagrangean : public binary_function<T, T, bool> {
+template <class T = Variable*> struct  CompareLagrangean  {
 public:
 
     bool  operator() (Variable* v1, Variable* v2) {
@@ -69,7 +69,7 @@ public:
 
 };
 
-template <class T = Variable*> struct  NotCompareLagrangean : public binary_function<T, T, bool> {
+template <class T = Variable*> struct  NotCompareLagrangean {
 public:
 
     bool  operator() (Variable* v1, Variable* v2) {
@@ -88,7 +88,7 @@ public:
 };
 
 
-template <class T = Variable*> struct  LessCost : public binary_function<T, T, bool> {
+template <class T = Variable*> struct  LessCost {
 public:
 
     bool  operator() (Variable* v1, Variable* v2) {
@@ -107,7 +107,7 @@ public:
 
 };
 
-template <class T = Variable*> struct  GreaterCost : public binary_function<T, T, bool> {
+template <class T = Variable*> struct  GreaterCost  {
 public:
 
     bool  operator() (Variable* v1, Variable* v2) {
@@ -125,7 +125,7 @@ public:
 
 };
 
-template <class T> struct  ComparaCobertura : public binary_function<T, T, bool> {
+template <class T> struct  ComparaCobertura  {
 public:
     ComparaCobertura() { }
 
@@ -150,7 +150,7 @@ public:
 
 };
 
-template <class T> struct  ComparaFixa : public binary_function<T, T, bool> {
+template <class T> struct  ComparaFixa  {
 public:
     ComparaFixa() { }
 

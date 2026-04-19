@@ -40,6 +40,7 @@ LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, ch
     setLowerBound(_config->MINUS00);
     setUpperBound(_config->PLUS00);
     _variables.reserve(5000);
+   
 }
 
 LagrangeanManager::LagrangeanManager(LagrangeanManager* m):
@@ -57,6 +58,8 @@ LagrangeanManager::LagrangeanManager(LagrangeanManager* m):
 {
     setLowerBound(_config->MINUS00);
     setUpperBound(_config->PLUS00);
+    _variables.reserve(5000);
+ 
 }
 
 LagrangeanManager* LagrangeanManager::CopyAndClean(LagrangeanManager* m) {
@@ -912,7 +915,7 @@ void LagrangeanManager::FinalStats() {
     printf("Cortes Submetidos: %d\n", _cutsFound);
     printf("Cortes Inseridos:  %d\n", _cutsInserted);
     printf("Cortes Removidos:  %d\n", _cutsRemoved);
-    printf("Cortes Finais:     %d\n", _cuts.size());
+    printf("Cortes Finais:     %d\n", static_cast<int>(_cuts.size()));
 
     if ( (LS-LI) < _config->STOP_GAP) 
         printf("Optimality proved \n");

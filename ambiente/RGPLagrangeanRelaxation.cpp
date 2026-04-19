@@ -39,7 +39,7 @@ void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 		_ordenou = false;
 	}
 	else {
-		_manager->Ordena2(CompareLagrangean <Variable*>());
+		_manager->Ordena3(CompareLagrangean <Variable*>());
 		_ordenou = true;
 	}
 
@@ -124,7 +124,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	cout << "** Fixa Variaveis **" << endl;
 
 	if (! _ordenou)  {
-		_manager->Ordena2( CompareLagrangean <Variable *> () );
+		_manager->Ordena3( CompareLagrangean <Variable *> () );
 		_ordenou = true;
 	}
 

@@ -72,7 +72,7 @@ public:
 
 };
 
-template <class T> struct  CompareNames : public binary_function<T, T, bool> {
+template <class T> struct  CompareNames  {
 public:
 	CompareNames() { }
 

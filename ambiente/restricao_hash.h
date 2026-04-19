@@ -6,11 +6,12 @@
 
 using namespace std;
 
-
-template <class T = Variable*> struct lessVariavel : binary_function <T, T, bool> {
-    bool operator() (const T& x, const T& y) const { return x->_nome < y->_nome; }
+template <class T = Variable*>
+struct lessVariavel {
+    bool operator()(const T& x, const T& y) const {
+        return x->_nome < y->_nome;
+    }
 };
-
 
 struct eqVariavel {
     bool operator()(const Variable *v1, const Variable *v2) const

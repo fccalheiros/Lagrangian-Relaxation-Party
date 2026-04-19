@@ -29,7 +29,7 @@ protected:
 };
 
 
-template <class T> struct ComparaArea : public binary_function<T, T, bool> {
+template <class T> struct ComparaArea  {
 public:
     ComparaArea() { }
 

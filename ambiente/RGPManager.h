@@ -105,7 +105,7 @@ class CompFixa  {
 
 };
   
-template <class T> struct  CompFixa2 : public binary_function<T,T,bool> {
+template <class T> struct  CompFixa2  {
 public:
     CompFixa2() { } 
     bool  operator() (Variable *v1, Variable *v2) {     
