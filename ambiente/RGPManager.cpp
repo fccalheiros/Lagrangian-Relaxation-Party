@@ -9,19 +9,13 @@
 
 using namespace std;
 
-RGPManager::RGPManager(Configuration * config) : LagrangeanManager(config),
-    _colunas(0),
-    _colunas2(0),
-    _colunas3(0),
-    _colunas4(0),
-    _JaImprimiu(true),
-    _uns(0),
-    _numeroPontos(0),
-    _faixa(0)
-{ }
+RGPManager::RGPManager(Configuration* config)
+    : RGPManager(config, nullptr, Direction::MINIMIZE) 
+{
+}
 
-RGPManager::RGPManager(Configuration* config, Algoritmo * algo, char direcao ):
-  LagrangeanManager(config, algo,direcao),
+RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direction):
+  LagrangeanManager(config, algo,direction),
     _colunas(0),
     _colunas2(0),
     _colunas3(0),

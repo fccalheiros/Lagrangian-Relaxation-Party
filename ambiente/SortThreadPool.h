@@ -7,6 +7,8 @@
 #include <condition_variable>
 #include <future>
 #include <functional>
+#include "Windows.h"
+#include <sstream>
 
 class SortThreadPool {
 public:
@@ -14,7 +16,6 @@ public:
     explicit SortThreadPool(size_t n);
     ~SortThreadPool();
 
-    // implementação do template enqueue
     template<class F>
     auto enqueue(F f) -> std::future<void> {
         auto task = std::make_shared<std::packaged_task<void()>>(f);
@@ -25,7 +26,8 @@ public:
         }
         condition.notify_one();
         return res;
-    }
+     }
+
 
 private:
     void Initialize(size_t n);
@@ -34,4 +36,5 @@ private:
     std::mutex queue_mutex;
     std::condition_variable condition;
     bool stop;
+	size_t max_queue_size; 
 };

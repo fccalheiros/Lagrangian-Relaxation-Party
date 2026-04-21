@@ -1,7 +1,6 @@
 #ifndef _LagrangeanManager_H
 #define _LagrangeanManager_H
 
-#define MAXIMIZA 0
 #define MINIMIZA 1 
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -19,10 +18,19 @@ using namespace std;
 #include "algoritmo.h"
 #include "SortThreadPool.h"
 
+#include <Windows.h>
+#include <string>
+#include <sstream>
+
+
 typedef vector<Variable*>::iterator VariableIterator;
 typedef vector<Constraint*>::iterator ConstraintIterator;
 typedef vector<Variable*> VariableSet;
 
+enum class Direction {
+    MAXIMIZE,
+    MINIMIZE
+};
 
 template<class Tp, class _Function> struct VariavelValida : public unary_function<Tp, void>
 {
@@ -78,8 +86,9 @@ public:
 
 protected:
 
-    char _direction;
+    Direction _direction;
     Configuration* _config;
+    size_t _max_sort_depth;
     SortThreadPool _pool;
 
 private:
@@ -91,8 +100,8 @@ protected:
 
     inline void setUpperBound(float UB) { _upperBound = UB; }
     inline void setLowerBound(float LB) { _lowerBound = LB; }
-    inline void setBound(float B)       { if (_direction == MINIMIZA) setUpperBound(B); else setLowerBound(B); }
-    inline char getDirection()          { return _direction; }
+    inline void setBound(float B)       { if (_direction == Direction::MINIMIZE) setUpperBound(B); else setLowerBound(B); }
+    inline Direction getDirection()          { return _direction; }
 
     void StoreIncumbent(Solucao &sol);
 
@@ -109,7 +118,7 @@ protected:
 public:
 
     LagrangeanManager(Configuration *config);
-    LagrangeanManager(Configuration* config, Algoritmo *algo, char direcao = MINIMIZA );
+    LagrangeanManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE, size_t max_sort_depth = 4 );
     LagrangeanManager(LagrangeanManager* m);
     virtual LagrangeanManager* CopyAndClean(LagrangeanManager* m);
 
@@ -147,7 +156,7 @@ public:
  
     inline float getUpperBound() { return _upperBound;  }
     inline float getLowerBound() { return _lowerBound;  }
-    inline float getBound() { if (_direction == MINIMIZA) return getUpperBound(); else return getLowerBound(); }
+    inline float getBound() { if (_direction == Direction::MINIMIZE) return getUpperBound(); else return getLowerBound(); }
 
     inline void SetAlgorithm(Algoritmo* algo) { _algo = algo; }
     inline float TotalRunTime() { return _algo->TotalRunTime();  }
@@ -216,12 +225,12 @@ public:
     template <class StrictWeakOrdering> void Ordena3(StrictWeakOrdering comp) {
         VariableIterator inicio = _variables.begin();
         VariableIterator fim = _end;
-        ThreadMergeSort(_pool, comp, inicio, fim, 0);
+        ThreadMergeSort(_pool, comp, inicio, fim, 0, _max_sort_depth);
         //if ( ! is_sorted(inicio, fim ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
 
     // parâmetros configuráveis
-    int max_sort_size_thread = 500; // mínimo para criar nova thread
+    int max_sort_size_thread = 500; // mínimo para usar outra thread
     int max_sort_size = 64;  // mínimo para usar std::sort
 
     template <class StrictWeakOrdering> void OrdenaRecursivo(StrictWeakOrdering comp, VariableIterator inicio, VariableIterator fim, int profundidade) {
@@ -234,38 +243,42 @@ public:
         }
         else sort (inicio, fim, comp);
     };
-   
+    
     template <class StrictWeakOrdering>
     void ThreadMergeSort(SortThreadPool& pool, StrictWeakOrdering comp,
-        VariableIterator inicio, VariableIterator fim, int profundidade) {
-        auto tamanho = fim - inicio;
-        if (tamanho <= max_sort_size) {
-            std::sort(inicio, fim, comp);
+        VariableIterator begin, VariableIterator end, int depth, int max_depth) {
+        auto size = end - begin;
+
+        DWORD tid = GetCurrentThreadId();
+        OutputDebugStringA((std::string("Execução na Thread: ") + std::to_string(tid) + " " +  std::to_string(depth) + "\r\n").c_str());
+        if (size <= max_sort_size) {
+            std::sort(begin, end, comp);
             return;
         }
 
-        VariableIterator meio = inicio + tamanho / 2;
-
-        if (tamanho > max_sort_size_thread) {
-            // primeira metade em nova thread
-            auto fut = pool.enqueue([this, &pool, comp, inicio, meio, profundidade] {
-                ThreadMergeSort(pool, comp, inicio, meio, profundidade + 1);
+        VariableIterator mid = begin + size / 2;
+        if (size > max_sort_size_thread && depth < max_depth) {
+			// first half in new thread
+            auto fut = pool.enqueue([this, &pool, comp, begin, mid, depth, max_depth] {
+                ThreadMergeSort(pool, comp, begin, mid, depth + 1, max_depth);
                 });
 
-            // segunda metade na thread atual
-            ThreadMergeSort(pool, comp, meio, fim, profundidade + 1);
-
+            // secont half in current thread
+            ThreadMergeSort(pool, comp, mid, end, depth + 1, max_depth);
             fut.get(); // espera thread terminar
         }
         else {
-            // recursão sequencial
-            OrdenaRecursivo(comp, inicio, meio, profundidade + 1);
-            OrdenaRecursivo(comp, meio, fim, profundidade + 1);
+			// threadless execution
+            OrdenaRecursivo(comp, begin, mid, depth + 1);
+            OrdenaRecursivo(comp, mid, end, depth + 1);
         }
 
-        // otimização com lower_bound
-        VariableIterator it = std::lower_bound(inicio, meio, *meio, comp);
-        std::inplace_merge(it, meio, fim, comp);
+        // Optimized merge works well in a quasi-sorted array
+        VariableIterator it = std::lower_bound(begin, mid, *mid, comp);
+        std::inplace_merge(it, mid, end, comp);
+
+        OutputDebugStringA((std::string("Fim Thread: ") + std::to_string(tid) + " " + std::to_string(depth) + "\r\n").c_str());
+
     }
 
     template <class RandomAccessIterator, class StrictWeakOrdering> void retira_heap(RandomAccessIterator last,StrictWeakOrdering comp) {

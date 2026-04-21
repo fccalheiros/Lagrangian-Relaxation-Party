@@ -4,29 +4,9 @@
 #include <iomanip>
 #include <fstream>
 
-
-
-LagrangeanManager::LagrangeanManager(Configuration * config):
-    _algo(NULL),
-    _direction(MINIMIZA),
-    _countConstraints(0),
-    _countConstraintsND(0),
-    _cutsInserted(0),
-    _cutsFound(0),
-    _cutsRemoved(0),
-    _countFixed(0),
-    _countFixedPartial(0),
-    _totalVariaveis(0),
-    _config(config)
-{
-  setLowerBound(_config->MINUS00);
-  setUpperBound(_config->PLUS00);
-  _variables.reserve(5000);
-}
-
-LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, char direcao):
+LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, Direction direction, size_t max_sort_depth):
     _algo(algo),
-    _direction(direcao),
+    _direction(direction),
     _countConstraints(0),
     _countConstraintsND(0),
     _cutsInserted(0),
@@ -35,7 +15,9 @@ LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, ch
     _countFixed(0),
     _countFixedPartial(0),
     _totalVariaveis(0),
-    _config(config)
+    _config(config),
+	_max_sort_depth(max_sort_depth),
+	_pool(1 << _max_sort_depth)
 {   
     setLowerBound(_config->MINUS00);
     setUpperBound(_config->PLUS00);
@@ -43,24 +25,17 @@ LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, ch
    
 }
 
-LagrangeanManager::LagrangeanManager(LagrangeanManager* m):
-    _algo(m->_algo),
-    _direction(m->_direction),
-    _countConstraints(0),
-    _countConstraintsND(0),
-    _cutsInserted(0),
-    _cutsFound(0),
-    _cutsRemoved(0),
-    _countFixed(0),
-    _countFixedPartial(0),
-    _totalVariaveis(m->_totalVariaveis),
-    _config(m->_config)
-{
-    setLowerBound(_config->MINUS00);
-    setUpperBound(_config->PLUS00);
-    _variables.reserve(5000);
- 
+LagrangeanManager::LagrangeanManager(Configuration* config)
+    : LagrangeanManager(config, nullptr) {
 }
+
+
+LagrangeanManager::LagrangeanManager(LagrangeanManager* m)
+    : LagrangeanManager(m->_config, m->_algo, m->_direction, m->_max_sort_depth)
+{
+    _totalVariaveis = m->_totalVariaveis; // ajuste específico
+}
+
 
 LagrangeanManager* LagrangeanManager::CopyAndClean(LagrangeanManager* m) {
     if (m == NULL) {
@@ -199,7 +174,7 @@ void LagrangeanManager::CheckBounds(float valRelaxado, float valHeuristica, vect
 
     float LI = getLowerBound();
 
-    if ( _direction == MINIMIZA ) {   
+    if ( _direction == Direction::MINIMIZE ) {   
         if ( valRelaxado > LI ) 
             setLowerBound(valRelaxado);
         if ( resHeuristica ) 

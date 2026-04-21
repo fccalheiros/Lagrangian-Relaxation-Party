@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 {
 #ifndef NDEBUG
     argc = 3;
-    string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w20h20n17i4.pt";
+    string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w50h50n30i10.pt";
     argv[1] = &str0[0];
     string str1 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\Configuration.json";
     argv[2] = &str1[0];

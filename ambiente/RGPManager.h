@@ -30,7 +30,7 @@ class RGPManager : public LagrangeanManager {
     double _uns;
 
     RGPManager(Configuration *config);
-    RGPManager(Configuration* config, Algoritmo *algo, char direcao = MINIMIZA);
+    RGPManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE);
     RGPManager(RGPManager* m);
     virtual LagrangeanManager* CopyAndClean(LagrangeanManager* m);
 

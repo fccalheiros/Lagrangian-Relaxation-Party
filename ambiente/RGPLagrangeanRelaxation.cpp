@@ -39,7 +39,7 @@ void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 		_ordenou = false;
 	}
 	else {
-		_manager->Ordena3(CompareLagrangean <Variable*>());
+		_manager->Ordena3( CompareLagrangean <Variable*> () );
 		_ordenou = true;
 	}
 
@@ -137,17 +137,8 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	VariableIterator vIt, vDummy;
 	_manager->VariableBounds(vDummy, vIt);
 	int InitialTotal = distance(vDummy, vIt);
-
-	/*
-	vIt--;
-	while ((*vIt)->_valorLag > V2) {
-		vIt--;
-		_manager->FixLastVariable();
-		contaFixadas++;
-	}
-	*/
 	
-	int numVar =  ((RGPManager*)_manager)->_numeroPontos + 1;  
+	int CardinalityRestriction =  ((RGPManager*)_manager)->_numeroPontos + 1;  
 	VariableIterator var,varFim,varTeste, varFimTeste, varInicioTeste, varTesteAnt;   
 	RGPVariable * vTeste;
 	float soma;
@@ -182,7 +173,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 					if ( (*var)->_nome != vTeste->_nome ) { 
 						soma += (*var)->_valorLag;
 						contaVar++;
-						if ( contaVar == numVar ) break;
+						if ( contaVar == CardinalityRestriction ) break;
 						if ( soma > LS - _config->STOP_GAP ) break;
 					}
 			}
@@ -194,7 +185,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 				fixou = true; 
 			}
 			else {
-				if (contaVar != numVar) {
+				if (contaVar != CardinalityRestriction) {
 					cout << "Dif2: " ;
 					cout << "x" << vTeste->_nome << " ++ " << soma << " ++ " << contaVar << " ++ " << valor << endl;
 				}
