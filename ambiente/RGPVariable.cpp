@@ -4,8 +4,8 @@
 #include "RGPVariable.h"
 
 RGPVariable::RGPVariable() : Variable(),
-_hx1(0), _hx2(0), _vy1(0), _vy2(0),
-_x1(0), _x2(0), _y1(0), _y2(0) {
+    _hx1(0), _hx2(0), _vy1(0), _vy2(0),
+    _x1(0), _x2(0), _y1(0), _y2(0) {
 }
 
 
