@@ -7,71 +7,57 @@
 
 
 
-BBTreeNode::BBTreeNode() 
+BBTreeNode::BBTreeNode() : 
+    _father(0), 
+    _manager(nullptr), 
+    _algo(nullptr), 
+    _branchVariable(nullptr),
+    _value(1), 
+    _leftSon(-1), 
+    _rightSon(-1), 
+    _index(0), 
+    _fantasyNumber(0),
+    _optimalFound(false), 
+    _executed(false), 
+    _pruned(false),
+    _lowerBound(0), 
+    _upperBound(0), 
+    _originalBound(0),
+    _initialCost(0), 
+    _totalRunTime(0) 
 {
-    _father          = 0;
-    _manager         = NULL;
-    _algo            = NULL;
-    _branchVariable           = NULL;
-    _value           = 1;
-    _leftSon         = -1;
-    _rightSon        = -1;
-    _index           = 0;
-    _fantasyNumber   = 0;
-    _optimalFound    = false;
-    _executed        = false;
-    _pruned          = false;
-    _lowerBound      = 0;
-    _upperBound      = 0;
-    _originalBound   = 0;
-    _initialCost     = 0;
-    _totalRunTime    = 0;
 }
 
-BBTreeNode::BBTreeNode(Configuration *config)
-{
-    _father = 0;
-    _manager = NULL;
-    _algo = NULL;
-    _branchVariable = NULL;
-    _value = 1;
-    _leftSon = -1;
-    _rightSon = -1;
-    _index = 0;
-    _fantasyNumber = 0;
-    _optimalFound = false;
-    _executed = false;
-    _pruned = false;
+BBTreeNode::BBTreeNode(Configuration* config)
+    : BBTreeNode() { 
     _lowerBound = config->MINUS00;
     _upperBound = config->PLUS00;
-    _originalBound = 0;
-    _initialCost = 0;
-    _totalRunTime = 0;
+}
+
+// Construtor de cópia
+BBTreeNode::BBTreeNode(const BBTreeNode& node) : 
+    _father(node._father),
+    _manager(node._manager),
+    _algo(node._algo),
+    _branchVariable(node._branchVariable),
+    _value(node._value),
+    _leftSon(node._leftSon),
+    _rightSon(node._rightSon),
+    _index(node._index),
+    _fantasyNumber(node._fantasyNumber),
+    _optimalFound(node._optimalFound),
+    _executed(node._executed),
+    _pruned(node._pruned),
+    _lowerBound(node._lowerBound),
+    _upperBound(node._upperBound),
+    _originalBound(node._originalBound),
+    _initialCost(node._initialCost), 
+    _totalRunTime(node._totalRunTime) 
+{
 }
 
 
 BBTreeNode::~BBTreeNode() {}
-
-BBTreeNode::BBTreeNode(const BBTreeNode &node) {
-    _father        = node._father;
-    _manager       = node._manager;
-    _algo          = node._algo;
-    _branchVariable         = node._branchVariable;
-    _value         = node._value;
-    _leftSon       = node._leftSon;
-    _rightSon      = node._rightSon;
-    _index         = node._index;
-    _fantasyNumber = node._fantasyNumber;
-    _optimalFound  = node._optimalFound;
-    _executed      = node._executed;
-    _pruned        = node._pruned;
-    _lowerBound    = node._lowerBound;
-    _upperBound    = node._upperBound;
-    _originalBound = node._originalBound;
-    _initialCost   = node._initialCost;
-    _totalRunTime  = node._totalRunTime;
-}
-
 
 bool BBTreeNode::hasChild() {
     return (_leftSon != -1 || _rightSon != -1);
@@ -79,50 +65,39 @@ bool BBTreeNode::hasChild() {
 
 /********* BBTree **********/
 
-BBTree::BBTree() {
 
-    _current = 0;
-    _nodesCount = 0;
-    _nodesExecuted = 0;
-    _nodes.reserve((int) pow(2, 5));
+BBTree::BBTree()
+    : _current(0)
+    , _nodesCount(0)
+    , _nodesExecuted(0)
+    , _config(nullptr)
+{
+    _nodes.reserve(static_cast<int>(std::pow(2, 5)));
     createEmptyNode(-1);
-
-};
-
-BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo, Configuration *config) {
-
-    _current = 0;
-    _nodesCount = 0;
-    _nodesExecuted = 0;
-    _config = config;
-
-    _nodes.reserve( (int) pow(2, _config->MAX_DEPTH + 1));
-    createEmptyNode(-1);
-
-    _nodes[_current]._manager = manager;
-    _nodes[_current]._algo = algo;
-
 }
 
-BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo, SearchAlgorithm sa, Configuration *config) {
-
-    _current = 0;
-    _nodesCount = 0;
-    _nodesExecuted = 0;
-    _config = config;
-
-    _nodes.reserve((int)pow(2, _config->MAX_DEPTH + 1));
+BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo, Configuration* config)
+    : _current(0)
+    , _nodesCount(0)
+    , _nodesExecuted(0)
+    , _config(config)
+{
+    _nodes.reserve(static_cast<int>(std::pow(2, _config->MAX_DEPTH + 1)));
     createEmptyNode(-1);
 
     _nodes[_current]._manager = manager;
     _nodes[_current]._algo = algo;
+}   
 
+
+BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo,
+    SearchAlgorithm sa, Configuration* config)
+    : BBTree(manager, algo, config) 
+{
     if (sa == SearchAlgorithm::BFS)
         populateTreeBFS(0, _config->MAX_DEPTH);
-
-    if (sa == SearchAlgorithm::DFS)
+    else if (sa == SearchAlgorithm::DFS)
         populateTreeDFS(0, _config->MAX_DEPTH);
-
 }
 
 BBTree::~BBTree() {
