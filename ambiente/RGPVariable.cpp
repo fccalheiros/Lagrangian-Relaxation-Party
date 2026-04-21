@@ -3,36 +3,20 @@
 #include <iostream>
 #include "RGPVariable.h"
 
-RGPVariable::RGPVariable() :
-    Variable()
-{
-    _hx1 = 0;
-    _hx2 = 0;
-    _vy1 = 0;
-    _vy2 = 0;
-    _x1 = 0;
-    _x2 = 0;
-    _y1 = 0;
-    _y2 = 0;
+RGPVariable::RGPVariable() : Variable(),
+_hx1(0), _hx2(0), _vy1(0), _vy2(0),
+_x1(0), _x2(0), _y1(0), _y2(0) {
 }
 
-RGPVariable::RGPVariable(float coef, int nome):
-  Variable(coef,nome)
-{
-    _hx1 = 0;
-    _hx2 = 0;
-    _vy1 = 0;
-    _vy2 = 0;
-    _x1 = 0;
-    _x2 = 0;
-    _y1 = 0;
-    _y2 = 0;
+
+RGPVariable::RGPVariable(float coef, int nome)
+    : RGPVariable() {
+    Variable::operator=(Variable(coef, nome));
 }
 
-RGPVariable::RGPVariable(float coef, int nome, int x1, int y1, int x2, int y2):
-  Variable(coef,nome)
-{
-  Retangulo(x1,y1,x2,y2);
+RGPVariable::RGPVariable(float coef, int nome, int x1, int y1, int x2, int y2)
+    : RGPVariable(coef, nome) {
+    Retangulo(x1, y1, x2, y2);
 }
 
 RGPVariable::RGPVariable(RGPVariable* v) :
