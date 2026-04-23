@@ -1,33 +1,22 @@
 #include "Variable.h"
 
-Variable::Variable():
-    _nome(0),
-    _valorFO(0),
-    _valorLag(0),
-    _marca(false),
-    _fixaEmZero(false),
-    _fixa(false),
-    _linhasCobertas(0)
-{}
 
-Variable::Variable(float coef, int nome):
+Variable::Variable(float coef, int nome, short int coveredConstraints,float valorLag):
     _nome(nome),
     _valorFO(coef),
-    _valorLag(coef),
+    _valorLag(valorLag),
     _marca(false),
     _fixaEmZero(false),
     _fixa(false),
-    _linhasCobertas(0)
+    _linhasCobertas(coveredConstraints)
 {}
 
-Variable::Variable(Variable* v): 
-    _nome(v->_nome),
-    _valorFO(v->_valorFO),
-    _valorLag(0),
-    _marca(false),
-    _fixaEmZero(false),
-    _fixa(false),
-    _linhasCobertas(v->_linhasCobertas)
+Variable::Variable() : 
+    Variable( 0.0f, 0, 0, 0.0f) {
+}
+
+Variable::Variable(Variable* v) :
+    Variable(v->_valorFO, v->_nome, v->_linhasCobertas, 0.0f)
 {
 }
 

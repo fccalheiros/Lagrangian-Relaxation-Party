@@ -27,7 +27,7 @@ class Variable {
  public:
   
 	Variable();
-	Variable(float coef, int nome = 0);
+	Variable(float coef, int nome = 0, short int coveredConstraints = 0, float valorLag = 0.0f);
 	Variable(Variable* v);
 
 	virtual Variable* CopyAndClean(Variable *v);

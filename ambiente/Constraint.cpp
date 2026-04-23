@@ -1,15 +1,9 @@
 #include "Variable.h"
 #include "Constraint.h"
 
-Constraint::Constraint():
-    _rhs(1),
-    _direction(ConstraintSign::Equal),
-    _index(0),
-    _lagrangean(0),
-    _deleted(false),
-    _covered(false)
-{
-    _variables.reserve(50);
+
+Constraint::Constraint()
+    : Constraint(1.0f, ConstraintSign::Equal, 0.0f, 50) {
 }
 
 Constraint::Constraint(float rhs, ConstraintSign sign = ConstraintSign::Equal, float ml = 0, int varCount = 50):
@@ -23,16 +17,14 @@ Constraint::Constraint(float rhs, ConstraintSign sign = ConstraintSign::Equal, f
     _variables.reserve(varCount);
 }
 
-Constraint::Constraint(Constraint* r):
-    _rhs(r->_rhs),
-    _direction(r->_direction),
-    _lagrangean(0),
-    _index(r->_index),
-    _deleted(r->_deleted),
-    _covered(r->_covered)
+Constraint::Constraint(Constraint* r)
+    : Constraint(r->_rhs, r->_direction, 0.0f, static_cast<int>(r->_variables.size()))
 {
-    _variables.reserve(r->_variables.size());
+    _index = r->_index;
+    _deleted = r->_deleted;
+    _covered = r->_covered;
 }
+
 
 Constraint* Constraint::CopyAndClean(Constraint* r) 
 {

@@ -22,23 +22,18 @@ GraphNode::~GraphNode()
 { }
 
 
-Grafo::Grafo(int size) {
+Grafo::Grafo(int size) :
+    _proximo(0),
+    _numeroNos(0),
+    _aumentou(false)
+{
     _nos.reserve(size);
-    //_nosVariaveis.reserve(2*size);
-
-    _arestas.reserve(size);
-    _proximo = 0;
-    _numeroNos = 0;
-    _aumentou = false;
+    _arestas.reserve(size);    
 }
 
-Grafo::Grafo() {
-  _nos.reserve(40);
-  //_nosVariaveis.reserve(80);
-  _arestas.reserve(40);
-  _proximo = 0;
-  _numeroNos = 0;
-  _aumentou = false;
+Grafo::Grafo() :
+    Grafo(40)
+{
 }
 
 Grafo::~Grafo() {
