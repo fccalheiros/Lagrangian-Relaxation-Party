@@ -91,6 +91,7 @@ void Constraint::CleanUpConstraint() {
 
 
 void Constraint::InsertVariable(Variable* var, float coef) {
+    _key += var->_nome;
     size_t i = _variables.size();
     size_t j = _variables.capacity();
     if (i == j) {
@@ -102,6 +103,28 @@ void Constraint::InsertVariable(Variable* var, float coef) {
 
 void Constraint::RemoveVariable(VariableIterator & it) {
     _variables.erase(it);
+}
+
+bool Constraint::Compare(Constraint* other) {
+
+    if (_key != other->getKey())
+        return false;
+
+    if (_variables.size() != other->_variables.size())
+        return false;
+
+    VariableIterator comeco, fim;
+    other->ConstraintIterators(comeco, fim);
+    for (; comeco != fim; comeco++) {
+        if (getCoefficient((*comeco)) == 0)
+            return false;
+    }
+
+    if (_rhs > other->getRHS())
+        _rhs = other->getRHS();
+
+    return true;
+
 }
 
 float Constraint::getIntercession(vector <Variable*>& sol)

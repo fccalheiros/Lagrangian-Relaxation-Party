@@ -8,18 +8,16 @@ using namespace std;
 
 #include <stdio.h>
 #include <iostream>
-
 #include <vector>
 #include <algorithm>
-#include "Variable.h"
-#include "Constraint.h"
-#include "RGPCut.h"
-#include "algoritmo.h"
-#include "SortThreadPool.h"
-
 #include <Windows.h>
 #include <string>
 #include <sstream>
+
+#include "Variable.h"
+#include "Constraint.h"
+#include "algoritmo.h"
+#include "SortThreadPool.h"
 
 
 typedef vector<Variable*>::iterator VariableIterator;

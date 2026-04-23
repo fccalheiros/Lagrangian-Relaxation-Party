@@ -73,7 +73,7 @@ public:
 	void Cover()      { _covered = true;  }
 	void Uncover()    { _covered = false; }
 	bool IsCovered() const { return _covered;  }
-	virtual bool Compare(Constraint* other) { return false; }
+	virtual bool Compare(Constraint* other);
 };
 
 template <class T> struct  CompareNames  {
