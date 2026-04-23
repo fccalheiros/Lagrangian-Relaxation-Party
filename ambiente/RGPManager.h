@@ -11,7 +11,7 @@ class RGPManager : public LagrangeanManager {
 
  protected:
 
-  Pontos _instancia;
+  Points _instancia;
 
   int _faixa;
   

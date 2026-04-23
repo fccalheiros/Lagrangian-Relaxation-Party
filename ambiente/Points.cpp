@@ -2,15 +2,15 @@
 #include <sstream>
 
 
-Pontos::Pontos() 
+Points::Points() 
 {
     _gridX.reserve(200);
     _gridY.reserve(200);
 }
 
-Pontos::~Pontos() { }
+Points::~Points() { }
 
-void Pontos::Insere(int x, int y) {
+void Points::Insere(int x, int y) {
     _px[x] = y;
     _py[y] = x;
 
@@ -18,7 +18,7 @@ void Pontos::Insere(int x, int y) {
     _gridY.push_back(y);
 }
 
-int Pontos::retornaX (int y) {
+int Points::retornaX (int y) {
  
     map<int, int>::const_iterator it = _py.find(y);
 
@@ -27,7 +27,7 @@ int Pontos::retornaX (int y) {
     return -1;
 }
 
-int Pontos::retornaY(int x) {
+int Points::retornaY(int x) {
 
     map<int, int>::const_iterator it = _px.find(x);
     if (it != _px.end())
@@ -35,73 +35,72 @@ int Pontos::retornaY(int x) {
     return -1;
 }
 
-int Pontos::retornaIndiceX(int x) {
-  int i,f,m;
-  i=0;
-  f=_gridX.size();
+int Points::retornaIndiceX(int x) {
+  size_t i = 0, m;
+  size_t f = _gridX.size();
 
   while (i != f) {
-    m = (i+f) /2;
-    if ( _gridX[m] < x ) i = m + 1;
-    else f = m;
+      m = (i+f) /2;
+      if ( _gridX[m] < x ) i = m + 1;
+      else f = m;
   }
   
-  return i;
+  return static_cast<int>(i);
 }
 
-int Pontos::retornaXDelta (int x, int delta) {
+int Points::retornaXDelta (int x, int delta) {
 
   int indice = retornaIndiceX(x);
-  return _gridX[indice+delta];
+  return _gridX[static_cast<size_t>(indice+delta)];
 
 }
 
-int Pontos::retornaIndiceY(int y) {
+int Points::retornaIndiceY(int y) {
 
   GridIter it = lower_bound(_gridY.begin(),_gridY.end(),y);
   
   return (int)( distance(_gridY.begin(),it));
 }
 
-void Pontos::retornaPontoX(int &x, int &y, int indice) {
+void Points::retornaPontoX(int& x, int& y, int indice) {
     x = _gridX[indice];
     y = _gridXespelho[indice];
 }
 
-int Pontos::retornaYDelta (int y, int delta) {
+int Points::retornaYDelta (int y, int delta) {
 
   int indice = retornaIndiceY(y);
-  return _gridY[indice+delta];
+  return _gridY[static_cast<size_t>(indice+delta)];
 
 }
 
-GridIter Pontos::retornaIterY(int y) {
+GridIter Points::retornaIterY(int y) {
    return ( lower_bound(_gridY.begin(),_gridY.end(),y) );
 }
 
-void Pontos::LimiteGridX(GridIter &comeco, GridIter &fim){
+void Points::LimiteGridX(GridIter &comeco, GridIter &fim){
   comeco = _gridX.begin();
   fim    = _gridX.end();
 }
 
-void Pontos::LimiteGridY(GridIter &comeco, GridIter &fim){
+void Points::LimiteGridY(GridIter &comeco, GridIter &fim){
   comeco = _gridY.begin();
   fim    = _gridY.end();
 }
 
-void Pontos::LimitePontosX(PointsIterator &comeco, PointsIterator &fim)
+void Points::LimitePontosX(PointsIterator &comeco, PointsIterator &fim)
 {
   comeco = _px.begin();
   fim    = _px.end();
 }
 
-void Pontos::LimitePontosY(PointsIterator &comeco, PointsIterator &fim)
+void Points::LimitePontosY(PointsIterator &comeco, PointsIterator &fim)
 {
   comeco = _py.begin();
   fim    = _py.end();
 }
 
-void Pontos::FinalizaGrid(int inix, int fimx, int iniy, int fimy) {
+void Points::FinalizaGrid(int inix, int fimx, int iniy, int fimy) {
 
     _gridX.push_back(inix);
     _gridX.push_back(fimx);
@@ -123,7 +122,7 @@ void Pontos::FinalizaGrid(int inix, int fimx, int iniy, int fimy) {
 
 }
 
-string Pontos::Print() {
+string Points::Print() {
 
     stringstream work;
 

@@ -58,7 +58,7 @@ void Grafo::InsereNo(Variable *no) {
 void Grafo::InsereAresta(int no1, int no2) {
   
     if (_aumentou ) {
-        _arestas.resize(_proximo + 3);
+        _arestas.resize(static_cast<size_t>(_proximo) + 3);
         _aumentou = false;
     }
 
@@ -70,7 +70,7 @@ void Grafo::InsereAresta(int no1, int no2) {
 void Grafo::InsereAresta(Variable *no1, Variable *no2) {
   
   if (_aumentou ) {
-    _arestas.resize(_proximo + 3);
+    _arestas.resize(static_cast<size_t>(_proximo) + 3);
     _aumentou = false;
   }
   short int n1 = _nosVariaveis[no1];
@@ -82,7 +82,7 @@ void Grafo::InsereAresta(Variable *no1, Variable *no2) {
 }
 
 int Grafo::Grau(int no) {
-  return _arestas[no].size();
+  return static_cast<int>(_arestas[no].size());
 }
 
 bool Grafo::TemAresta(int no1, int no2) {
@@ -123,7 +123,7 @@ void Grafo::DFS(int no) {
         marca[no] = true;
         fila.pop_front();
         prof = _infoNos[no]._nivel + 1;
-        int tamanho = _arestas[no].size();
+        int tamanho = static_cast<int>(_arestas[no].size());
 
         for (indice=0; indice < tamanho; indice++) {
             noTeste = _arestas[no][indice];
@@ -149,7 +149,7 @@ void Grafo::DFS(int no) {
 void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
  
     if (_aumentou ) {
-        _arestas.resize(_proximo + 3);
+        _arestas.resize(static_cast<size_t>(_proximo) + 3);
         _aumentou = false;
     }
 
@@ -157,8 +157,8 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
     RGPCut *corte;
     bool fim = false;
 
-    unsigned int maiorGrau = 0;
-    unsigned int grau;
+    size_t maiorGrau = 0;
+    size_t grau;
 
     int candidata;
     int tamanho;
@@ -240,7 +240,7 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
 void Grafo::CicloImpar(LagrangeanManager *mestre) {
 
     if (_aumentou ) {
-        _arestas.resize(_proximo+3);
+        _arestas.resize(static_cast<size_t>(_proximo) + 3);
         _aumentou = false;
     }
 
@@ -252,7 +252,7 @@ void Grafo::CicloImpar(LagrangeanManager *mestre) {
 
     no = 0;
     DFS(no);
-    grau = _arestas[no].size();
+    grau = static_cast<int>(_arestas[no].size());
     for (indice = 0; indice < grau; indice++) {
         noTeste = _arestas[no][indice];
         if ( ( _infoNos[noTeste]._nivel > 3 ) && (_infoNos[noTeste]._nivel % 2 == 0) && (noTeste > no) ) {
@@ -273,7 +273,7 @@ void Grafo::CicloImpar(LagrangeanManager *mestre) {
 void Grafo::Imprime() {
 
     if (_aumentou ) {
-        _arestas.resize(_proximo + 3);
+        _arestas.resize(static_cast<size_t>(_proximo) + 3);
         _aumentou = false;
     }
 

@@ -100,12 +100,12 @@ void RGPManager::ReadProblem(char *arq) {
 
 void RGPManager::CreateProblem() {
     int i;
-    int tamanho = (_numeroPontos+1)*(_numeroPontos+1);
+    size_t tamanho = static_cast<size_t>((_numeroPontos+1)*(_numeroPontos+1));
     GridIter x1,y1,x2,y2, fimx, fimy;
 
     _constraints.reserve(tamanho + 1);
     for (i=0; i < tamanho; i++) 
-        InsertConstraint( new Constraint(1, EQUAL, 0, 0) );        
+        InsertConstraint( new Constraint(1, ConstraintSign::Equal, 0, 0) );        
 
     _instancia.LimiteGridX(x1,fimx);
 
@@ -320,7 +320,7 @@ void RGPManager::InsertVariableIntoConstraint(Variable *var1) {
     line = ( _numeroPontos + 1 ) * Iy1;
     for ( Iy=Iy1; Iy < Iy2; Iy++ ) {
         for ( Ix=Ix1; Ix < Ix2; Ix++) {
-            var->poeRestricao( _constraints[line + Ix] );
+            var->poeRestricao( _constraints[static_cast<size_t>(line + Ix)] );
             _uns++;
         }
         line += (_numeroPontos+1);

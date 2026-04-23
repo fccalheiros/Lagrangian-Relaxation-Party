@@ -32,7 +32,7 @@ struct eqstr
 };
 
 
-class Pontos {
+class Points {
   
 protected:
 
@@ -45,8 +45,8 @@ protected:
 
  public:
 
-    Pontos();
-    ~Pontos();
+    Points();
+    ~Points();
   
     void Insere(int x, int y);
 

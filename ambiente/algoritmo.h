@@ -46,7 +46,7 @@ class Algoritmo {
 
   virtual Algoritmo* getNew() { return new Algoritmo(_config);  }
 
-  inline float TotalRunTime() { return ElapsedTime(_tempoInicio, _tempoFinal); }
+  inline float TotalRunTime() const { return ElapsedTime(_tempoInicio, _tempoFinal); }
 
 };
 

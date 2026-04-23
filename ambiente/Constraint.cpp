@@ -3,7 +3,7 @@
 
 Constraint::Constraint():
     _rhs(1),
-    _direction(EQUAL),
+    _direction(ConstraintSign::Equal),
     _index(0),
     _lagrangean(0),
     _deleted(false),
@@ -12,9 +12,9 @@ Constraint::Constraint():
     _variables.reserve(50);
 }
 
-Constraint::Constraint(float rhs, char dir = EQUAL, float ml = 0, int varCount = 50):
+Constraint::Constraint(float rhs, ConstraintSign sign = ConstraintSign::Equal, float ml = 0, int varCount = 50):
     _rhs(rhs),
-    _direction(dir),
+    _direction(sign),
     _lagrangean(ml),
     _index(0),
     _deleted(false),
@@ -59,21 +59,18 @@ Constraint::~Constraint()
 int Constraint::Degree() {
     VariableIterator it, itFim;
     ConstraintIterators(it, itFim);
-    return distance(it,itFim);
+    return static_cast<int>(distance(it,itFim));
 }
 
 
-bool Constraint::setDirection(char dir){
-    if ( (dir >= LOWER_EQUAL) && ( dir <= GREATER_EQUAL ) ) {
-        _direction = dir;
-        return true;
-    }
-    return false;
+bool Constraint::setDirection(ConstraintSign dir) {
+    _direction = dir;
+    return true;
 }
 
 void Constraint::setLagrangean(float ml) {
     _lagrangean = ml;
-    if ( _direction  == LOWER_EQUAL ) {
+    if ( _direction  == ConstraintSign::LowerEqual ) {
         if ( _lagrangean > 0 )
             _lagrangean = 0;
     }
@@ -101,10 +98,10 @@ void Constraint::CleanUpConstraint() {
 
 
 void Constraint::InsertVariable(Variable* var, float coef) {
-    unsigned int i = _variables.size();
-    unsigned int j = _variables.capacity();
+    size_t i = _variables.size();
+    size_t j = _variables.capacity();
     if (i == j) {
-        i = (unsigned int)(i * 1.2);
+        i = static_cast<size_t>(i * 1.2);
         _variables.reserve(i);
     }
     _variables.push_back(var);
@@ -117,17 +114,14 @@ void Constraint::RemoveVariable(VariableIterator & it) {
 float Constraint::getIntercession(vector <Variable*>& sol)
 {
     float count = 0;
-    int solSize = sol.size();
-    int i;
+    size_t solSize = sol.size();
+    size_t i;
+    VariableIterator begin, end;
 
-    VariableIterator it, itFim ;
-
-    ConstraintIterators(it, itFim);
-
-    for (i = 0; i < solSize; i++) {
-        it = lower_bound(it, itFim, sol[i], CompareNames <Variable*>());
-        if (it == itFim) return count;
-        if ((*it)->_nome == sol[i]->_nome)
+    for (ConstraintIterators(begin, end), i = 0; i < solSize; i++) {
+        begin = lower_bound(begin, end, sol[i], CompareNames <Variable*>());
+        if (begin == end) return count;
+        if ((*begin)->_nome == sol[i]->_nome)
             count++;
     }
 
@@ -162,7 +156,7 @@ void Constraint::Print(FILE* fp) {
         fprintf(fp, " + x%d", (*it)->retNome());
         i++;
     }
-    if (_direction == LOWER_EQUAL)
+    if (_direction == ConstraintSign::LowerEqual)
         fprintf(fp, "<");
 
     fprintf(fp, "= %f\n", _rhs);

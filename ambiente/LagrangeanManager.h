@@ -1,7 +1,6 @@
 #ifndef _LagrangeanManager_H
 #define _LagrangeanManager_H
 
-#define MINIMIZA 1 
 
 #define _CRT_SECURE_NO_WARNINGS
 
@@ -101,7 +100,7 @@ protected:
     inline void setUpperBound(float UB) { _upperBound = UB; }
     inline void setLowerBound(float LB) { _lowerBound = LB; }
     inline void setBound(float B)       { if (_direction == Direction::MINIMIZE) setUpperBound(B); else setLowerBound(B); }
-    inline Direction getDirection()          { return _direction; }
+    inline Direction getDirection()  const  { return _direction; }
 
     void StoreIncumbent(Solucao &sol);
 
@@ -154,12 +153,12 @@ public:
     void FreeMemory();
     void GenerateProblem(char *arq);
  
-    inline float getUpperBound() { return _upperBound;  }
-    inline float getLowerBound() { return _lowerBound;  }
-    inline float getBound() { if (_direction == Direction::MINIMIZE) return getUpperBound(); else return getLowerBound(); }
+    inline float getUpperBound() const { return _upperBound;  }
+    inline float getLowerBound() const { return _lowerBound;  }
+    inline float getBound() const { if (_direction == Direction::MINIMIZE) return getUpperBound(); else return getLowerBound(); }
 
     inline void SetAlgorithm(Algoritmo* algo) { _algo = algo; }
-    inline float TotalRunTime() { return _algo->TotalRunTime();  }
+    inline float TotalRunTime() const { return _algo->TotalRunTime();  }
 
     void CoveredConstraints(Variable *var, vector <Constraint *> &linhas);
 
@@ -246,7 +245,7 @@ public:
     
     template <class StrictWeakOrdering>
     void ThreadMergeSort(SortThreadPool& pool, StrictWeakOrdering comp,
-        VariableIterator begin, VariableIterator end, int depth, int max_depth) {
+        VariableIterator begin, VariableIterator end, int depth, size_t max_depth) {
         auto size = end - begin;
 
         DWORD tid = GetCurrentThreadId();

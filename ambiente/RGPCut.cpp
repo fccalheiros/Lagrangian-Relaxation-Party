@@ -1,12 +1,12 @@
 #include "RGPCut.h"
 
 RGPCut::RGPCut():
-    Constraint(1,LOWER_EQUAL,0,30),
+    Constraint(1,ConstraintSign::LowerEqual,0,30),
     _key(0) 
 {}
 
 RGPCut::RGPCut(float rhs):
-    Constraint(rhs,LOWER_EQUAL,0,30),
+    Constraint(rhs,ConstraintSign::LowerEqual,0,30),
     _key(0) 
 {}
 

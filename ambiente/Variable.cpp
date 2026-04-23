@@ -64,7 +64,7 @@ float Variable::retCusto() const {
     return _valorFO;
 }
 
-float Variable::retCustoLag() {
+float Variable::retCustoLag() const {
     return _valorLag;
 }
 
@@ -81,10 +81,10 @@ void Variable::poeCustoLag(float custo) {
 }
 
 void Variable::poeRestricao(Constraint *restricao) {
-    unsigned int i = _constraints.size();
-    unsigned int j = _constraints.capacity();
+    size_t i = _constraints.size();
+    size_t j = _constraints.capacity();
     if ( i == j ) {
-        i = (unsigned int)(i*1.2);
+        i = static_cast<size_t>(i * 1.2);
         _constraints.reserve(i);
     }
     _constraints.push_back(restricao);
@@ -102,7 +102,7 @@ void Variable::RetiraFixZero() {
   _fixaEmZero = false;
 }
 
-bool Variable::EstaFixada() {
+bool Variable::EstaFixada() const {
   return _fixaEmZero;
 }
 
@@ -114,7 +114,7 @@ void Variable::Desmarca() {
   _marca = false;
 }
 
-bool Variable::Valida() {
+bool Variable::Valida() const {
   if ( _fixaEmZero ) return false;
   if ( _fixa ) return false;
   return true;

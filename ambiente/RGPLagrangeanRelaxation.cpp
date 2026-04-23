@@ -136,7 +136,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	//float V2 = LS - (valor - _manager->GetMaxLagrangean(solRel)) - _config->STOP_GAP;
 	VariableIterator vIt, vDummy;
 	_manager->VariableBounds(vDummy, vIt);
-	int InitialTotal = distance(vDummy, vIt);
+	size_t InitialTotal = distance(vDummy, vIt);
 	
 	int CardinalityRestriction =  ((RGPManager*)_manager)->_numeroPontos + 1;  
 	VariableIterator var,varFim,varTeste, varFimTeste, varInicioTeste, varTesteAnt;   
@@ -149,14 +149,14 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	_manager->VariableBounds(varTeste,varFimTeste);
 	varInicioTeste  = varTeste;
 	varTesteAnt     = varFimTeste;
-	int total       = distance(varTeste, varFimTeste);
+	size_t total    = distance(varTeste, varFimTeste);
 	float passo     = _config->STEP_TRY_FIX;
 	float acumulado = passo;
 	bool fixou      = true;
    
 	while ( fixou && (acumulado <= _config->MAX_TRY_FIX) ) {
 		fixou       = false;
-		varTeste    = varInicioTeste + (int) ( total * (1-acumulado) );   
+		varTeste = varInicioTeste + static_cast<size_t>(total * (1 - acumulado));
 		varFimTeste = varTesteAnt; 
 		varTesteAnt = varTeste;
 		acumulado  += passo;

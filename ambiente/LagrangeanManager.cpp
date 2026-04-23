@@ -17,7 +17,7 @@ LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, Di
     _totalVariaveis(0),
     _config(config),
 	_max_sort_depth(max_sort_depth),
-	_pool(1 << _max_sort_depth)
+	_pool(static_cast<size_t>(1) << _max_sort_depth)
 {   
     setLowerBound(_config->MINUS00);
     setUpperBound(_config->PLUS00);
@@ -349,10 +349,10 @@ void LagrangeanManager::FixLastVariable() {
 
 
 void LagrangeanManager::InsertVariable(Variable *var) {
-    unsigned int i = _variables.size();
-    unsigned int j = _variables.capacity();
+    size_t i = _variables.size();
+    size_t j = _variables.capacity();
     if ( i == j ) {
-        i = (unsigned int)(i * 1.2);
+        i = static_cast<size_t>(i * 1.2);
         _variables.reserve(i);
     }
     _variables.push_back(var);
@@ -380,7 +380,7 @@ void LagrangeanManager::MarkConstraintForDeletion(Variable* var) {
         (*it)->LogicalDelete();
         set++;
     }
-    _countConstraints = _constraints.size() - set;
+    _countConstraints = static_cast<int>(_constraints.size() - set);
     cout << "Restricoes Marcadas: " << set << endl;
 }
 
@@ -424,7 +424,7 @@ void LagrangeanManager::RemoveCut(ConstraintIterator &it) {
 }
 
 int LagrangeanManager::ActiveVariables() {
-    return ( distance(_variables.begin(),_end) );
+    return static_cast<int>(distance(_variables.begin(),_end));
 } 
 
 void LagrangeanManager::VariableBounds(VariableIterator& comeco, VariableIterator& fim) {
@@ -925,38 +925,32 @@ void LagrangeanManager::CheckConstraints(Solucao& sol) {
 
     ConstraintIterator rest, fim, restLixo;
     VariableIterator vIt, vEnd;
-    int i;
-    int tamanho = _constraints.size() + _cuts.size();
-    vector <bool> Check(tamanho);
+    size_t i = 0;
+    size_t size = _constraints.size() + _cuts.size();
+    vector <bool> Check(size);
 
     float maxCost = sol[sol.size() - 1]->retCustoLag();
 
-    ConstraintsBounds(rest, fim);
-    for (i = 0; rest != fim; rest++, i++) {
+    for (ConstraintsBounds(rest, fim), i = 0; rest != fim; rest++, i++) {
         Check[i] = true;
     }
 
-    CutsBounds(rest, fim);
-    for (; rest != fim; rest++, i++) {
+    for (CutsBounds(rest, fim); rest != fim; rest++, i++) {
         Check[i] = true;
-        (*rest)->ConstraintIterators(vIt, vEnd);
-        for (; vIt != vEnd; vIt++) {
+        for ((*rest)->ConstraintIterators(vIt, vEnd); vIt != vEnd; vIt++) {
             Check[i] = Check[i] && (*vIt)->retCustoLag() >=  maxCost;
         }
     }
    
-    VariableBounds(vIt, vEnd);
-
-    for (; vIt != vEnd; vIt++) {
+    for (VariableBounds(vIt, vEnd) ; vIt != vEnd; vIt++) {
         if ((*vIt)->retCustoLag() < maxCost) {
-            (*vIt)->ConstraintsBounds(rest, fim);
-            for (; rest != fim; rest++) {
+            for ((*vIt)->ConstraintsBounds(rest, fim); rest != fim; rest++) {
                 Check[(*rest)->_index] = false;
             }
         }
     }
 
-    for (i = 0; i < tamanho; i++) {
+    for (i = 0; i < size; i++) {
         if (! Check[i])
             cout << "Constraint: " << i <<  endl;
         

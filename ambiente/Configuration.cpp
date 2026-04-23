@@ -171,7 +171,7 @@ int Configuration::getTokenIndex(string token) {
 	it = find(_token.begin(), _token.end(), token);
 	if (it == _token.end())
 		return -1;
-	return distance(_token.begin(), it);
+	return static_cast<int>(distance(_token.begin(), it));
 }
 
 void Configuration::TryChangeDefaultToken(string token, string value) {

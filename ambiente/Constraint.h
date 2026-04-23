@@ -6,9 +6,11 @@
 #include <iostream>
 
 
-#define LOWER_EQUAL   1
-#define EQUAL         2
-#define GREATER_EQUAL 3
+enum class ConstraintSign {
+	LowerEqual = 1,  // ?
+	Equal = 2,  // =
+	GreaterEqual = 3   // ?
+};
 
 typedef vector<Variable*>::iterator VariableIterator;
 
@@ -23,7 +25,7 @@ public:
 protected:
 
 	float _rhs;
-	char _direction;
+	ConstraintSign _direction;
 	bool _deleted;
 	bool _covered;
 
@@ -31,7 +33,7 @@ protected:
 public:
 
 	Constraint();
-	Constraint(float rhs, char dir, float ml, int varCount);          // Alterada... apaguei os valores default que estão no cpp
+	Constraint(float rhs, ConstraintSign sign, float ml, int varCount);          // Alterada... apaguei os valores default que estão no cpp
 	Constraint(Constraint* r);
 
 	virtual Constraint* CopyAndClean(Constraint* r);
@@ -55,20 +57,20 @@ public:
 	void CleanUpConstraint();
 
 
-	float getRHS() { return _rhs; }
-	int   getDirection() { return _direction; }
-	float getLagrangean() { return _lagrangean; }
+	float getRHS() const  { return _rhs; }
+	ConstraintSign  getDirection()  const { return _direction; }
+	float getLagrangean() const { return _lagrangean; }
 
 	void setRHS(float rhs) { _rhs = rhs; }
-	bool setDirection(char dir);
+	bool setDirection(ConstraintSign dir);
 	void setLagrangean(float ml);
 
 	void LogicalDelete()  { _deleted = true; }
-	bool LogicalDeleted() { return _deleted; }
+	bool LogicalDeleted() const { return _deleted; }
 
 	void Cover()      { _covered = true;  }
 	void Uncover()    { _covered = false; }
-	bool IsCovered()  { return _covered;  }
+	bool IsCovered() const { return _covered;  }
 
 };
 

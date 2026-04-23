@@ -147,9 +147,9 @@ void LagrangeanRelaxation::SubGradiente(Solucao &sol){
     float LI = _manager->getLowerBound();
     float LS = _manager->getUpperBound();
     float tw;
-    int solSize = sol.size();
+    int solSize = static_cast<int>(sol.size());
 
-    int tamanho = _manager->_constraints.size() + _manager->_cuts.size();  
+    int tamanho = static_cast<int>(_manager->_constraints.size() + _manager->_cuts.size());
     cout << "CUTS: " << _manager->_cuts.size() << endl; 
     vector <float> Gw(tamanho);
     float moduloGw = 0;

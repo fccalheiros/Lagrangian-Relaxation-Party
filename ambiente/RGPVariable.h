@@ -7,7 +7,7 @@ class RGPVariable : public Variable {
 
 	//felipe -- retirar
 public: 
-	bool _out;
+	bool _out = false;
 
 protected:
 

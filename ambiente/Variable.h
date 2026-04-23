@@ -36,7 +36,7 @@ class Variable {
 
 	int    retNome() const;
 	float  retCusto() const;
-	float  retCustoLag();  
+	float  retCustoLag() const;  
 
 	void poeNome(int s);
 	void poeCusto(float coef);
@@ -47,14 +47,14 @@ class Variable {
 
 	void FixaEmZero();
 	void RetiraFixZero();
-	bool EstaFixada();
+	bool EstaFixada() const;
   
 	void Marca(); 
 	void Desmarca();
-	bool Valida();
+	bool Valida() const;
 
 	void setCoveredConstraints(int i) { _linhasCobertas = i; _constraints.reserve(i); }
-	int  getCoveredConstraints()      { return _linhasCobertas; }
+	int  getCoveredConstraints() const { return _linhasCobertas; }
 	void addCoveredConstraints(int i) { _linhasCobertas += i;  }
 	void ResetCoveredConstraints()    { _linhasCobertas = (short int)_constraints.size(); }
 
