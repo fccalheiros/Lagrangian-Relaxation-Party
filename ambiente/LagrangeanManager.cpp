@@ -385,18 +385,19 @@ void LagrangeanManager::MarkConstraintForDeletion(Variable* var) {
 }
 
 
-void LagrangeanManager::InsertCut(Constraint *restricao) {
-    ConstraintIterator comeco;
-    ConstraintIterator fim;
-    CutsBounds(comeco, fim);
+void LagrangeanManager::InsertCut(Constraint *constraint) {
+    ConstraintIterator begin;
+    ConstraintIterator end;
     _cutsFound++;
-    for (;comeco != fim; comeco++) {
-        if ( ((RGPCut *)(*comeco))->Compare( (RGPCut *) restricao ) )
+
+    for (CutsBounds(begin, end); begin != end; begin++) {
+        if ( (*begin)->Compare(constraint) )
             return; 
-    } 
-    restricao->SortVariablesByName();
+    }
+
+    constraint->SortVariablesByName();
     _cutsInserted++;
-    _cuts.push_back(restricao);
+    _cuts.push_back(constraint);
 }
 
 void LagrangeanManager::RemoveVariable(VariableIterator &it) {
@@ -417,7 +418,6 @@ void LagrangeanManager::RemoveConstraintND(ConstraintIterator &it) {
 }
 
 void LagrangeanManager::RemoveCut(ConstraintIterator &it) {
-    //cout << "RGPCut removido : " << endl; ((Constraint *)(*it))->Imprime();
     delete *it;
     _cuts.erase(it);
     _cutsRemoved++;

@@ -131,7 +131,7 @@ public:
     void InsertVariable(Variable *var);
     void InsertConstraint(Constraint *restricao);
     void InsertConstraintND(Constraint *restricao);
-    void InsertCut(Constraint *corte);
+    void InsertCut(Constraint *constraint);
 
     void RemoveVariable(VariableIterator &it);
     void RemoveConstraint(ConstraintIterator &it);

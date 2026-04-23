@@ -28,6 +28,7 @@ protected:
 	ConstraintSign _direction;
 	bool _deleted;
 	bool _covered;
+	int _key;
 
 
 public:
@@ -60,6 +61,7 @@ public:
 	float getRHS() const  { return _rhs; }
 	ConstraintSign  getDirection()  const { return _direction; }
 	float getLagrangean() const { return _lagrangean; }
+	int getKey() const { return _key; }
 
 	void setRHS(float rhs) { _rhs = rhs; }
 	bool setDirection(ConstraintSign dir);
@@ -71,7 +73,7 @@ public:
 	void Cover()      { _covered = true;  }
 	void Uncover()    { _covered = false; }
 	bool IsCovered() const { return _covered;  }
-
+	virtual bool Compare(Constraint* other) { return false; }
 };
 
 template <class T> struct  CompareNames  {

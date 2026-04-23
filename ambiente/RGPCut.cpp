@@ -1,13 +1,11 @@
 #include "RGPCut.h"
 
 RGPCut::RGPCut():
-    Constraint(1,ConstraintSign::LowerEqual,0,30),
-    _key(0) 
+    Constraint(1,ConstraintSign::LowerEqual,0,30)
 {}
 
 RGPCut::RGPCut(float rhs):
-    Constraint(rhs,ConstraintSign::LowerEqual,0,30),
-    _key(0) 
+    Constraint(rhs,ConstraintSign::LowerEqual,0,30)
 {}
 
 RGPCut::~RGPCut() { }
@@ -17,23 +15,23 @@ void RGPCut::InsertVariable(Variable *var, float  coef)  {
     Constraint::InsertVariable(var,coef);
 }
 
-bool RGPCut::Compare( RGPCut * rest ) {
+bool RGPCut::Compare(Constraint* other) {
 
-    if ( _key != rest->_key ) 
+    if ( _key != other->getKey() ) 
         return false;
 
-    if ( _variables.size() != rest->_variables.size() ) 
+    if ( _variables.size() != other->_variables.size() ) 
         return false;
 
     VariableIterator comeco,fim;
-    rest->ConstraintIterators(comeco,fim);
+    other->ConstraintIterators(comeco,fim);
     for (;comeco !=  fim; comeco++) {
         if ( getCoefficient( (*comeco) ) == 0 ) 
         return false;
     }
 
-    if ( _rhs > rest->_rhs ) 
-        _rhs = rest->_rhs;
+    if ( _rhs > other->getRHS() ) 
+        _rhs = other->getRHS();
 
   return true;
   

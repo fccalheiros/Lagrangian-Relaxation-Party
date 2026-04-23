@@ -17,14 +17,10 @@ class RGPCut : public Constraint {
 
  public:
 
-    bool Compare( RGPCut *rest );
+    //bool Compare( RGPCut *rest );
+    bool Compare(Constraint* other) override;
 
-    //bool operator== (RGPCut *rest);
 
-protected:
-
-    int _key;
-  
 };
 
 

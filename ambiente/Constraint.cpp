@@ -12,7 +12,8 @@ Constraint::Constraint(float rhs, ConstraintSign sign = ConstraintSign::Equal, f
     _lagrangean(ml),
     _index(0),
     _deleted(false),
-    _covered(false)
+    _covered(false),
+    _key(0)
 {
     _variables.reserve(varCount);
 }
