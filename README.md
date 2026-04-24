@@ -5,9 +5,11 @@ This code is the result of my master's degree completed more than 20 years ago. 
 
 I now share this code with the aim that students have a starting point and are able to implement a Lagrangian Relaxation for the problem they want, without going through all the challenges that this type of implementation offers.
 
-I will briefly explain how to do this later...
+I have started documenting how to reuse and extend the framework for other combinatorial optimization problems in [How to Extend the Framework](HOW_TO_EXTEND.md).
 
-I also have some problems with the code (a program never ends) which I will share here. If you are an enthusiast, feel free to contribute. Also feel free to suggest new topics.
+At the moment, the code is most naturally suited to binary problems with unit coefficients, especially formulations that look like set partitioning, set covering, or packing models. Adapting it to more general integer models may require extending the base classes.
+
+I also have some problems with the code (a program is never truly finished) which I will share here. If you are an enthusiast, feel free to contribute. Also feel free to suggest new topics.
 
 Here you have some links to my work. Unfortunately, my master's thesis is written in Portuguese (as you may have noticed, English is not one of my talents). The article is paid for, but I believe you can find a free version by searching Google.
 
