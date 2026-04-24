@@ -871,12 +871,12 @@ void LagrangianManager::Restart() {
 
     ConstraintsBounds(cIt,cItEnd);
     for ( ; cIt != cItEnd; cIt++) {
-        (*cIt)->setLagrangean(0);
+        (*cIt)->setLagrangian(0);
     }
 
     CutsBounds(cIt, cItEnd);
     for ( ; cIt != cItEnd; cIt++) {
-        (*cIt)->setLagrangean(0);
+        (*cIt)->setLagrangian(0);
     }
 
 }

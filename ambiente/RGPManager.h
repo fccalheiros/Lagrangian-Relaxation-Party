@@ -5,7 +5,7 @@
 #include "Points.h"
 #include "RGPVariable.h"
 
-class RGPLagrangeanRelaxation;
+class RGPLagrangianRelaxation;
 
 class RGPManager : public LagrangianManager {
 

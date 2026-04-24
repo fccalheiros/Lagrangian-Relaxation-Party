@@ -1,16 +1,16 @@
-#ifndef _RGPLagrangeanRelaxation_H
-#define _RGPLagrangeanRelaxation_H
+#ifndef _RGPLagrangianRelaxation_H
+#define _RGPLagrangianRelaxation_H
 
 #include "LagrangeanRelaxation.h"
 #include "RGPVariable.h"
 
 
-class RGPLagrangeanRelaxation : public LagrangeanRelaxation {
+class RGPLagrangianRelaxation : public LagrangianRelaxation {
   
  public:
   
-  RGPLagrangeanRelaxation(Configuration * config);
-  ~RGPLagrangeanRelaxation();
+  RGPLagrangianRelaxation(Configuration * config);
+  ~RGPLagrangianRelaxation();
 
   bool _primeira;
   int _vezes1;
@@ -22,7 +22,7 @@ class RGPLagrangeanRelaxation : public LagrangeanRelaxation {
 
   void Relaxacao2(Solucao& sol, float& valor, float InitialCost);
 
-  virtual Algoritmo* getNew() { return new RGPLagrangeanRelaxation(_config); }
+  virtual Algoritmo* getNew() { return new RGPLagrangianRelaxation(_config); }
   
 protected:
 

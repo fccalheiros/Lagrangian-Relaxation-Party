@@ -1,15 +1,15 @@
-#ifndef _LAGRANGEANO_H
-#define _LAGRANGEANO_H
+#ifndef _LAGRANGIAN_RELAXATION_H
+#define _LAGRANGIAN_RELAXATION_H
 
 #include "algoritmo.h"
 
-class LagrangeanRelaxation : public Algoritmo {
+class LagrangianRelaxation : public Algoritmo {
 
 public:
 
-	LagrangeanRelaxation(Configuration * config);
+	LagrangianRelaxation(Configuration * config);
 
-	virtual ~LagrangeanRelaxation();
+	virtual ~LagrangianRelaxation();
 
 	virtual void setLagrangianManager(LagrangianManager *mes);
   
@@ -25,7 +25,7 @@ public:
 
 	void ResetIterations() { _iteracoes = 0;  }
 
-	virtual Algoritmo* getNew() { return new LagrangeanRelaxation(_config); }
+	virtual Algoritmo* getNew() { return new LagrangianRelaxation(_config); }
 
 protected:
 
@@ -33,7 +33,7 @@ protected:
 	inline virtual bool TemIntercessao(Solucao &solHeu, Variable *var); 
 	void InicializaRelaxacao(float &soma);
 
-	Variable* ChooseBranchVariableLowLagrangean();
+	Variable* ChooseBranchVariableLowLagrangian();
 	Variable* ChooseBranchVariableHighIncumbentCost();
 
  protected:

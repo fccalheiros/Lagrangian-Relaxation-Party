@@ -1,4 +1,4 @@
-# Lagrangean-Relaxation-Party
+# Lagrangian-Relaxation-Party
 A C++ program for solving Rectangular Partitions using Lagrangian Relaxation, which tries to be generic enough that you can easily build your own case.
 
 This code is the result of my master's degree completed more than 20 years ago. Recently during the Pandemic I added Branch & Bound capabilities. It worked but I have to say I'm not a programmer anymore so there will be much better ways to do this.

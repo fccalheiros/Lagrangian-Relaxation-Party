@@ -6,9 +6,9 @@
 #include "grafo.h"
 
 
-/************ Comeco da LagrangeanRelaxation *********************/
+/************ Comeco da LagrangianRelaxation *********************/
 
-LagrangeanRelaxation::LagrangeanRelaxation(Configuration *config):
+LagrangianRelaxation::LagrangianRelaxation(Configuration *config):
   Algoritmo(config)
 {
     _alfa = (float)config->INI_ALFA;
@@ -24,15 +24,15 @@ LagrangeanRelaxation::LagrangeanRelaxation(Configuration *config):
 }
 
 
-LagrangeanRelaxation::~LagrangeanRelaxation() 
+LagrangianRelaxation::~LagrangianRelaxation() 
 {
 }
 
-void LagrangeanRelaxation::setLagrangianManager(LagrangianManager *mes) {
+void LagrangianRelaxation::setLagrangianManager(LagrangianManager *mes) {
     Algoritmo::setLagrangianManager(mes);
 }
 
-void LagrangeanRelaxation::Inicializacao() {
+void LagrangianRelaxation::Inicializacao() {
   Algoritmo::Inicializacao();
 }
 
@@ -42,25 +42,25 @@ void LagrangeanRelaxation::Inicializacao() {
 
 
 
-void LagrangeanRelaxation::InicializaRelaxacao(float & soma) {
+void LagrangianRelaxation::InicializaRelaxacao(float & soma) {
 
     ConstraintIterator pComeco, pFim;
     VariableIterator   rComeco, rFim;
     VariableIterator   vComeco, vFim;
 
   /*
-  // Inicializa o custo lagrangeano de cada variavel com seu custo na FO
+  // Inicializa o custo lagrangiano de cada variavel com seu custo na FO
   for ( _manager->VariableBounds(vComeco, vFim); vComeco != vFim; vComeco++ ) 
      (*vComeco)->iniciaCustoLag();
 
-  soma = 0;  // Soma dos multiplicadores lagrangeanos
+  soma = 0;  // Soma dos multiplicadores lagrangianos
 
   
-  // Calcula os novos custo lagrangeanos de cada variavel
+  // Calcula os novos custo lagrangianos de cada variavel
   // Percorre todas as restricoes, e para cada uma percorre todas suas variaveis
   for ( _manager->ConstraintsBounds(pComeco, pFim) ; pComeco != pFim ; pComeco++) {
     Constraint *rest = (Constraint *) (*pComeco);
-    float multiplicador = rest->getLagrangean();
+    float multiplicador = rest->getLagrangian();
     if ( ! rest->_fixa ) {
        soma += multiplicador * rest->getRHS();
        for ( rest->ConstraintIterators(rComeco, rFim); rComeco != rFim; rComeco++) {
@@ -74,16 +74,16 @@ void LagrangeanRelaxation::InicializaRelaxacao(float & soma) {
   */
 
   
-    soma = 0;  // Soma dos multiplicadores lagrangeanos
+    soma = 0;  // Soma dos multiplicadores lagrangianos
     for ( _manager->ConstraintsBounds(pComeco, pFim) ; pComeco != pFim ; pComeco++)  
-        soma += (*pComeco)->_lagrangean * (*pComeco)->getRHS();
+        soma += (*pComeco)->_lagrangian * (*pComeco)->getRHS();
 
     _manager->VariableBounds(vComeco, vFim);
     for ( ; vComeco != vFim;) {
         Variable *var = (*vComeco);
         var->iniciaCustoLag();
         for (int i = 0; i < var->_linhasCobertas; i++) {
-            var->_valorLag -= var->_constraints[i]->_lagrangean;   //Está assumindo que o coeficiente da restrição é 1
+            var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
         }
         vComeco++;
     }
@@ -91,7 +91,7 @@ void LagrangeanRelaxation::InicializaRelaxacao(float & soma) {
 
     for ( _manager->CutsBounds(pComeco, pFim) ; pComeco != pFim ; pComeco++) {  
         Constraint *rest = (Constraint *) (*pComeco);
-        float multiplicador = rest->getLagrangean();
+        float multiplicador = rest->getLagrangian();
         soma += multiplicador * rest->getRHS();
         for ( rest->ConstraintIterators(rComeco, rFim); rComeco != rFim; rComeco++) {  
 	        ((Variable *)(*rComeco))->_valorLag -= multiplicador;        //Está assumindo que o coeficiente da restrição é 1
@@ -102,7 +102,7 @@ void LagrangeanRelaxation::InicializaRelaxacao(float & soma) {
 }
 
 // generic relaxation without any non dualized constraint
-void LagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
+void LagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
 
     InicializaRelaxacao(valor);
     valor += InitialCost;
@@ -125,7 +125,7 @@ void LagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCo
         }
     }
     else {
-        _manager->Ordena2(CompareLagrangean <Variable*> ());
+        _manager->Ordena2(CompareLagrangian <Variable*> ());
         _ordenou = true;
         while ((*vIt)->_valorLag <= 0) {
             sol.push_back(*vIt);
@@ -139,7 +139,7 @@ void LagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCo
 
 
 
-void LagrangeanRelaxation::SubGradiente(Solucao &sol){ 
+void LagrangianRelaxation::SubGradiente(Solucao &sol){ 
     int i = 0;
     int var;
     ConstraintIterator rest,fim, restLixo;
@@ -210,8 +210,8 @@ void LagrangeanRelaxation::SubGradiente(Solucao &sol){
     i = 0;
     _manager->ConstraintsBounds(rest,fim);
     for (; rest != fim; rest++ ){
-        float ml = (*rest)->_lagrangean;
-        (*rest)->setLagrangean( ml + tw*Gw[i]/moduloGw );
+        float ml = (*rest)->_lagrangian;
+        (*rest)->setLagrangian( ml + tw*Gw[i]/moduloGw );
         i++;
     }  
   
@@ -221,10 +221,10 @@ void LagrangeanRelaxation::SubGradiente(Solucao &sol){
     i = tamanho - 1;
     while ( ! sai ) {
         sai = ( fim == rest );
-        float ml = (*fim)->_lagrangean;
-        (*fim)->setLagrangean( ml + tw*Gw[i]/moduloGw);
+        float ml = (*fim)->_lagrangian;
+        (*fim)->setLagrangian( ml + tw*Gw[i]/moduloGw);
         i--;
-        if ( (*fim)->_lagrangean == 0 ) {
+        if ( (*fim)->_lagrangian == 0 ) {
             restLixo = fim;
             if (!sai) fim --;
             _manager->RemoveCut(restLixo);
@@ -238,7 +238,7 @@ void LagrangeanRelaxation::SubGradiente(Solucao &sol){
 /* Comeco da heuristica para obtencao de solucao viavel */
 /********************************************************/
 
-bool LagrangeanRelaxation::TemIntercessao(Solucao &solHeu, Variable *var) {
+bool LagrangianRelaxation::TemIntercessao(Solucao &solHeu, Variable *var) {
 
     for (unsigned int i=0; i < solHeu.size(); i++) {
 
@@ -249,7 +249,7 @@ bool LagrangeanRelaxation::TemIntercessao(Solucao &solHeu, Variable *var) {
 
 }
 
-void LagrangeanRelaxation::InicializacoesHeuristica() {
+void LagrangianRelaxation::InicializacoesHeuristica() {
 
     ConstraintIterator rest, restFim;
     _manager->ConstraintsNDBounds(rest, restFim);
@@ -258,7 +258,7 @@ void LagrangeanRelaxation::InicializacoesHeuristica() {
 
 }
 
-bool LagrangeanRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost) {
+bool LagrangianRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost) {
   
     //return false;
  
@@ -308,7 +308,7 @@ bool LagrangeanRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &v
 
 /************ Geracao de cortes ************/
 
-void LagrangeanRelaxation::GeraCortes(Solucao &solRel) {
+void LagrangianRelaxation::GeraCortes(Solucao &solRel) {
 
     if (!_config->CUT_GENERATION) return;
 
@@ -335,7 +335,7 @@ void LagrangeanRelaxation::GeraCortes(Solucao &solRel) {
     g.CicloImpar(_manager);
 }
 
-bool LagrangeanRelaxation::Price(Solucao& relaxed) {
+bool LagrangianRelaxation::Price(Solucao& relaxed) {
 
     if (! _manager->OptimalFound()) return false;
 
@@ -363,8 +363,8 @@ bool LagrangeanRelaxation::Price(Solucao& relaxed) {
  }
 
 
-/************* Teste de parada do algoritmo lagrangeano ************/
-bool LagrangeanRelaxation::TesteParada() { 
+/************* Teste de parada do algoritmo lagrangiano ************/
+bool LagrangianRelaxation::TesteParada() { 
 
     //if  ( ((_manager->getUpperBound() - _manager->getLowerBound()) < (float) _config->STOP_GAP) ||
      if ( (_manager->OptimalFound()) || (_iteracoes > _config->MAX_ITERATIONS) ) {
@@ -379,7 +379,7 @@ bool LagrangeanRelaxation::TesteParada() {
     return false; 
 };
 
-void LagrangeanRelaxation::Restart() {
+void LagrangianRelaxation::Restart() {
     _alfa = (float)_config->INI_ALFA;
     _lambda = _config->LAMBDA;
     _naoMudouLI = 0;
@@ -391,7 +391,7 @@ void LagrangeanRelaxation::Restart() {
 }
 
 
-Variable* LagrangeanRelaxation::ChooseBranchVariableLowLagrangean() {
+Variable* LagrangianRelaxation::ChooseBranchVariableLowLagrangian() {
 
     VariableIterator vIt, vEnd, vSelected;
     float MIN = _config->PLUS00;
@@ -407,7 +407,7 @@ Variable* LagrangeanRelaxation::ChooseBranchVariableLowLagrangean() {
     return (*vSelected)->CopyAndClean(NULL);
 
 }
-Variable* LagrangeanRelaxation::ChooseBranchVariableHighIncumbentCost() {
+Variable* LagrangianRelaxation::ChooseBranchVariableHighIncumbentCost() {
 
     VariableIterator vIt, vEnd, vSelected;
     VariableIterator vItAll, vEndAll;
@@ -434,10 +434,10 @@ Variable* LagrangeanRelaxation::ChooseBranchVariableHighIncumbentCost() {
 }
 
 
- Variable* LagrangeanRelaxation::ChooseBranchVariable() {
+ Variable* LagrangianRelaxation::ChooseBranchVariable() {
 
-     if (_config->getValue("VARIABLESTRATEGY").compare("LOWLAGRANGEAN") == 0)
-         return ChooseBranchVariableLowLagrangean();
+     if (_config->getValue("VARIABLESTRATEGY").compare("LOWLAGRANGIAN") == 0)
+         return ChooseBranchVariableLowLagrangian();
 
      return ChooseBranchVariableHighIncumbentCost();
 

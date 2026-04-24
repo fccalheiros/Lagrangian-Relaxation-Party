@@ -20,7 +20,7 @@ class Constraint {
 public:
 
 	vector <Variable *> _variables;
-	float _lagrangean;
+	float _lagrangian;
 	short int _index;
 
 protected:
@@ -61,12 +61,12 @@ public:
 
 	float getRHS() const  { return _rhs; }
 	ConstraintSign  getDirection()  const { return _direction; }
-	float getLagrangean() const { return _lagrangean; }
+	float getLagrangian() const { return _lagrangian; }
 	int getKey() const { return _key; }
 
 	void setRHS(float rhs) { _rhs = rhs; }
 	bool setDirection(ConstraintSign dir);
-	void setLagrangean(float ml);
+	void setLagrangian(float ml);
 
 	void LogicalDelete()  { _deleted = true; }
 	bool LogicalDeleted() const { return _deleted; }

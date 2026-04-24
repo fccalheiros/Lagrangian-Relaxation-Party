@@ -184,8 +184,8 @@ public:
 
  public:
 
-     float GetMaxLagrangean(VariableSet sol) {
-         VariableIterator it = max_element(sol.begin(),sol.end(), CompareLagrangean <Variable*>());
+     float GetMaxLagrangian(VariableSet sol) {
+         VariableIterator it = max_element(sol.begin(),sol.end(), CompareLagrangian <Variable*>());
          return (*it)->_valorLag;
      }
 

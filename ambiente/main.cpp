@@ -79,7 +79,7 @@ int main2 (int argc, char * argv[]) {
     
     cout << config->Print();
 
-    RGPLagrangeanRelaxation* algorithm = new RGPLagrangeanRelaxation(config);
+    RGPLagrangianRelaxation* algorithm = new RGPLagrangianRelaxation(config);
     RGPManager *manager = new RGPManager(config, algorithm);
     SearchAlgorithm sa = SearchAlgorithm::BFS;
     if (config->getValue("BRANCHSTRATEGY").compare("DFS") == 0)

@@ -13,7 +13,7 @@ class Variable {
 
 	int   _nome;              
 	float _valorFO;
-	float _valorLag;          // custo Lagrangeano da variavel
+	float _valorLag;          // custo Lagrangiano da variavel
 	bool  _marca;
 	bool  _fixaEmZero;
 	bool  _fixa;

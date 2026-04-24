@@ -20,7 +20,7 @@ public:
     SomaMultiplicadores() { resultado = 2; }
     void operator() (T &rest) 
     {  
-            resultado += rest->getLagrangean(); 
+            resultado += rest->getLagrangian(); 
             cout << resultado << " "; 
     }
     float resultado;

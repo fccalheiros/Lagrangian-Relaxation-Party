@@ -51,7 +51,7 @@ class Algoritmo {
 
 };
 
-template <class T = Variable*> struct  CompareLagrangean  {
+template <class T = Variable*> struct  CompareLagrangian  {
 public:
 
     bool  operator() (Variable* v1, Variable* v2) {
@@ -70,7 +70,7 @@ public:
 
 };
 
-template <class T = Variable*> struct  NotCompareLagrangean {
+template <class T = Variable*> struct  NotCompareLagrangian {
 public:
 
     bool  operator() (Variable* v1, Variable* v2) {

@@ -8,7 +8,7 @@ Constraint::Constraint()
 Constraint::Constraint(float rhs, ConstraintSign sign = ConstraintSign::Equal, float ml = 0, int varCount = 50):
     _rhs(rhs),
     _direction(sign),
-    _lagrangean(ml),
+    _lagrangian(ml),
     _index(0),
     _deleted(false),
     _covered(false),
@@ -34,7 +34,7 @@ Constraint* Constraint::CopyAndClean(Constraint* r)
     else {
         r->_rhs = _rhs;
         r->_direction = _direction;
-        r->_lagrangean = 0;
+        r->_lagrangian = 0;
         r->_index = _index;
         r->_covered = _covered;
     }
@@ -60,11 +60,11 @@ bool Constraint::setDirection(ConstraintSign dir) {
     return true;
 }
 
-void Constraint::setLagrangean(float ml) {
-    _lagrangean = ml;
+void Constraint::setLagrangian(float ml) {
+    _lagrangian = ml;
     if ( _direction  == ConstraintSign::LowerEqual ) {
-        if ( _lagrangean > 0 )
-            _lagrangean = 0;
+        if ( _lagrangian > 0 )
+            _lagrangian = 0;
     }
 
 }

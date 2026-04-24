@@ -483,7 +483,7 @@ void RGPManager::PrintSolution() {
 
 void RGPManager::FinalStats() {
     LagrangianManager::FinalStats();
-    RGPLagrangeanRelaxation* l = (RGPLagrangeanRelaxation*)_algo;
+    RGPLagrangianRelaxation* l = (RGPLagrangianRelaxation*)_algo;
     cout << "Vezes 1  = " << l->_vezes1 << endl << "Vezes 2 = " << l->_vezes2 << endl;
     cout << "Fator Maior = " << l->_maximofator << endl;
     

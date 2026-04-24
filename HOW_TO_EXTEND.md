@@ -51,7 +51,7 @@ Create a derived constraint class only if your problem needs custom coefficients
 
 ### 3. A manager class that builds the model
 
-Derive a class from `LagrangeanManager`.
+Derive a class from `LagrangianManager`.
 
 This class is the central place where the problem instance is transformed into variables and constraints.
 
@@ -81,7 +81,7 @@ In this repository, `RGPManager` is the example of a specialized manager.
 
 ### 4. An algorithm class
 
-If your problem fits the same general structure, derive from `LagrangeanRelaxation`.
+If your problem fits the same general structure, derive from `LagrangianRelaxation`.
 
 If you need more freedom, derive directly from `Algoritmo`.
 
@@ -111,18 +111,18 @@ This is also the place where relax-and-cut strategies can be implemented. In thi
 
 By contrast, pricing support is not yet mature as a general framework feature. Although there is a `Price` hook in the algorithm interface, it should be seen as experimental or problem-specific, not as a ready-to-use generic pricing or column generation component.
 
-In this repository, `RGPLagrangeanRelaxation` is the example of a specialized algorithm.
+In this repository, `RGPLagrangianRelaxation` is the example of a specialized algorithm.
 
 ## Suggested step-by-step process
 
 1. Identify what one decision variable means in your formulation.
 2. Decide which constraints will be dualized and which ones, if any, should remain explicit.
 3. Create a variable class if the base `Variable` class does not carry enough information.
-4. Create a manager derived from `LagrangeanManager`.
+4. Create a manager derived from `LagrangianManager`.
 5. Implement `ReadProblem` to load your instance data.
 6. Implement `CreateProblem` to enumerate variables and create the constraints.
 7. Implement `InsertVariableIntoConstraint` so each variable knows the constraints it covers.
-8. Create an algorithm derived from `LagrangeanRelaxation` or `Algoritmo`.
+8. Create an algorithm derived from `LagrangianRelaxation` or `Algoritmo`.
 9. Implement `Relaxacao` for your Lagrangian subproblem.
 10. Implement `Heuristica` to recover feasible solutions.
 11. Optionally customize cuts, branching, and variable fixing. Pricing can also be explored, but it is not yet a mature generic feature of the framework.

@@ -1,8 +1,8 @@
 #include "RGPLagrangeanRelaxation.h"
 #include "RGPManager.h"
 
-RGPLagrangeanRelaxation::RGPLagrangeanRelaxation(Configuration *config) :
-  LagrangeanRelaxation(config) 
+RGPLagrangianRelaxation::RGPLagrangianRelaxation(Configuration *config) :
+  LagrangianRelaxation(config) 
 {
   _primeira = true;
   _vezes1 = 0;
@@ -10,13 +10,13 @@ RGPLagrangeanRelaxation::RGPLagrangeanRelaxation(Configuration *config) :
   _maximofator = 0;
 }
 
-RGPLagrangeanRelaxation::~RGPLagrangeanRelaxation() 
+RGPLagrangianRelaxation::~RGPLagrangianRelaxation() 
 {
 }
 
 
 // This relaxation considers the cardinality constraint of the RGP problem.
-void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
+void RGPLagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
 
 	int i;
 
@@ -35,11 +35,11 @@ void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 	int Cardinality = ((RGPManager*)_manager)->_numeroPontos + 1;
 
 	if (naoOrdena) {
-		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangean <Variable*>());
+		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangian <Variable*>());
 		_ordenou = false;
 	}
 	else {
-		_manager->Ordena3( CompareLagrangean <Variable*> () );
+		_manager->Ordena3( CompareLagrangian <Variable*> () );
 		_ordenou = true;
 	}
 
@@ -57,7 +57,7 @@ void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 
 // felipe - versão adaptada para usar com o pricing beta - nesse procedimento é necessário verificar se a variável está priced out.
 /*
-void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
+void RGPLagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
 
 	int i,j ;
 
@@ -76,11 +76,11 @@ void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 	int Cardinality = ((RGPManager*)_manager)->_numeroPontos + 1;
 
 	if (naoOrdena) {
-		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangean <Variable*>());
+		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangian <Variable*>());
 		_ordenou = false;
 	}
 	else {
-		_manager->Ordena2(CompareLagrangean <Variable*>());
+		_manager->Ordena2(CompareLagrangian <Variable*>());
 		_ordenou = true;
 	}
 
@@ -103,7 +103,7 @@ void RGPLagrangeanRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 }
 */
 
-void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float InitialCost) {
+void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float InitialCost) {
    
 	float LI = _manager->getLowerBound();
 	float LS = _manager->getUpperBound();
@@ -124,7 +124,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	cout << "** Fixa Variaveis **" << endl;
 
 	if (! _ordenou)  {
-		_manager->Ordena3( CompareLagrangean <Variable *> () );
+		_manager->Ordena3( CompareLagrangian <Variable *> () );
 		_ordenou = true;
 	}
 
@@ -133,7 +133,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 
 	// disabled
 	//at first run a lowcost fixation algorithm
-	//float V2 = LS - (valor - _manager->GetMaxLagrangean(solRel)) - _config->STOP_GAP;
+	//float V2 = LS - (valor - _manager->GetMaxLagrangian(solRel)) - _config->STOP_GAP;
 	VariableIterator vIt, vDummy;
 	_manager->VariableBounds(vDummy, vIt);
 	size_t InitialTotal = distance(vDummy, vIt);
@@ -218,7 +218,7 @@ void RGPLagrangeanRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 /******** Relaxacao com restricao de area em baixo **********/
 // este codigo e inativo e devera ser checado
 
-void RGPLagrangeanRelaxation::Relaxacao2(Solucao& sol, float& valor, float InitialCost) {
+void RGPLagrangianRelaxation::Relaxacao2(Solucao& sol, float& valor, float InitialCost) {
 
 	int i = 0;
 	int area = ((RGPManager*)_manager)->Area();
@@ -251,7 +251,7 @@ void RGPLagrangeanRelaxation::Relaxacao2(Solucao& sol, float& valor, float Initi
 
 // Virtual implementation that runs faster than the base class one
 // Both must give the same result.
-bool RGPLagrangeanRelaxation::TemIntercessao(Solucao& solHeu, Variable* var) {
+bool RGPLagrangianRelaxation::TemIntercessao(Solucao& solHeu, Variable* var) {
 
 	int veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY, hiX1, hiX2;
 	((RGPVariable*)var)->RetornaSegmentos(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY, hiX1, hiX2);

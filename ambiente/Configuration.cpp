@@ -192,7 +192,7 @@ void Configuration::TryChangeDefaultToken(string token, string value) {
 	if (token.compare("CLEANFACTOR") == 0) { CLEANFACTOR = stof(value); return; }
 	if (token.compare("CUT_GENERATION") == 0) { CUT_GENERATION = (value.compare("false") == 0 ? false : true); return; }
 	if (token.compare("BRANCHSTRATEGY") == 0) {	BRANCHSTRATEGY = (value.compare("BFS") == 0 ? "BFS" : (value.compare("DFS") == 0 ? "DFS" : BRANCHSTRATEGY)); return;}
-	if (token.compare("VARIABLESTRATEGY") == 0) { VARIABLESTRATEGY = (value.compare("HIGHINCUMBENTCOST") == 0 ? "HIGHINCUMBENTCOST" : (value.compare("LOWLAGRANGEAN") == 0 ? "LOWLAGRANGEAN" : VARIABLESTRATEGY)); return; }
+	if (token.compare("VARIABLESTRATEGY") == 0) { VARIABLESTRATEGY = (value.compare("HIGHINCUMBENTCOST") == 0 ? "HIGHINCUMBENTCOST" : ((value.compare("LOWLAGRANGIAN") == 0 || value.compare("LOWLAGRANGEAN") == 0) ? "LOWLAGRANGIAN" : VARIABLESTRATEGY)); return; }
 	if (token.compare("PRICEOUTRATIO") == 0) { PRICEOUTRATIO = stof(value); return; }
 
 }
