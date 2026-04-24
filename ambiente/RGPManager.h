@@ -1,7 +1,7 @@
 #ifndef _RGPManager_H
 #define _RGPManager_H
 
-#include "LagrangeanManager.h"
+#include "LagrangianManager.h"
 #include "Points.h"
 #include "RGPVariable.h"
 

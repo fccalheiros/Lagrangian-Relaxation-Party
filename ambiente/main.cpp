@@ -4,7 +4,7 @@
 #include "Configuration.h"
 
 #include "RGPManager.h"
-#include "RGPLagrangeanRelaxation.h"
+#include "RGPLagrangianRelaxation.h"
 #include "grafo.h"
 #include "BBTree.h"
 

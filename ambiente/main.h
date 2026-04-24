@@ -7,7 +7,7 @@
 #pragma warning(disable:4996)
 
 #include "Constraint.h"
-#include "LagrangeanManager.h"
+#include "LagrangianManager.h"
 
 
 int main2(int argc, char* argv[]);

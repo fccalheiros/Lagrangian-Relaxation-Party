@@ -7,7 +7,7 @@
 
 #include "restricao_hash.h"
 #include "Variable.h"
-#include "LagrangeanManager.h"
+#include "LagrangianManager.h"
 
 class GraphNode {
 

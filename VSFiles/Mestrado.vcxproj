@@ -156,10 +156,10 @@
     <ClInclude Include="..\ambiente\BBTree.h" />
     <ClInclude Include="..\ambiente\Configuration.h" />
     <ClInclude Include="..\ambiente\grafo.h" />
-    <ClInclude Include="..\ambiente\LagrangeanRelaxation.h" />
-    <ClInclude Include="..\ambiente\RGPLagrangeanRelaxation.h" />
+    <ClInclude Include="..\ambiente\LagrangianRelaxation.h" />
+    <ClInclude Include="..\ambiente\RGPLagrangianRelaxation.h" />
     <ClInclude Include="..\ambiente\main.h" />
-    <ClInclude Include="..\ambiente\LagrangeanManager.h" />
+    <ClInclude Include="..\ambiente\LagrangianManager.h" />
     <ClInclude Include="..\ambiente\Points.h" />
     <ClInclude Include="..\ambiente\Constraint.h" />
     <ClInclude Include="..\ambiente\restricao_hash.h" />
@@ -177,10 +177,10 @@
     <ClCompile Include="..\ambiente\BBTree.cpp" />
     <ClCompile Include="..\ambiente\Configuration.cpp" />
     <ClCompile Include="..\ambiente\grafo.cpp" />
-    <ClCompile Include="..\ambiente\LagrangeanRelaxation.cpp" />
-    <ClCompile Include="..\ambiente\RGPLagrangeanRelaxation.cpp" />
+    <ClCompile Include="..\ambiente\LagrangianRelaxation.cpp" />
+    <ClCompile Include="..\ambiente\RGPLagrangianRelaxation.cpp" />
     <ClCompile Include="..\ambiente\main.cpp" />
-    <ClCompile Include="..\ambiente\LagrangeanManager.cpp" />
+    <ClCompile Include="..\ambiente\LagrangianManager.cpp" />
     <ClCompile Include="..\ambiente\Points.cpp" />
     <ClCompile Include="..\ambiente\Constraint.cpp" />
     <ClCompile Include="..\ambiente\RGPManager.cpp" />

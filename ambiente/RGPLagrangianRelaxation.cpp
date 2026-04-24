@@ -1,4 +1,4 @@
-#include "RGPLagrangeanRelaxation.h"
+#include "RGPLagrangianRelaxation.h"
 #include "RGPManager.h"
 
 RGPLagrangianRelaxation::RGPLagrangianRelaxation(Configuration *config) :

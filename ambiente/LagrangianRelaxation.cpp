@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <algorithm>
 
-#include "LagrangeanRelaxation.h"
+#include "LagrangianRelaxation.h"
 #include "Constraint.h"
 #include "grafo.h"
 

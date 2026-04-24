@@ -1,7 +1,7 @@
 #ifndef _RGPLagrangianRelaxation_H
 #define _RGPLagrangianRelaxation_H
 
-#include "LagrangeanRelaxation.h"
+#include "LagrangianRelaxation.h"
 #include "RGPVariable.h"
 
 

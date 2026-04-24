@@ -8,7 +8,7 @@
 #include <string>
 
 #include "Variable.h"
-#include "LagrangeanManager.h"
+#include "LagrangianManager.h"
 #include "algoritmo.h"
 #include "Configuration.h"
 

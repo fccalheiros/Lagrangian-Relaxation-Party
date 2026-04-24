@@ -1,6 +1,6 @@
 #include "RGPManager.h"
 #include "Time.h"
-#include "RGPLagrangeanRelaxation.h"
+#include "RGPLagrangianRelaxation.h"
 
 #include <stdio.h>
 
