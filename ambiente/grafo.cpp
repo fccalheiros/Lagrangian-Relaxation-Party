@@ -1,6 +1,5 @@
 #include "grafo.h"
 #include "Constraint.h"
-#include "RGPCut.h"
 
 
 typedef map <Variable*, int, lessVariavel <Variable*>>::iterator GraphNodeIterator;
@@ -149,7 +148,7 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
     }
 
     vector <bool> marca( _numeroNos );
-    RGPCut *corte;
+    Constraint* cut;
     bool fim = false;
 
     size_t maiorGrau = 0;
@@ -178,9 +177,8 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
     fim = ( maiorGrau == 0 );
   
     while ( ! fim ) {
-
-        corte = new RGPCut(); 
-        corte->InsertVariable(_nos[maior],1);
+		cut = new Constraint(1, ConstraintSign::LowerEqual,0.0f,30);
+        cut->InsertVariable(_nos[maior], 1);
         marca[maior] = true;
         tamanho = 1;
 
@@ -192,7 +190,7 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
             VariableIterator restFim;
             bool podeInserir = true;
       
-            corte->ConstraintIterators(rest,restFim);
+            cut->ConstraintIterators(rest,restFim);
       
             for (; rest!= restFim; rest++) {
 	            if ( ! TemAresta( _nosVariaveis[(*rest)], candidata  ) ) {
@@ -201,19 +199,18 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
 	            }	
             }  
             if ( podeInserir ) {
-	            corte->InsertVariable(_nos[candidata],1);
+	            cut ->InsertVariable(_nos[candidata],1);
 	            marca[candidata] = true;
                 tamanho++;
             }
         }
 
         if (tamanho >= Minimo ) {
-            mestre->InsertCut(corte);
+            mestre->InsertCut(cut);
             contacortes++;    
-            //corte->Imprime();
+            //cut->Imprime();
         }
-        else delete corte;
-
+        else delete cut;
         fim = true;
         for (it=_nosVariaveis.begin(); it != _nosVariaveis.end(); it++) {
             no = (*it).second;
@@ -242,7 +239,8 @@ void Grafo::CicloImpar(LagrangeanManager *mestre) {
     int no,noTeste;
     int indice;
     int grau;
-    RGPCut *corte;
+
+	Constraint* cut;
 
 
     no = 0;
@@ -251,13 +249,12 @@ void Grafo::CicloImpar(LagrangeanManager *mestre) {
     for (indice = 0; indice < grau; indice++) {
         noTeste = _arestas[no][indice];
         if ( ( _infoNos[noTeste]._nivel > 3 ) && (_infoNos[noTeste]._nivel % 2 == 0) && (noTeste > no) ) {
-            corte = new RGPCut( (float) ((int) (_infoNos[noTeste]._nivel / 2)) );
+			cut = new Constraint((float)((int)(_infoNos[noTeste]._nivel / 2)), ConstraintSign::LowerEqual, 0.0f, 30);
             while ( noTeste >= 0 ) {
-
-	            corte->InsertVariable(_nos[noTeste],1);
+	            cut->InsertVariable(_nos[noTeste],1);
 	            noTeste = _infoNos[noTeste]._pai;
             }
-            mestre->InsertCut(corte);
+            mestre->InsertCut(cut);
             contacortes++;
             break;
         }

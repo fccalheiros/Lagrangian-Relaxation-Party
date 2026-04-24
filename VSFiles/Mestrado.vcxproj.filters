@@ -26,9 +26,6 @@
     <ClInclude Include="..\ambiente\restricao_hash.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="..\ambiente\RGPCut.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
-    </ClInclude>
     <ClInclude Include="..\ambiente\BBTree.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
@@ -81,7 +78,6 @@
     <ClCompile Include="..\ambiente\LagrangeanManager.cpp" />
     <ClCompile Include="..\ambiente\BBTree.cpp" />
     <ClCompile Include="..\ambiente\grafo.cpp" />
-    <ClCompile Include="..\ambiente\RGPCut.cpp" />
     <ClCompile Include="..\ambiente\Points.cpp" />
     <ClCompile Include="..\ambiente\RGPManager.cpp" />
     <ClCompile Include="..\ambiente\Configuration.cpp" />

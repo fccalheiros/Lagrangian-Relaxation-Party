@@ -155,7 +155,6 @@
     <ClInclude Include="..\ambiente\algoritmo.h" />
     <ClInclude Include="..\ambiente\BBTree.h" />
     <ClInclude Include="..\ambiente\Configuration.h" />
-    <ClInclude Include="..\ambiente\RGPCut.h" />
     <ClInclude Include="..\ambiente\grafo.h" />
     <ClInclude Include="..\ambiente\LagrangeanRelaxation.h" />
     <ClInclude Include="..\ambiente\RGPLagrangeanRelaxation.h" />
@@ -177,7 +176,6 @@
     <ClCompile Include="..\ambiente\algoritmo.cpp" />
     <ClCompile Include="..\ambiente\BBTree.cpp" />
     <ClCompile Include="..\ambiente\Configuration.cpp" />
-    <ClCompile Include="..\ambiente\RGPCut.cpp" />
     <ClCompile Include="..\ambiente\grafo.cpp" />
     <ClCompile Include="..\ambiente\LagrangeanRelaxation.cpp" />
     <ClCompile Include="..\ambiente\RGPLagrangeanRelaxation.cpp" />

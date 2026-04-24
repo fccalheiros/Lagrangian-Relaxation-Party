@@ -102,6 +102,7 @@ void Constraint::InsertVariable(Variable* var, float coef) {
 }
 
 void Constraint::RemoveVariable(VariableIterator & it) {
+    //_key -= (*it)->_nome;
     _variables.erase(it);
 }
 
