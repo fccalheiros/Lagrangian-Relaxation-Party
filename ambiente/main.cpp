@@ -85,7 +85,7 @@ int main2 (int argc, char * argv[]) {
     if (config->getValue("BRANCHSTRATEGY").compare("DFS") == 0)
         sa = SearchAlgorithm::DFS;
 
-    algorithm->setLagrangeanManager(manager);
+    algorithm->setLagrangianManager(manager);
     manager->GenerateProblem(argv[1]);
  
     BBTree bbTree(manager, algorithm, sa, config);
@@ -123,7 +123,7 @@ int main2 (int argc, char * argv[]) {
 }
 
 
-void cortes(LagrangeanManager* prob, FILE* saida) {
+void cortes(LagrangianManager* prob, FILE* saida) {
     unsigned int i, j;
     int num = 0;
     vector <int> vars;

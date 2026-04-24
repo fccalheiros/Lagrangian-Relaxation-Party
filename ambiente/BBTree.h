@@ -46,7 +46,7 @@ class BBTreeNode {
 
     float _totalRunTime;
 
-    LagrangeanManager* _manager;
+    LagrangianManager* _manager;
     Algoritmo* _algo;
 
     Variable* _branchVariable;
@@ -60,8 +60,8 @@ class BBTree {
 public:
 
     BBTree();
-    BBTree(LagrangeanManager* manager, Algoritmo* algo, Configuration *config);
-    BBTree(LagrangeanManager* manager, Algoritmo* algo, SearchAlgorithm sa, Configuration *config);
+    BBTree(LagrangianManager* manager, Algoritmo* algo, Configuration *config);
+    BBTree(LagrangianManager* manager, Algoritmo* algo, SearchAlgorithm sa, Configuration *config);
     ~BBTree();
 
     void populateTreeDFS(int father, int depth);

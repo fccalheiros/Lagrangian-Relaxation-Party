@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <fstream>
 
-LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, Direction direction, size_t max_sort_depth):
+LagrangianManager::LagrangianManager(Configuration* config, Algoritmo * algo, Direction direction, size_t max_sort_depth):
     _algo(algo),
     _direction(direction),
     _countConstraints(0),
@@ -25,21 +25,21 @@ LagrangeanManager::LagrangeanManager(Configuration* config, Algoritmo * algo, Di
    
 }
 
-LagrangeanManager::LagrangeanManager(Configuration* config)
-    : LagrangeanManager(config, nullptr) {
+LagrangianManager::LagrangianManager(Configuration* config)
+    : LagrangianManager(config, nullptr) {
 }
 
 
-LagrangeanManager::LagrangeanManager(LagrangeanManager* m)
-    : LagrangeanManager(m->_config, m->_algo, m->_direction, m->_max_sort_depth)
+LagrangianManager::LagrangianManager(LagrangianManager* m)
+    : LagrangianManager(m->_config, m->_algo, m->_direction, m->_max_sort_depth)
 {
     _totalVariaveis = m->_totalVariaveis; // ajuste específico
 }
 
 
-LagrangeanManager* LagrangeanManager::CopyAndClean(LagrangeanManager* m) {
+LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
     if (m == NULL) {
-        m = new LagrangeanManager(this);
+        m = new LagrangianManager(this);
     }
     else 
     {
@@ -103,11 +103,11 @@ LagrangeanManager* LagrangeanManager::CopyAndClean(LagrangeanManager* m) {
     return m;
 }
 
-LagrangeanManager::~LagrangeanManager() {
+LagrangianManager::~LagrangianManager() {
     FreeMemory();
 }
 
-void LagrangeanManager::FreeMemory() {
+void LagrangianManager::FreeMemory() {
 
     VariableIterator varIni,varFim, varLixo;
     ConstraintIterator proIni,proFim, proLixo;
@@ -149,13 +149,13 @@ void LagrangeanManager::FreeMemory() {
 
 }
 
-void LagrangeanManager::GenerateProblem(char *arq) {  
+void LagrangianManager::GenerateProblem(char *arq) {  
   ReadProblem(arq);
   CreateProblem();
   FinalizeProblemCreation();
 }
 
-void LagrangeanManager::FinalizeProblemCreation() {
+void LagrangianManager::FinalizeProblemCreation() {
     _variables.shrink_to_fit();
     _end = _variables.end();
 
@@ -170,7 +170,7 @@ void LagrangeanManager::FinalizeProblemCreation() {
     }
 }
 
-void LagrangeanManager::CheckBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
+void LagrangianManager::CheckBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
 
     float LI = getLowerBound();
 
@@ -195,7 +195,7 @@ void LagrangeanManager::CheckBounds(float valRelaxado, float valHeuristica, vect
 }
 
 
-void LagrangeanManager::Solve(float InitialCost, float KnownBound ) { 
+void LagrangianManager::Solve(float InitialCost, float KnownBound ) { 
   
     bool testeParada = false;
     bool resHeuristica;
@@ -204,7 +204,7 @@ void LagrangeanManager::Solve(float InitialCost, float KnownBound ) {
     float valorRelaxado;
     float valorHeuristica;
       
-    _algo->setLagrangeanManager(this);  
+    _algo->setLagrangianManager(this);  
     _algo->Inicializacao();
     setBound(KnownBound);
 
@@ -227,7 +227,7 @@ void LagrangeanManager::Solve(float InitialCost, float KnownBound ) {
 }
 
 
-void LagrangeanManager::SetVariableForBranch(Variable* v, short int value) {
+void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
 
     VariableIterator vIt,vBegin, vEnd, vBranch, vRecicle;
     bool sai;
@@ -332,7 +332,7 @@ void LagrangeanManager::SetVariableForBranch(Variable* v, short int value) {
 
 }
 
-void LagrangeanManager::FixVariable(VariableIterator var) {
+void LagrangianManager::FixVariable(VariableIterator var) {
     (*var)->_fixaEmZero = true;
     _end--;
     _countFixed++;
@@ -340,7 +340,7 @@ void LagrangeanManager::FixVariable(VariableIterator var) {
     iter_swap(var,_end);
 }
 
-void LagrangeanManager::FixLastVariable() {
+void LagrangianManager::FixLastVariable() {
     _end--;
     (*_end)->_fixaEmZero = true;
     _countFixed++;
@@ -348,7 +348,7 @@ void LagrangeanManager::FixLastVariable() {
 }
 
 
-void LagrangeanManager::InsertVariable(Variable *var) {
+void LagrangianManager::InsertVariable(Variable *var) {
     size_t i = _variables.size();
     size_t j = _variables.capacity();
     if ( i == j ) {
@@ -358,19 +358,19 @@ void LagrangeanManager::InsertVariable(Variable *var) {
     _variables.push_back(var);
 }
 
-void LagrangeanManager::InsertConstraint(Constraint *restricao) {
+void LagrangianManager::InsertConstraint(Constraint *restricao) {
     _constraints.push_back(restricao);
     _countConstraints++;
 }
 
-void LagrangeanManager::InsertConstraintND(Constraint *restricao) {
+void LagrangianManager::InsertConstraintND(Constraint *restricao) {
     _constraintsND.push_back(restricao);
     _countConstraintsND++;
 }
 
 // Use only with regular constraints 
 // Dont use with cuts
-void LagrangeanManager::MarkConstraintForDeletion(Variable* var) {
+void LagrangianManager::MarkConstraintForDeletion(Variable* var) {
 
     int set = 0;
     ConstraintIterator it = var->_constraints.begin();
@@ -385,7 +385,7 @@ void LagrangeanManager::MarkConstraintForDeletion(Variable* var) {
 }
 
 
-void LagrangeanManager::InsertCut(Constraint *constraint) {
+void LagrangianManager::InsertCut(Constraint *constraint) {
     ConstraintIterator begin;
     ConstraintIterator end;
     _cutsFound++;
@@ -400,66 +400,66 @@ void LagrangeanManager::InsertCut(Constraint *constraint) {
     _cuts.push_back(constraint);
 }
 
-void LagrangeanManager::RemoveVariable(VariableIterator &it) {
+void LagrangianManager::RemoveVariable(VariableIterator &it) {
       delete *it;
       _variables.erase(it);
 }
 
-void LagrangeanManager::RemoveConstraint(ConstraintIterator &it) {
+void LagrangianManager::RemoveConstraint(ConstraintIterator &it) {
     delete *it;
     _constraints.erase(it);
     _countConstraints--;
 }
 
-void LagrangeanManager::RemoveConstraintND(ConstraintIterator &it) {
+void LagrangianManager::RemoveConstraintND(ConstraintIterator &it) {
     delete *it;
     _constraintsND.erase(it);
     _countConstraintsND--;
 }
 
-void LagrangeanManager::RemoveCut(ConstraintIterator &it) {
+void LagrangianManager::RemoveCut(ConstraintIterator &it) {
     delete *it;
     _cuts.erase(it);
     _cutsRemoved++;
 }
 
-int LagrangeanManager::ActiveVariables() {
+int LagrangianManager::ActiveVariables() {
     return static_cast<int>(distance(_variables.begin(),_end));
 } 
 
-void LagrangeanManager::VariableBounds(VariableIterator& comeco, VariableIterator& fim) {
+void LagrangianManager::VariableBounds(VariableIterator& comeco, VariableIterator& fim) {
     comeco = _variables.begin();
     fim = _end;
 }
 
-void LagrangeanManager::ConstraintsBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
+void LagrangianManager::ConstraintsBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
     comeco = _constraints.begin();
     fim    = _constraints.end();
 }
 
-void LagrangeanManager::ConstraintsNDBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
+void LagrangianManager::ConstraintsNDBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
     comeco = _constraintsND.begin();
     fim    = _constraintsND.end();
 }
 
-void LagrangeanManager::CutsBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
+void LagrangianManager::CutsBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
     comeco = _cuts.begin();
     fim    = _cuts.end();
 }
 
-Constraint * LagrangeanManager::getConstraint (int i) {
+Constraint * LagrangianManager::getConstraint (int i) {
     return _constraints[i];
 }
 
-Constraint * LagrangeanManager::getConstraintND (int i) {
+Constraint * LagrangianManager::getConstraintND (int i) {
     return _constraintsND[i];
 }
 
-Constraint * LagrangeanManager::getCut (int i) {
+Constraint * LagrangianManager::getCut (int i) {
     return _cuts[i];
 }
 
-void LagrangeanManager::CoveredConstraints(Variable *var, vector <Constraint *> &linhas) {
+void LagrangianManager::CoveredConstraints(Variable *var, vector <Constraint *> &linhas) {
 
     ConstraintIterator rest,fim;
 
@@ -474,7 +474,7 @@ void LagrangeanManager::CoveredConstraints(Variable *var, vector <Constraint *> 
 }
 
 
-void LagrangeanManager::PrintLagrangean() {
+void LagrangianManager::PrintLagrangian() {
     unsigned int i = 0;
     int j;
     bool prim;
@@ -494,7 +494,7 @@ void LagrangeanManager::PrintLagrangean() {
 }
 
 
-void LagrangeanManager::ImprimeLP(FILE *saida) {
+void LagrangianManager::ImprimeLP(FILE *saida) {
     unsigned int i = 0;
     int j;
     bool prim;
@@ -595,7 +595,7 @@ void LagrangeanManager::ImprimeLP(FILE *saida) {
     fflush(saida);
 }
 
-string LagrangeanManager::PrintVariableVector(Solucao s) {
+string LagrangianManager::PrintVariableVector(Solucao s) {
     stringstream work;
 
     VariableIterator vIt = s.begin();
@@ -605,14 +605,14 @@ string LagrangeanManager::PrintVariableVector(Solucao s) {
     return work.str();
 }
 
-void LagrangeanManager::PrintLP(string filename) {
+void LagrangianManager::PrintLP(string filename) {
     ofstream file;
     file.open(filename);
     file << PrintLP();
     file.close();
 }
 
-string LagrangeanManager::PrintLP() {
+string LagrangianManager::PrintLP() {
   
     stringstream work;
 
@@ -729,7 +729,7 @@ string LagrangeanManager::PrintLP() {
 }
 
 
-void LagrangeanManager::CleanUp() {
+void LagrangianManager::CleanUp() {
    
     if (ActiveVariables() < 1000) return;
    
@@ -741,7 +741,7 @@ void LagrangeanManager::CleanUp() {
     }
 }
 
-int LagrangeanManager::Audit() {
+int LagrangianManager::Audit() {
     int i;
     int res = 0;
     i = ActiveVariables();
@@ -753,7 +753,7 @@ int LagrangeanManager::Audit() {
 }
 
 
-void LagrangeanManager::CleanUpProblem() {
+void LagrangianManager::CleanUpProblem() {
 
     Constraint *constraint;
     Variable *var;
@@ -864,7 +864,7 @@ void LagrangeanManager::CleanUpProblem() {
     cout << "CUTS after reduction: " << _cuts.size() << endl;
 }
 
-void LagrangeanManager::Restart() {
+void LagrangianManager::Restart() {
 
     setLowerBound(_config->MINUS00);
     ConstraintIterator cIt,cItEnd;  
@@ -881,7 +881,7 @@ void LagrangeanManager::Restart() {
 
 }
 
-void LagrangeanManager::FinalStats() {
+void LagrangianManager::FinalStats() {
 
     float LI = getLowerBound();
     float LS = getUpperBound();
@@ -906,7 +906,7 @@ void LagrangeanManager::FinalStats() {
 
 }
 
-void LagrangeanManager::StoreIncumbent(Solucao &sol) {
+void LagrangianManager::StoreIncumbent(Solucao &sol) {
 
     VariableIterator It;
     
@@ -921,7 +921,7 @@ void LagrangeanManager::StoreIncumbent(Solucao &sol) {
 }
 
 
-void LagrangeanManager::CheckConstraints(Solucao& sol) {
+void LagrangianManager::CheckConstraints(Solucao& sol) {
 
     ConstraintIterator rest, fim, restLixo;
     VariableIterator vIt, vEnd;

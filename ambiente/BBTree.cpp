@@ -74,7 +74,7 @@ BBTree::BBTree()
     createEmptyNode(-1);
 }
 
-BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo, Configuration* config)
+BBTree::BBTree(LagrangianManager* manager, Algoritmo* algo, Configuration* config)
     : _current(0)
     , _nodesCount(0)
     , _nodesExecuted(0)
@@ -88,7 +88,7 @@ BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo, Configuration* confi
 }   
 
 
-BBTree::BBTree(LagrangeanManager* manager, Algoritmo* algo,
+BBTree::BBTree(LagrangianManager* manager, Algoritmo* algo,
     SearchAlgorithm sa, Configuration* config)
     : BBTree(manager, algo, config) 
 {

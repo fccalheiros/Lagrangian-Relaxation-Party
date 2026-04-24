@@ -1,5 +1,5 @@
-#ifndef _LagrangeanManager_H
-#define _LagrangeanManager_H
+#ifndef _LagrangianManager_H
+#define _LagrangianManager_H
 
 
 #define _CRT_SECURE_NO_WARNINGS
@@ -57,7 +57,7 @@ public:
 /*****************************************************/
 
 
-class LagrangeanManager {
+class LagrangianManager {
 
 public:
 
@@ -114,12 +114,12 @@ protected:
 
 public:
 
-    LagrangeanManager(Configuration *config);
-    LagrangeanManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE, size_t max_sort_depth = 4 );
-    LagrangeanManager(LagrangeanManager* m);
-    virtual LagrangeanManager* CopyAndClean(LagrangeanManager* m);
+    LagrangianManager(Configuration *config);
+    LagrangianManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE, size_t max_sort_depth = 4 );
+    LagrangianManager(LagrangianManager* m);
+    virtual LagrangianManager* CopyAndClean(LagrangianManager* m);
 
-    virtual ~LagrangeanManager();
+    virtual ~LagrangianManager();
 
     virtual void Solve(float InitialCost, float KnownBound);
 
@@ -164,7 +164,7 @@ public:
     string PrintLP();
     void PrintLP(string filename);
     string PrintVariableVector(Solucao s);
-    void PrintLagrangean();
+    void PrintLagrangian();
 
     void CleanUpProblem();
     void Restart();
@@ -177,7 +177,7 @@ public:
 
     inline bool OptimalFound() { return ( (getUpperBound() - getLowerBound()) < _config->STOP_GAP); }
 
-    inline virtual string DefaultFilePrefix() { return "LagrangeanManager"; }
+    inline virtual string DefaultFilePrefix() { return "LagrangianManager"; }
 
 
     void CheckConstraints(Solucao& sol);

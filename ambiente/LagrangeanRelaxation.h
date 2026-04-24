@@ -11,7 +11,7 @@ public:
 
 	virtual ~LagrangeanRelaxation();
 
-	virtual void setLagrangeanManager(LagrangeanManager *mes);
+	virtual void setLagrangianManager(LagrangianManager *mes);
   
 	virtual void Inicializacao();
 	virtual void Relaxacao(Solucao& sol, float& valor, float InitialCost);

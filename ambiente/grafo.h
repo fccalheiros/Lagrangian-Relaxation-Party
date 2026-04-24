@@ -49,8 +49,8 @@ class Grafo {
 	bool TemAresta(int no1, int no2);
 
 	int Grau(int no);
-	void Clique(LagrangeanManager *mestre,int Minimo=3);
-	void CicloImpar(LagrangeanManager *mestre);
+	void Clique(LagrangianManager *mestre,int Minimo=3);
+	void CicloImpar(LagrangianManager *mestre);
 	void DFS(int no);
 
 	void Imprime();

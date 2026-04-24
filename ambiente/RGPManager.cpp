@@ -12,7 +12,7 @@ RGPManager::RGPManager(Configuration* config)
 }
 
 RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direction):
-  LagrangeanManager(config, algo,direction),
+  LagrangianManager(config, algo,direction),
     _colunas(0),
     _colunas2(0),
     _colunas3(0),
@@ -25,7 +25,7 @@ RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direct
 }
 
 RGPManager::RGPManager(RGPManager* m) :
-    LagrangeanManager( (LagrangeanManager *) m),
+    LagrangianManager( (LagrangianManager *) m),
     _colunas(m->_colunas),
     _colunas2(m->_colunas2),
     _colunas3(m->_colunas3),
@@ -38,7 +38,7 @@ RGPManager::RGPManager(RGPManager* m) :
 
 }
 
-LagrangeanManager* RGPManager::CopyAndClean(LagrangeanManager* m) {
+LagrangianManager* RGPManager::CopyAndClean(LagrangianManager* m) {
 
     RGPManager* m1;
     if (m == NULL) {
@@ -59,11 +59,11 @@ LagrangeanManager* RGPManager::CopyAndClean(LagrangeanManager* m) {
 
     m1->_instancia = _instancia;
 
-    return LagrangeanManager::CopyAndClean(m);
+    return LagrangianManager::CopyAndClean(m);
 }
 
 void RGPManager::SetVariableForBranch(Variable* v, short int value) {
-    LagrangeanManager::SetVariableForBranch(v, value);
+    LagrangianManager::SetVariableForBranch(v, value);
     if (value == 1)
         _numeroPontos--;
 }
@@ -400,7 +400,7 @@ void RGPManager::MarcaVariaveis(RGPVariable* var) {
 void RGPManager::Solve(float InitialCost, float KnownBound) {
 
     if ( _colunas3 < 50000 ) _JaImprimiu = true;
-    LagrangeanManager::Solve(InitialCost,KnownBound);
+    LagrangianManager::Solve(InitialCost,KnownBound);
 
 }
 
@@ -482,7 +482,7 @@ void RGPManager::PrintSolution() {
 }
 
 void RGPManager::FinalStats() {
-    LagrangeanManager::FinalStats();
+    LagrangianManager::FinalStats();
     RGPLagrangeanRelaxation* l = (RGPLagrangeanRelaxation*)_algo;
     cout << "Vezes 1  = " << l->_vezes1 << endl << "Vezes 2 = " << l->_vezes2 << endl;
     cout << "Fator Maior = " << l->_maximofator << endl;

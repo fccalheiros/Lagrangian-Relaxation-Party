@@ -11,7 +11,7 @@
 
 
 int main2(int argc, char* argv[]);
-void cortes(LagrangeanManager* prob, FILE* saida);
+void cortes(LagrangianManager* prob, FILE* saida);
 float Psi(bool perturbacao);
 float Custo(int var);
 

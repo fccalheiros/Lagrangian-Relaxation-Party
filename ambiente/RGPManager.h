@@ -7,7 +7,7 @@
 
 class RGPLagrangeanRelaxation;
 
-class RGPManager : public LagrangeanManager {
+class RGPManager : public LagrangianManager {
 
  protected:
 
@@ -32,7 +32,7 @@ class RGPManager : public LagrangeanManager {
     RGPManager(Configuration *config);
     RGPManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE);
     RGPManager(RGPManager* m);
-    virtual LagrangeanManager* CopyAndClean(LagrangeanManager* m);
+    virtual LagrangianManager* CopyAndClean(LagrangianManager* m);
 
     virtual ~RGPManager();
 

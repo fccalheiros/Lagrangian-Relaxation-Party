@@ -140,7 +140,7 @@ void Grafo::DFS(int no) {
 
 /************* Clique ***************/
 
-void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
+void Grafo::Clique(LagrangianManager *mestre, int Minimo) {
  
     if (_aumentou ) {
         _arestas.resize(static_cast<size_t>(_proximo) + 3);
@@ -229,7 +229,7 @@ void Grafo::Clique(LagrangeanManager *mestre, int Minimo) {
 /************* Ciclo Impar **************/
 
 
-void Grafo::CicloImpar(LagrangeanManager *mestre) {
+void Grafo::CicloImpar(LagrangianManager *mestre) {
 
     if (_aumentou ) {
         _arestas.resize(static_cast<size_t>(_proximo) + 3);

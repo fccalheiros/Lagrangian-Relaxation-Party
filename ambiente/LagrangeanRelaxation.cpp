@@ -28,8 +28,8 @@ LagrangeanRelaxation::~LagrangeanRelaxation()
 {
 }
 
-void LagrangeanRelaxation::setLagrangeanManager(LagrangeanManager *mes) {
-    Algoritmo::setLagrangeanManager(mes);
+void LagrangeanRelaxation::setLagrangianManager(LagrangianManager *mes) {
+    Algoritmo::setLagrangianManager(mes);
 }
 
 void LagrangeanRelaxation::Inicializacao() {

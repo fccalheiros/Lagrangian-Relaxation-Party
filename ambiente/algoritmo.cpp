@@ -17,7 +17,7 @@ Algoritmo::Algoritmo(Configuration * config) :
 
 Algoritmo::~Algoritmo() {}
 
-void Algoritmo::setLagrangeanManager(LagrangeanManager *mes){
+void Algoritmo::setLagrangianManager(LagrangianManager *mes){
 	_manager = mes;
 }
 

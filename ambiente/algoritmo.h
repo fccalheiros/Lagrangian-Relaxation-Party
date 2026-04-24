@@ -9,13 +9,13 @@
 
 typedef vector<Variable *> Solucao;
 
-class LagrangeanManager;
+class LagrangianManager;
 
 class Algoritmo {
   
  protected:
   
-  LagrangeanManager * _manager;
+  LagrangianManager * _manager;
   Configuration * _config;
 
  public:
@@ -31,7 +31,7 @@ class Algoritmo {
   Algoritmo(Configuration * config);
   virtual ~Algoritmo();
 
-  virtual void setLagrangeanManager(LagrangeanManager * mes);
+  virtual void setLagrangianManager(LagrangianManager * mes);
   virtual void Inicializacao();
   virtual void Finalizacao();
 
