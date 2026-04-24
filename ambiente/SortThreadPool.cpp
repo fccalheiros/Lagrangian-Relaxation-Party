@@ -1,4 +1,6 @@
 #include "SortThreadPool.h"
+#include "Windows.h"
+#include <sstream>
 
 using namespace std;
 

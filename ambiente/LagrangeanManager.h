@@ -29,7 +29,7 @@ enum class Direction {
     MINIMIZE
 };
 
-template<class Tp, class _Function> struct VariavelValida : public unary_function<Tp, void>
+template<class Tp, class _Function> struct VariavelValida 
 {
 public:
 
@@ -43,7 +43,7 @@ public:
 
 /*****************************************************/
 
-template<class Tp, class _Function> struct RestricaoAtiva : public unary_function<Tp, void>
+template<class Tp, class _Function> struct RestricaoAtiva 
 {
 public:
     RestricaoAtiva(_Function f) : _f(f) { };

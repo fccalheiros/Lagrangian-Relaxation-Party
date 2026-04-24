@@ -1,4 +1,3 @@
-#include "Variable.h"
 #include "Constraint.h"
 
 

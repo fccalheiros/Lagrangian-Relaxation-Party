@@ -1,6 +1,4 @@
 #include "BBTree.h"
-#include "RGPLagrangeanRelaxation.h"
-
 
 #include <sstream>
 #include <fstream>

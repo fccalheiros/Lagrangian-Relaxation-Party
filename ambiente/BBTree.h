@@ -5,6 +5,8 @@
 
 #include <vector> 
 #include <iostream>
+#include <string>
+
 #include "Variable.h"
 #include "LagrangeanManager.h"
 #include "algoritmo.h"

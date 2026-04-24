@@ -2,6 +2,7 @@
 #define _RGPLagrangeanRelaxation_H
 
 #include "LagrangeanRelaxation.h"
+#include "RGPVariable.h"
 
 
 class RGPLagrangeanRelaxation : public LagrangeanRelaxation {

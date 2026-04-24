@@ -1,12 +1,12 @@
 #ifndef GRAFO_H
 #define GRAFO_H
 
-#include <unordered_map>
 #include <map>
 #include <list>
+#include <vector>
+
 #include "restricao_hash.h"
 #include "Variable.h"
-
 #include "LagrangeanManager.h"
 
 class GraphNode {

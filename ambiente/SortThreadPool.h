@@ -7,8 +7,7 @@
 #include <condition_variable>
 #include <future>
 #include <functional>
-#include "Windows.h"
-#include <sstream>
+
 
 class SortThreadPool {
 public:

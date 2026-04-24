@@ -1,11 +1,12 @@
+#include <fstream>
+
 #include "main.h"
 #include "Configuration.h"
 
-#include <sstream>
-#include <iomanip>
-#include <fstream>
-
-
+#include "RGPManager.h"
+#include "RGPLagrangeanRelaxation.h"
+#include "grafo.h"
+#include "BBTree.h"
 
 bool perturbacao;
 bool linear;

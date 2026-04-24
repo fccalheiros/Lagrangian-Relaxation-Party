@@ -1,5 +1,5 @@
 #include "algoritmo.h"
-#include "LagrangeanManager.h"
+#include <iostream>
 
 using namespace std;
 

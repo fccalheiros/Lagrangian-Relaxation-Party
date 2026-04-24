@@ -2,6 +2,7 @@
 #define _ALGORITMO_H
 
 #include <vector>
+
 #include "Variable.h"
 #include "Time.h"
 #include "Configuration.h"

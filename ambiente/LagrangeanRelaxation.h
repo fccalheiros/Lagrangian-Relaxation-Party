@@ -2,8 +2,6 @@
 #define _LAGRANGEANO_H
 
 #include "algoritmo.h"
-#include "RGPManager.h"
-#include "Time.h"
 
 class LagrangeanRelaxation : public Algoritmo {
 

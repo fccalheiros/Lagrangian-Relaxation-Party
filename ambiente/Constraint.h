@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <iostream>
 
+using namespace std;
 
 enum class ConstraintSign {
 	LowerEqual = 1,  // ?

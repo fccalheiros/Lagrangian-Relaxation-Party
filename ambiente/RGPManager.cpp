@@ -1,11 +1,8 @@
 #include "RGPManager.h"
-#include "algoritmo.h"
 #include "Time.h"
-#include "Constraint.h"
-#include <stdio.h>
 #include "RGPLagrangeanRelaxation.h"
-#include <format>
 
+#include <stdio.h>
 
 using namespace std;
 

@@ -4,8 +4,6 @@
 
 using namespace std;
 
-
-
 class Constraint;
 typedef vector<Constraint*>::iterator ConstraintIterator;
 
@@ -19,6 +17,7 @@ class Variable {
 	bool  _marca;
 	bool  _fixaEmZero;
 	bool  _fixa;
+	bool _out = false;
 
 	short int _linhasCobertas;
  

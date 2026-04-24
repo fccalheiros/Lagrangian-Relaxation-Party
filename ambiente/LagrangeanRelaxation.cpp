@@ -3,7 +3,6 @@
 
 #include "LagrangeanRelaxation.h"
 #include "Constraint.h"
-#include "RGPManager.h"
 #include "grafo.h"
 
 
@@ -351,12 +350,11 @@ bool LagrangeanRelaxation::Price(Solucao& relaxed) {
 
     _manager->VariableBounds(vIt, vEnd);
 
-    // felipe -- não deveria ter referência a RGPVariable aqui
     int count = 0;
     for (; vIt != vEnd; vIt++) {
-        if ((*vIt)->retCustoLag() < max && ((RGPVariable*)(*vIt))->_out) {
+        if ((*vIt)->retCustoLag() < max && (*vIt)->_out) {
             cout << "x" << (*vIt)->retNome() << " : " << (*vIt)->retCustoLag() << endl;
-            ((RGPVariable*)(*vIt))->_out = false;
+            (*vIt)->_out = false;
             count++;
         }
     }

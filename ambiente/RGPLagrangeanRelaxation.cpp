@@ -1,5 +1,5 @@
 #include "RGPLagrangeanRelaxation.h"
-
+#include "RGPManager.h"
 
 RGPLagrangeanRelaxation::RGPLagrangeanRelaxation(Configuration *config) :
   LagrangeanRelaxation(config) 
