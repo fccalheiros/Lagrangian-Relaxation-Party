@@ -67,7 +67,6 @@ public:
     vector<Constraint*> _cuts;
 
     vector<Variable*> _best;
-    VariableIterator _end;
 
     Algoritmo* _algo;
 
@@ -80,8 +79,12 @@ public:
     int _totalVariaveis;
     int _countFixed;
     int _countFixedPartial;
+    
+    double _nonZeroCount = 0;
 
 protected:
+
+    
 
     Direction _direction;
     Configuration* _config;
@@ -93,11 +96,14 @@ private:
     float _upperBound;
     float _lowerBound;
 
+    VariableIterator _activeVariablesEnd;
+
 protected:
 
     inline void setUpperBound(float UB) { _upperBound = UB; }
     inline void setLowerBound(float LB) { _lowerBound = LB; }
-    inline void setBound(float B)       { if (_direction == Direction::MINIMIZE) setUpperBound(B); else setLowerBound(B); }
+    inline void setBound(float B)       { if (_direction == Direction::MINIMIZE) setUpperBound(B); 
+                                          else setLowerBound(B); }
     inline Direction getDirection()  const  { return _direction; }
 
     void StoreIncumbent(Solucao &sol);
@@ -139,10 +145,10 @@ public:
     void MarkConstraintForDeletion(Variable* var);
 
     int  ActiveVariables();
-    void VariableBounds(VariableIterator &comeco, VariableIterator &fim);
-    void ConstraintsBounds(ConstraintIterator &comeco, ConstraintIterator &fim);
-    void ConstraintsNDBounds(ConstraintIterator &comeco, ConstraintIterator &fim);
-    void CutsBounds(ConstraintIterator &comeco, ConstraintIterator &fim);
+    void GetActiveVariableRange(VariableIterator &begin, VariableIterator &end);
+    void GetConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
+    void GetNDConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
+    void GetCutsRange(ConstraintIterator &begin, ConstraintIterator &end);
 
     Constraint * getConstraint (int i);
     Constraint * getConstraintND (int i);
@@ -166,6 +172,7 @@ public:
     string PrintVariableVector(Solucao s);
     void PrintLagrangian();
 
+    void CleanupDeletedConstraints();
     void CleanUpProblem();
     void Restart();
 
@@ -179,51 +186,55 @@ public:
 
     inline virtual string DefaultFilePrefix() { return "LagrangianManager"; }
 
-
     void CheckConstraints(Solucao& sol);
-
- public:
 
      float GetMaxLagrangian(VariableSet sol) {
          VariableIterator it = max_element(sol.begin(),sol.end(), CompareLagrangian <Variable*>());
          return (*it)->_valorLag;
      }
+ 
+public:
 
     template <class StrictWeakOrdering> void EstOrdemVariaveis(int posicao, StrictWeakOrdering comp) {
-
-        if ( distance(_variables.begin(),_end) > 200)
-            nth_element(_variables.begin(), _variables.begin() + posicao, _end, comp);
+        VariableIterator begin, end;
+		GetActiveVariableRange(begin, end);
+        if ( distance(begin,end) > 200)
+            nth_element(begin, begin + posicao, end, comp);
         else
-            sort(_variables.begin(), _end, comp);
+            sort(begin, end, comp);
     };
 
     template <class StrictWeakOrdering> void EstOrdemVariaveis2(int posicao, StrictWeakOrdering comp) {
         int p = 4 * posicao;
-        if ( distance(_variables.begin(),_end)  > p) {
-            nth_element(_variables.begin(), _variables.begin() + p, _end, comp);
-            sort(_variables.begin(), _variables.begin() + p, comp);
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end);
+        if ( distance(begin,end)  > p) {
+            nth_element(begin, begin + p, end, comp);
+            sort(begin, begin + p, comp);
         }
         else
-            sort(_variables.begin(), _end, comp);
+            sort(begin, end, comp);
     };
 
 
     template <class StrictWeakOrdering> void Ordena(StrictWeakOrdering comp) {
-        sort(_variables.begin(),_end,comp);
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end);
+        sort(begin, end, comp);
     };
 
     template <class StrictWeakOrdering> void Ordena2(StrictWeakOrdering comp) {
-        VariableIterator inicio = _variables.begin();
-        VariableIterator fim    = _end;
-        OrdenaRecursivo(comp, inicio, fim, 0);
-        //if ( ! is_sorted(inicio, fim ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end); 
+        OrdenaRecursivo(comp, begin, end, 0);
+        //if ( ! is_sorted(begin, end ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
 
     template <class StrictWeakOrdering> void Ordena3(StrictWeakOrdering comp) {
-        VariableIterator inicio = _variables.begin();
-        VariableIterator fim = _end;
-        ThreadMergeSort(_pool, comp, inicio, fim, 0, _max_sort_depth);
-        //if ( ! is_sorted(inicio, fim ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end); 
+        ThreadMergeSort(_pool, comp, begin, end, 0, _max_sort_depth);
+        //if ( ! is_sorted(begin, end ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
 
     // parâmetros configuráveis
@@ -247,7 +258,7 @@ public:
         auto size = end - begin;
 
         DWORD tid = GetCurrentThreadId();
-        OutputDebugStringA((std::string("Execução na Thread: ") + std::to_string(tid) + " " +  std::to_string(depth) + "\r\n").c_str());
+        // OutputDebugStringA((std::string("Execução na Thread: ") + std::to_string(tid) + " " +  std::to_string(depth) + "\r\n").c_str());
         if (size <= max_sort_size) {
             std::sort(begin, end, comp);
             return;
@@ -274,47 +285,61 @@ public:
         VariableIterator it = std::lower_bound(begin, mid, *mid, comp);
         std::inplace_merge(it, mid, end, comp);
 
-        OutputDebugStringA((std::string("Fim Thread: ") + std::to_string(tid) + " " + std::to_string(depth) + "\r\n").c_str());
+        //OutputDebugStringA((std::string("Fim Thread: ") + std::to_string(tid) + " " + std::to_string(depth) + "\r\n").c_str());
 
     }
 
-    template <class RandomAccessIterator, class StrictWeakOrdering> void retira_heap(RandomAccessIterator last,StrictWeakOrdering comp) {
-        pop_heap(_variables.begin(),last,comp);
+    template <class RandomAccessIterator, class StrictWeakOrdering> void pop_heap_t(RandomAccessIterator last,StrictWeakOrdering comp) {
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end);
+        pop_heap(begin, last, comp);
     }  
 
-    template <class StrictWeakOrdering> void faz_heap(StrictWeakOrdering comp) {
-        make_heap(_variables.begin(),_end,comp);
+    template <class StrictWeakOrdering> void make_heap_t(StrictWeakOrdering comp) {
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end);     
+        make_heap(begin, end, comp);
     }
 
-    template <class StrictWeakOrdering> void ordena_heap(StrictWeakOrdering comp) {
-        sort_heap(_variables.begin(),_end,comp);
+    template <class StrictWeakOrdering> void sort_heap_t(StrictWeakOrdering comp) {
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end);
+        sort_heap(begin, end, comp);
     }
 
     template <class _Function>
-    _Function para_cada_variavel(_Function __f) {
-    VariavelValida<Variable * , _Function> tmp =
-        for_each(_variables.begin(),_end,VariavelValida <Variable *,_Function> (__f) );
-        return tmp._f;
+    _Function for_each_variable(_Function __f) {
+        VariableIterator begin, end;
+        GetActiveVariableRange(begin, end);
+        VariavelValida<Variable * , _Function> tmp =
+            for_each(begin, end, VariavelValida <Variable *,_Function> (__f) );
+            return tmp._f;
     };
   
     template <class _Function>
-    _Function para_cada_restricao(_Function __f) {
+    _Function for_each_constraint(_Function __f) {
+		ConstraintIterator begin, end;
+		GetConstraintRange(begin, end);
         RestricaoAtiva<Constraint *,_Function> tmp =
-            for_each(_constraints.begin(),_constraints.end(),RestricaoAtiva <Constraint* ,_Function> (__f) );
+            for_each(begin, end, RestricaoAtiva <Constraint* ,_Function> (__f) );
         return tmp._f;
     };
 
     template <class _Function>
-    _Function para_cada_restricaoND(_Function __f) {
+    _Function for_each_non_dualized_constraint(_Function __f) {
+        ConstraintIterator begin, end;
+		GetNDConstraintRange(begin, end);
         RestricaoAtiva<Constraint *,_Function> tmp =
-            for_each(_constraintsND.begin(),_constraintsND.end(),RestricaoAtiva <Constraint* ,_Function> (__f) );
+            for_each(begin, end, RestricaoAtiva <Constraint* ,_Function> (__f) );
         return tmp._f;
     };
 
     template <class _Function>
-    _Function para_cada_corte(_Function __f) {
+    _Function for_each_cut(_Function __f) {
+        ConstraintIterator begin, end;
+        GetCutsRange(begin, end); 
         RestricaoAtiva<Constraint *,_Function> tmp =
-            for_each(_cuts.begin(),_cuts.end(),RestricaoAtiva <Constraint* ,_Function> (__f) );
+            for_each(begin, end, RestricaoAtiva <Constraint* ,_Function> (__f) );
         return tmp._f;
     };
 

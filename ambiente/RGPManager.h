@@ -27,7 +27,6 @@ class RGPManager : public LagrangianManager {
 
 
     int _numeroPontos;
-    double _uns;
 
     RGPManager(Configuration *config);
     RGPManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE);
@@ -57,7 +56,7 @@ class RGPManager : public LagrangianManager {
     void CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
     virtual void InsertVariableIntoConstraint(Variable *var1);
   
-    void ConstraintsReduction();
+    void PostGenerationConstraintsReduction();
 
     void CalculaSegmentos(RGPVariable *var, int px1, int py1, int px2, int py2);
 

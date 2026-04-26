@@ -135,7 +135,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	//at first run a lowcost fixation algorithm
 	//float V2 = LS - (valor - _manager->GetMaxLagrangian(solRel)) - _config->STOP_GAP;
 	VariableIterator vIt, vDummy;
-	_manager->VariableBounds(vDummy, vIt);
+	_manager->GetActiveVariableRange(vDummy, vIt);
 	size_t InitialTotal = distance(vDummy, vIt);
 	
 	int CardinalityRestriction =  ((RGPManager*)_manager)->_numeroPontos + 1;  
@@ -146,7 +146,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
    
 	int veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2;
 
-	_manager->VariableBounds(varTeste,varFimTeste);
+	_manager->GetActiveVariableRange(varTeste,varFimTeste);
 	varInicioTeste  = varTeste;
 	varTesteAnt     = varFimTeste;
 	size_t total    = distance(varTeste, varFimTeste);
@@ -167,7 +167,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 			soma = _somaMultiplicadores + vTeste->_valorLag + InitialCost;
 			contaVar = 1;
 			vTeste->RetornaSegmentos(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2);
-			_manager->VariableBounds(var,varFim);
+			_manager->GetActiveVariableRange(var,varFim);
 			for (; var != varFim; var++ ) {
 				if ( ! ((RGPVariable *)(*var))->Intercepta(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2) ) 
 					if ( (*var)->_nome != vTeste->_nome ) { 
@@ -177,8 +177,6 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 						if ( soma > LS - _config->STOP_GAP ) break;
 					}
 			}
-			//cout << "Indice fixa: " << std::distance(_manager->_variables.begin(), var) << " Totais:" << std::distance(_manager->_variables.begin(), _manager->_end) <<endl;
-			// Fixando a variavel
 			if ( soma > LS - _config->STOP_GAP) {
 				_manager->FixVariable(varTeste);
 				contaFixadas++;

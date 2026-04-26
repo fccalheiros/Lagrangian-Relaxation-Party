@@ -37,7 +37,7 @@ public:
     FILE *_fp;
     Imprime() { _fp = stdin; }
     Imprime(FILE *fp) { _fp = fp; };
-    void operator() (T &rest) { ((Constraint *)rest)->Print(_fp); }
+    void operator() (T &rest) { rest->Print(_fp); }
 };
 
 

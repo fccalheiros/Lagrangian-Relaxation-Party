@@ -17,7 +17,7 @@ class Variable {
 	bool  _marca;
 	bool  _fixaEmZero;
 	bool  _fixa;
-	bool _out = false;
+	bool  _out = false;
 
 	short int _linhasCobertas;
  
@@ -52,12 +52,13 @@ class Variable {
 	void Desmarca();
 	bool Valida() const;
 
-	void setCoveredConstraints(int i) { _linhasCobertas = i; _constraints.reserve(i); }
+	void setCoveredConstraints(int i)  { _linhasCobertas = i; _constraints.reserve(i); }
 	int  getCoveredConstraints() const { return _linhasCobertas; }
-	void addCoveredConstraints(int i) { _linhasCobertas += i;  }
-	void ResetCoveredConstraints()    { _linhasCobertas = (short int)_constraints.size(); }
+	void addCoveredConstraints(int i)  { _linhasCobertas += i;  }
+	void ResetCoveredConstraints()     { _linhasCobertas = (short int)_constraints.size(); }
 
-	void ConstraintsBounds(ConstraintIterator& begin, ConstraintIterator& end) { begin = _constraints.begin();   end = _constraints.end(); }
+	void GetConstraintRange(ConstraintIterator& begin, ConstraintIterator& end) 
+		{ begin = _constraints.begin();   end = _constraints.end(); }
 
 
 

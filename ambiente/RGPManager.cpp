@@ -18,7 +18,6 @@ RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direct
     _colunas3(0),
     _colunas4(0),
     _JaImprimiu(true),
-    _uns(0),
     _numeroPontos(0),
     _faixa(0)
 {
@@ -31,7 +30,6 @@ RGPManager::RGPManager(RGPManager* m) :
     _colunas3(m->_colunas3),
     _colunas4(m->_colunas4),
     _JaImprimiu(m->_JaImprimiu),
-    _uns(m->_uns),
     _numeroPontos(m->_numeroPontos),
     _faixa(m->_faixa)
 {
@@ -52,7 +50,7 @@ LagrangianManager* RGPManager::CopyAndClean(LagrangianManager* m) {
          m1->_colunas3     = _colunas3;
          m1->_colunas4     = _colunas4;
          m1->_JaImprimiu   = _JaImprimiu;
-         m1->_uns          = _uns;
+         m1->_nonZeroCount          = _nonZeroCount;
          m1->_numeroPontos = _numeroPontos;
          m1->_faixa        = _faixa;
     }
@@ -123,44 +121,10 @@ void RGPManager::CreateProblem() {
         }
     }
 
-    ConstraintsReduction();
-  
-    /*
-    InsertConstraint(new Constraint(float (_numeroPontos + 1), EQUAL, 0, 0));
-    VariableIterator vIt, vEnd;
-    vIt = _variables.begin();
-    vEnd = _variables.end();
-    for (; vIt != vEnd; vIt++) {
-        (*vIt)->poeRestricao(_constraints[tamanho]);
-        (*vIt)->addCoveredConstraints(1);
-    }
-    _constraints[tamanho]->_index = tamanho;
-    */
-
-  /*
-    Constraint *corte = new Constraint(1,EQUAL,0,_variables.size()+40);
-    tamanho = _variables.size();
-    float area = Area();
-    for (i=0; i < tamanho ;i++) {
-        corte->InsertVariable( _variables[i],  ((float)((RGPVariable *) _variables[i])->Area()) /area  );
-    }
-    InsertCut(corte);
-    */
-    /*int j,k;
-    j=0;k=0;
-    for (i = 0 ; i< tamanho; i++) {
-    //((Constraint *)_constraints[i])->LimpaRestricao();
-    j += ((Constraint *)_constraints[i])->_variables.size();
-    k += ((Constraint *)_constraints[i])->_variables.capacity();
-    cout << i << " " << ((Constraint *)_constraints[i])->_variables.size() << " " << ((Constraint *)_constraints[i])->_variables.capacity() << endl;  
-    }
-    cout << j << " " << k << endl;
-    cout << _variables.size() << " " << _variables.capacity() << endl;
-    exit(1);*/
-
+    PostGenerationConstraintsReduction();
 
     char msg[20] = "";
-    sprintf(msg, "%10.0f", _uns);
+    sprintf(msg, "%10.0f", _nonZeroCount);
 
     cout << endl;
     cout << "Points: " << _numeroPontos << endl;
@@ -318,14 +282,14 @@ void RGPManager::InsertVariableIntoConstraint(Variable *var1) {
     for ( Iy=Iy1; Iy < Iy2; Iy++ ) {
         for ( Ix=Ix1; Ix < Ix2; Ix++) {
             var->poeRestricao( _constraints[static_cast<size_t>(line + Ix)] );
-            _uns++;
+            _nonZeroCount++;
         }
         line += (_numeroPontos+1);
     }
 
 }
 
-void RGPManager::ConstraintsReduction() {
+void RGPManager::PostGenerationConstraintsReduction() {
 
     GridIter x, fimx;
     int y,Iy,Ix, index;
@@ -340,45 +304,9 @@ void RGPManager::ConstraintsReduction() {
         Iy = _instancia.retornaIndiceY(y);
 
         index = (_numeroPontos + 1)*Iy + Ix;
+		// delegate memory managemenet to the base class, just mark the constraint for deletion
         _constraints[index]->LogicalDelete();
         cout << "Indice: " << index << " " << *x << " " << y << endl;
-    }
-
-    bool sai;
-    VariableIterator  vIt, vEnd;
-    ConstraintIterator cBegin, cIt, cEnd, cRecicle;
-    
-    //Remove deleted constraints from variable
-    vIt = _variables.begin();
-    vEnd = _variables.end();
-    for (; vIt != vEnd; vIt++) {
-        (*vIt)->ConstraintsBounds(cBegin, cIt);
-        sai = (cIt == cBegin);
-        if (!sai) cIt--;
-        while (!sai) {
-            sai = (cIt == cBegin);
-            if ((*cIt)->LogicalDeleted()) {
-                cRecicle = cIt;
-                if (!sai) cIt--;
-                (*vIt)->_constraints.erase(cRecicle);
-                _uns--;
-            }
-            else if (!sai) cIt--;
-        }
-    }
-
-    //delete fisically all logically deleted constraints
-    ConstraintsBounds(cBegin, cIt);
-    sai = (cIt == cBegin);
-    if (!sai) cIt--;
-    while (!sai) {
-        sai = (cIt == cBegin);
-        if ((*cIt)->LogicalDeleted()) {
-            cRecicle = cIt;
-            if (!sai) cIt--;
-            RemoveConstraint(cRecicle);
-        }
-        else if (!sai) cIt--;
     }
 
 } 

@@ -13,8 +13,6 @@ Algoritmo::Algoritmo(Configuration * config) :
 	_config(config)
 {}
 
-
-
 Algoritmo::~Algoritmo() {}
 
 void Algoritmo::setLagrangianManager(LagrangianManager *mes){

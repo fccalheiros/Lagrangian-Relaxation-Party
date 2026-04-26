@@ -1,4 +1,4 @@
-#include "LagrangianManager.h"
+﻿#include "LagrangianManager.h"
 #include "algoritmo.h"
 #include <sstream>
 #include <iomanip>
@@ -33,7 +33,8 @@ LagrangianManager::LagrangianManager(Configuration* config)
 LagrangianManager::LagrangianManager(LagrangianManager* m)
     : LagrangianManager(m->_config, m->_algo, m->_direction, m->_max_sort_depth)
 {
-    _totalVariaveis = m->_totalVariaveis; // ajuste espec�fico
+    _nonZeroCount = m->_nonZeroCount;
+    _totalVariaveis = m->_totalVariaveis; // ajuste específico
 }
 
 
@@ -62,17 +63,17 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
     ConstraintIterator rest, restFim;
 
 
-    ConstraintsBounds(rest, restFim);
+    GetConstraintRange(rest, restFim);
     for (; rest != restFim; rest++) {
         m->InsertConstraint((*rest)->CopyAndClean(NULL));
     }
 
-    ConstraintsNDBounds(rest, restFim);
+    GetNDConstraintRange(rest, restFim);
     for (; rest != restFim; rest++) {
         m->InsertConstraintND((*rest)->CopyAndClean(NULL));
     }
 
-    VariableBounds(var, varFim);
+    GetActiveVariableRange(var, varFim);
     for (; var != varFim; var++) {
 
         //copy variable
@@ -98,7 +99,7 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
     //cuts are not copied
 
     m->setUpperBound(getUpperBound());
-    m->_end = m->_variables.end();
+    m->_activeVariablesEnd = m->_variables.end();
 
     return m;
 }
@@ -112,28 +113,28 @@ void LagrangianManager::FreeMemory() {
     VariableIterator varIni,varFim, varLixo;
     ConstraintIterator proIni,proFim, proLixo;
 
-    VariableBounds(varIni,varFim);
+    GetActiveVariableRange(varIni,varFim);
     for (; varIni != varFim;) {
         varLixo = varIni;
         varIni++;
         delete *varLixo;
     }
 
-    ConstraintsBounds(proIni, proFim);
+    GetConstraintRange(proIni, proFim);
     for (; proIni != proFim;) {
         proLixo = proIni;
         proIni++;
         delete *proLixo;
     }
 
-    ConstraintsNDBounds(proIni, proFim);
+    GetNDConstraintRange(proIni, proFim);
     for (; proIni != proFim;) {
         proLixo = proIni;
         proIni++;
         delete* proLixo;
     }
 
-    CutsBounds(proIni, proFim);
+    GetCutsRange(proIni, proFim);
     for (; proIni != proFim;) {
         proLixo = proIni;
         proIni++;
@@ -145,7 +146,7 @@ void LagrangianManager::FreeMemory() {
     vector<Constraint*>().swap(_constraintsND);
     vector<Constraint*>().swap(_cuts);
 
-    _end = _variables.end();
+    _activeVariablesEnd = _variables.end();
 
 }
 
@@ -156,18 +157,22 @@ void LagrangianManager::GenerateProblem(char *arq) {
 }
 
 void LagrangianManager::FinalizeProblemCreation() {
-    _variables.shrink_to_fit();
-    _end = _variables.end();
 
+    _variables.shrink_to_fit();
+    _activeVariablesEnd = _variables.end();
+
+    CleanupDeletedConstraints();
 
     for (int i = 0; i < _countConstraints; i++) {
         _constraints[i]->_index = i;
     }
 
     VariableIterator vIt, vEnd;
-    for (VariableBounds(vIt, vEnd); vIt != vEnd; vIt++) {
+    for (GetActiveVariableRange(vIt, vEnd); vIt != vEnd; vIt++) {
         (*vIt)->ResetCoveredConstraints();
     }
+
+   
 }
 
 void LagrangianManager::CheckBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
@@ -232,7 +237,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
     VariableIterator vIt,vBegin, vEnd, vBranch, vRecicle;
     bool sai;
 
-    VariableBounds(vBranch, vEnd);
+    GetActiveVariableRange(vBranch, vEnd);
 
     for (; vBranch != vEnd; vBranch++) {
         if (v->_nome == (*vBranch)->_nome)
@@ -268,7 +273,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
 
         //Remove variables that were in logically deleted constraints 
         //Removal will include vBranch 
-        VariableBounds(vBegin, vIt);
+        GetActiveVariableRange(vBegin, vIt);
         sai = (vIt == vBegin);
         if (!sai) vIt--;
         while (!sai) {
@@ -290,7 +295,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
         }
 
         //delete fisically all logically deleted constraints
-        ConstraintsBounds(cBegin, cIt);
+        GetConstraintRange(cBegin, cIt);
         sai = (cIt == cBegin);
         if (!sai) cIt--;
         while (!sai) {
@@ -303,7 +308,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
             else if (!sai) cIt--;
         }
 
-        ConstraintsNDBounds(cBegin, cIt);
+        GetNDConstraintRange(cBegin, cIt);
         sai = (cIt == cBegin);
         if (!sai) cIt--;
         while (!sai) {
@@ -325,7 +330,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
             _constraintsND[i]->_index = i;
         }
 
-        _end = _variables.end();
+        _activeVariablesEnd = _variables.end();
 
     }
 
@@ -334,15 +339,15 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
 
 void LagrangianManager::FixVariable(VariableIterator var) {
     (*var)->_fixaEmZero = true;
-    _end--;
+    _activeVariablesEnd--;
     _countFixed++;
     _countFixedPartial++;
-    iter_swap(var,_end);
+    iter_swap(var,_activeVariablesEnd);
 }
 
 void LagrangianManager::FixLastVariable() {
-    _end--;
-    (*_end)->_fixaEmZero = true;
+    _activeVariablesEnd--;
+    (*_activeVariablesEnd)->_fixaEmZero = true;
     _countFixed++;
     _countFixedPartial++;
 }
@@ -390,7 +395,7 @@ void LagrangianManager::InsertCut(Constraint *constraint) {
     ConstraintIterator end;
     _cutsFound++;
 
-    for (CutsBounds(begin, end); begin != end; begin++) {
+    for (GetCutsRange(begin, end); begin != end; begin++) {
         if ( (*begin)->Compare(constraint) )
             return; 
     }
@@ -424,27 +429,28 @@ void LagrangianManager::RemoveCut(ConstraintIterator &it) {
 }
 
 int LagrangianManager::ActiveVariables() {
-    return static_cast<int>(distance(_variables.begin(),_end));
-} 
-
-void LagrangianManager::VariableBounds(VariableIterator& comeco, VariableIterator& fim) {
-    comeco = _variables.begin();
-    fim = _end;
+    return static_cast<int>(distance(_variables.begin(),_activeVariablesEnd));
 }
 
-void LagrangianManager::ConstraintsBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
-    comeco = _constraints.begin();
-    fim    = _constraints.end();
+void LagrangianManager::GetActiveVariableRange(VariableIterator& begin, VariableIterator& end   )
+{
+    begin = _variables.begin();    
+    end = _activeVariablesEnd;
 }
 
-void LagrangianManager::ConstraintsNDBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
-    comeco = _constraintsND.begin();
-    fim    = _constraintsND.end();
+void LagrangianManager::GetConstraintRange(ConstraintIterator &begin, ConstraintIterator &end){
+    begin = _constraints.begin();
+    end    = _constraints.end();
 }
 
-void LagrangianManager::CutsBounds(ConstraintIterator &comeco, ConstraintIterator &fim){
-    comeco = _cuts.begin();
-    fim    = _cuts.end();
+void LagrangianManager::GetNDConstraintRange(ConstraintIterator &begin, ConstraintIterator &end){
+    begin = _constraintsND.begin();
+    end    = _constraintsND.end();
+}
+
+void LagrangianManager::GetCutsRange(ConstraintIterator &begin, ConstraintIterator &end){
+    begin = _cuts.begin();
+    end    = _cuts.end();
 }
 
 Constraint * LagrangianManager::getConstraint (int i) {
@@ -464,7 +470,7 @@ void LagrangianManager::CoveredConstraints(Variable *var, vector <Constraint *> 
     ConstraintIterator rest,fim;
 
     linhas.erase(linhas.begin(),linhas.end());
-    ConstraintsBounds(rest,fim); 
+    GetConstraintRange(rest,fim); 
 
     for (; rest != fim; rest++) {
         if ( (*rest)->getCoefficient(var) != 0 ) 
@@ -752,6 +758,35 @@ int LagrangianManager::Audit() {
     return res;
 }
 
+void LagrangianManager::CleanupDeletedConstraints() {
+    
+    VariableIterator vIt, vEnd;
+    ConstraintIterator cBegin, cIt, cEnd, cRecicle;
+	
+    for (GetActiveVariableRange(vIt, vEnd); vIt != vEnd; ++vIt) {
+
+        auto& constraints = (*vIt)->_constraints;
+
+        for (auto it = constraints.end(); it != constraints.begin();) {
+            --it;
+            if ((*it)->LogicalDeleted()) {
+                constraints.erase(it);
+                //_nonZeroCount--;
+            }
+        }
+    }
+
+    // 🔹 Fase 2: remover globalmente
+    ConstraintIterator begin, end;
+    GetConstraintRange(begin, end);
+
+    for (auto it = end; it != begin;) {
+        --it;
+        if ((*it)->LogicalDeleted()) {
+            RemoveConstraint(it);
+        }
+    }
+}
 
 void LagrangianManager::CleanUpProblem() {
 
@@ -763,7 +798,7 @@ void LagrangianManager::CleanUpProblem() {
    
     //Code commented since restriction dont store its variable anymore. Instead variables have pointers to its restrictions.
     /*
-    ConstraintsNDBounds(cIt,cItEnd);
+    GetNDConstraintRange(cIt,cItEnd);
     _countConstraintsND = _constraintsND.size();
     while ( cIt != cItEnd ) {
         constraint = *cIt;
@@ -783,7 +818,7 @@ void LagrangianManager::CleanUpProblem() {
         cIt++;
     }
 
-    ConstraintsBounds(cIt, cItEnd);
+    GetConstraintRange(cIt, cItEnd);
     _countConstraints = _constraints.size();
     while (cIt != cItEnd) {
         constraint = *cIt;
@@ -806,7 +841,7 @@ void LagrangianManager::CleanUpProblem() {
     */
 
     // Cuts otherwise store their variables.
-    CutsBounds(cIt,cItEnd);
+    GetCutsRange(cIt,cItEnd);
     while ( cIt != cItEnd ) {
         constraint = *cIt;
         ((Constraint *)constraint)->ConstraintIterators(vIt,vItFim);
@@ -828,7 +863,7 @@ void LagrangianManager::CleanUpProblem() {
     VariableIterator v1, v2;
     finish = _variables.size() == 0;
    
-    v1 = _end;
+    v1 = _activeVariablesEnd;
     v2 = _variables.end();
     v2--;
     while ( ! finish ) {
@@ -843,9 +878,9 @@ void LagrangianManager::CleanUpProblem() {
             break;
     }
  
-    _end = _variables.end();
+    _activeVariablesEnd = _variables.end();
 
-    CutsBounds(cIt, cItEnd);
+    GetCutsRange(cIt, cItEnd);
     finish = (cIt == cItEnd);
     if (!finish) cItEnd--;
 
@@ -869,12 +904,12 @@ void LagrangianManager::Restart() {
     setLowerBound(_config->MINUS00);
     ConstraintIterator cIt,cItEnd;  
 
-    ConstraintsBounds(cIt,cItEnd);
+    GetConstraintRange(cIt,cItEnd);
     for ( ; cIt != cItEnd; cIt++) {
         (*cIt)->setLagrangian(0);
     }
 
-    CutsBounds(cIt, cItEnd);
+    GetCutsRange(cIt, cItEnd);
     for ( ; cIt != cItEnd; cIt++) {
         (*cIt)->setLagrangian(0);
     }
@@ -931,20 +966,20 @@ void LagrangianManager::CheckConstraints(Solucao& sol) {
 
     float maxCost = sol[sol.size() - 1]->retCustoLag();
 
-    for (ConstraintsBounds(rest, fim), i = 0; rest != fim; rest++, i++) {
+    for (GetConstraintRange(rest, fim), i = 0; rest != fim; rest++, i++) {
         Check[i] = true;
     }
 
-    for (CutsBounds(rest, fim); rest != fim; rest++, i++) {
+    for (GetCutsRange(rest, fim); rest != fim; rest++, i++) {
         Check[i] = true;
         for ((*rest)->ConstraintIterators(vIt, vEnd); vIt != vEnd; vIt++) {
             Check[i] = Check[i] && (*vIt)->retCustoLag() >=  maxCost;
         }
     }
    
-    for (VariableBounds(vIt, vEnd) ; vIt != vEnd; vIt++) {
+    for (GetActiveVariableRange(vIt, vEnd) ; vIt != vEnd; vIt++) {
         if ((*vIt)->retCustoLag() < maxCost) {
-            for ((*vIt)->ConstraintsBounds(rest, fim); rest != fim; rest++) {
+            for ((*vIt)->GetConstraintRange(rest, fim); rest != fim; rest++) {
                 Check[(*rest)->_index] = false;
             }
         }

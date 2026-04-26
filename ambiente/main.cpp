@@ -156,7 +156,7 @@ void cortes(LagrangianManager* prob, FILE* saida) {
     g.Imprime();
     g.Clique(prob, 2);
     g.CicloImpar(prob);
-    prob->para_cada_corte(Imprime <Constraint*>(saida));
+    prob->for_each_cut(Imprime <Constraint*> (saida) );
     cout << prob->_cuts.size() << endl;
 }
 
