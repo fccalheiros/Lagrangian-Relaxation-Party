@@ -109,7 +109,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	float LS = _manager->getUpperBound();
 	
 	cout << _iteracoes << " : " << LS << " --- " << LI << " --- " << valor << " ---> " << _alfa << endl;
-	cout << "Variables : " << _manager->_countFixed << " " << _manager->ActiveVariables() << " " << _manager->_variables.size() << endl;
+	cout << "Variables : " << _manager->_countFixed << " " << _manager->getActiveVariablesCount() << " " << _manager->_variables.size() << endl;
 
 
 	if ( valor < LI ) 

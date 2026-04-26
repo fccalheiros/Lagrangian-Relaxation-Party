@@ -97,6 +97,7 @@ private:
     float _lowerBound;
 
     VariableIterator _activeVariablesEnd;
+    VariableIterator _zeroFixedVariablesEnd;
 
 protected:
 
@@ -130,7 +131,6 @@ public:
     virtual void Solve(float InitialCost, float KnownBound);
 
     void FixVariable(VariableIterator var);
-    void FixLastVariable();
 
     void InsertVariable(Variable *var);
     void InsertConstraint(Constraint *restricao);
@@ -144,8 +144,9 @@ public:
 
     void MarkConstraintForDeletion(Variable* var);
 
-    int  ActiveVariables();
+    int  getActiveVariablesCount();
     void GetActiveVariableRange(VariableIterator &begin, VariableIterator &end);
+	void GetZeroFixedVariableRange(VariableIterator& begin, VariableIterator& end);
     void GetConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
     void GetNDConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
     void GetCutsRange(ConstraintIterator &begin, ConstraintIterator &end);
