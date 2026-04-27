@@ -38,11 +38,11 @@ void LagrangianRelaxation::Inicializacao() {
 
 
 
-/*************** Relaxacao ******************/
+/*************** SolveRelaxation ******************/
 
 
 
-void LagrangianRelaxation::InicializaRelaxacao(float & soma) {
+void LagrangianRelaxation::ComputeLagrangianCosts(float & multiplierSum) {
 
     ConstraintIterator pComeco, pFim;
     VariableIterator   rComeco, rFim;
@@ -72,37 +72,31 @@ void LagrangianRelaxation::InicializaRelaxacao(float & soma) {
     }
   }
   */
-    soma = 0;  // Soma dos multiplicadores lagrangianos
+
+    multiplierSum = 0;  // Soma dos multiplicadores lagrangianos
     for ( _manager->GetConstraintRange(pComeco, pFim) ; pComeco != pFim ; pComeco++)  
-        soma += (*pComeco)->_lagrangian * (*pComeco)->getRHS();
+        multiplierSum += (*pComeco)->_lagrangian * (*pComeco)->getRHS();
 
-    _manager->GetActiveVariablesRange(vComeco, vFim);
-    for ( ; vComeco != vFim;) {
-        Variable *var = (*vComeco);
-        var->initializeLagrangianCost();
-        for (int i = 0; i < var->_linhasCobertas; i++) {
-            var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
-        }
-        vComeco++;
-    }
+	//Compute reduced costs of active variables
+    ComputeReducedCosts(true);
 
-
+	//Add reduced costs related to cuts valids for the current iteration
     for ( _manager->GetCutsRange(pComeco, pFim) ; pComeco != pFim ; pComeco++) {  
         Constraint *rest = (Constraint *) (*pComeco);
         float multiplicador = rest->getLagrangian();
-        soma += multiplicador * rest->getRHS();
+        multiplierSum += multiplicador * rest->getRHS();
         for ( rest->ConstraintIterators(rComeco, rFim); rComeco != rFim; rComeco++) {  
 	        ((Variable *)(*rComeco))->_valorLag -= multiplicador;        //Está assumindo que o coeficiente da restrição é 1
         }
     }
 
-    _somaMultiplicadores = soma;
+    _somaMultiplicadores = multiplierSum;
 }
 
 // generic relaxation without any non dualized constraint
-void LagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
+void LagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float InitialCost) {
 
-    InicializaRelaxacao(valor);
+    ComputeLagrangianCosts(valor);
     valor += InitialCost;
     sol.erase(sol.begin(), sol.end());
 
@@ -137,7 +131,7 @@ void LagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCo
 
 
 
-void LagrangianRelaxation::SubGradiente(Solucao &sol){ 
+void LagrangianRelaxation::UpdateSubgradient(Solucao &sol){ 
     int i = 0;
     int var;
     ConstraintIterator rest,fim, restLixo;
@@ -256,7 +250,7 @@ void LagrangianRelaxation::InicializacoesHeuristica() {
 
 }
 
-bool LagrangianRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost) {
+bool LagrangianRelaxation::RunPrimalHeuristic(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost) {
   
     //return false;
  
@@ -304,9 +298,8 @@ bool LagrangianRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &v
 
 }
 
-/************ Geracao de cortes ************/
 
-void LagrangianRelaxation::GeraCortes(Solucao &solRel) {
+void LagrangianRelaxation::GenerateCuts(Solucao &solRel) {
 
     if (!_config->CUT_GENERATION) return;
 
@@ -360,9 +353,84 @@ bool LagrangianRelaxation::Price(Solucao& relaxed) {
     return true;
  }
 
+// implementing here.... decide later if have to move to son class of LagrangianRelaxation
+
+void LagrangianRelaxation::ComputeReducedCosts(bool onlyActiveVariables) {
+
+	VariableIterator vFirst, vLast, vDummy;
+    
+    if (onlyActiveVariables) {
+        _manager->GetActiveVariablesRange(vFirst, vLast);
+        for (; vFirst != vLast;) {
+            Variable* var = (*vFirst);
+            var->initializeLagrangianCost();
+            for (int i = 0; i < var->_linhasCobertas; i++) {
+                var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
+            }
+            vFirst++;
+        }
+    }
+    else {
+        //assume the two set are contiguous.
+        _manager->GetZeroFixedVariablesRange(vFirst, vDummy);
+        _manager->GetPricedOutVariablesRange(vDummy, vLast);
+        for (; vFirst != vLast;) {
+            Variable* var = (*vFirst);
+            var->initializeLagrangianCost();
+            for (int i = 0; i < var->_linhasCobertas; i++) {
+                var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
+            }
+            vFirst++;
+        }
+	}
+};
+
+bool LagrangianRelaxation::PricingTrigger() {
+
+	return (_iteracoes % 200 == 0); // only to test, decide later the best trigger for pricing
+}
+
+bool LagrangianRelaxation::ColumnGeneration(Solucao& relaxed) {
+	bool isAnyVariablePricedIn = false;
+    const double EPS = 1e-6;
+    VariableIterator bestVar;
+    double bestRC = 0.0;
+
+    if (PricingTrigger() || _manager->OptimalFound()  ) {
+		// Compute reduced costs for remaining variables. Assuming that active variables are already updated in the SolveRelaxation step.
+		ComputeReducedCosts(false);
+		
+        VariableIterator vFirst, vLast;
+        _manager->GetPricedOutVariablesRange(vFirst, vLast);
+		if (distance(vFirst, vLast) == 0) return false;
+        for ( ; vFirst != vLast; vFirst++) {
+            double rc = (*vFirst)->getLagrangianCost();
+            // best column
+            if (rc < bestRC) {
+                bestRC = rc;
+                bestVar = vFirst;
+            }
+            if (rc < -EPS) {
+				_manager->MarkVariableForPriceIn(vFirst);
+				isAnyVariablePricedIn = true;
+            }
+		}   
+        if (!isAnyVariablePricedIn && _manager->OptimalFound()) {
+            if (bestRC < 0) {
+                _manager->PriceInVariable(bestVar);
+                return true;
+            }
+        }
+        if (isAnyVariablePricedIn) {
+            _manager->CommitPriceIn();
+            return true;
+        }
+	}
+    return false;
+}
 
 /************* Teste de parada do algoritmo lagrangiano ************/
-bool LagrangianRelaxation::TesteParada() { 
+bool LagrangianRelaxation::CheckStopCondition() { 
 
     //if  ( ((_manager->getUpperBound() - _manager->getLowerBound()) < (float) _config->STOP_GAP) ||
      if ( (_manager->OptimalFound()) || (_iteracoes > _config->MAX_ITERATIONS) ) {

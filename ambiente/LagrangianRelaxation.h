@@ -14,12 +14,14 @@ public:
 	virtual void setLagrangianManager(LagrangianManager *mes);
   
 	virtual void Inicializacao();
-	virtual void Relaxacao(Solucao& sol, float& valor, float InitialCost);
-	virtual bool Heuristica(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost);
-	virtual void GeraCortes(Solucao &solRel);
+	virtual void SolveRelaxation(Solucao& sol, float& valor, float InitialCost);
+	virtual bool RunPrimalHeuristic(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost);
+	virtual void GenerateCuts(Solucao &solRel);
 	virtual bool Price(Solucao& relaxed);
-	virtual void SubGradiente(Solucao &sol);
-	virtual bool TesteParada();
+	virtual bool ColumnGeneration(Solucao& relaxed);
+	virtual bool PricingTrigger();
+	virtual void UpdateSubgradient(Solucao &sol);
+	virtual bool CheckStopCondition();
 	virtual Variable* ChooseBranchVariable();
 	void Restart();
 
@@ -31,7 +33,8 @@ protected:
 
 	void InicializacoesHeuristica();
 	inline virtual bool TemIntercessao(Solucao &solHeu, Variable *var); 
-	void InicializaRelaxacao(float &soma);
+	void ComputeLagrangianCosts(float & multiplierSum);
+	void ComputeReducedCosts(bool onlyActiveVariables);
 
 	Variable* ChooseBranchVariableLowLagrangian();
 	Variable* ChooseBranchVariableHighIncumbentCost();

@@ -29,18 +29,6 @@ enum class Direction {
     MINIMIZE
 };
 
-template<class Tp, class _Function> struct VariavelValida 
-{
-public:
-
-    VariavelValida(_Function f) : _f(f) { };
-
-    void operator() (Tp& var) {
-        _f(var);
-    };
-    _Function _f;
-};
-
 /*****************************************************/
 
 template<class Tp, class _Function> struct RestricaoAtiva 
@@ -108,7 +96,7 @@ protected:
 
     void StoreIncumbent(Solucao &sol);
 
-    void CheckBounds(float valRelaxado, float valHeuristica, vector <Variable*>& solHeu, bool resHeuristica);
+    void UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable*>& solHeu, bool resHeuristica);
     virtual void ReadProblem(char* arq) {};
     virtual void CreateProblem() { };
     virtual void InsertVariableIntoConstraint(Variable* var1) {};
@@ -133,6 +121,11 @@ public:
     void UnfixVariable(VariableIterator var);
 	void PriceOutVariable(VariableIterator var);
     void PriceInVariable(VariableIterator var);
+	void MarkVariableForPriceIn(VariableIterator var);
+	void MarkVariableForPriceOut(VariableIterator var);
+
+    void CommitPriceIn();
+	void CommitPriceOut();
 
     void TestVariableVector();
 
@@ -244,7 +237,7 @@ public:
     }
 
     // parâmetros configuráveis
-    int max_sort_size_thread = 500; // mínimo para usar outra thread
+    int max_sort_size_thread = 2500; // mínimo para usar outra thread
     int max_sort_size = 64;  // mínimo para usar std::sort
 
     template <class StrictWeakOrdering> void OrdenaRecursivo(StrictWeakOrdering comp, VariableIterator inicio, VariableIterator fim, int profundidade) {
@@ -313,15 +306,14 @@ public:
         sort_heap(begin, end, comp);
     }
 
-    template <class _Function>
-    _Function for_each_variable(_Function __f) {
+  
+    template <class F>
+    F for_each_variable(F f) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        VariavelValida<Variable * , _Function> tmp =
-            for_each(begin, end, VariavelValida <Variable *,_Function> (__f) );
-            return tmp._f;
-    };
-  
+        return for_each(begin, end, f);
+    }
+
     template <class _Function>
     _Function for_each_constraint(_Function __f) {
 		ConstraintIterator begin, end;

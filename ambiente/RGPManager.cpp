@@ -237,7 +237,7 @@ void RGPManager::CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter 
     else custo += segVertical;
     if ( *x2 == _faixa ) custo += 2 * segVertical;
     else custo += segVertical;
-
+ 
     //float fator = (x2-x1) / (y2-y1);
     //if ( (fator < 0.333 ) || ( fator > 3 ) ) return; 
     //if (  ( (segVertical/segHorizontal) < 2/3 ) || ( (segVertical/segHorizontal) > 3/2) )
@@ -246,19 +246,19 @@ void RGPManager::CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter 
 
     var = new RGPVariable((float) custo,nome,*x1,*y1,*x2,*y2);
     CalculaSegmentos(var,*x1,*y1,*x2,*y2);
-    
-    float ratio = stof(_config->getValue("PRICEOUTRATIO"));
-    float factor = ((float)segVertical / (float)segHorizontal);
+
+    //float ratio = stof(_config->getValue("PRICEOUTRATIO"));
+    //float factor = ((float)segVertical / (float)segHorizontal);
 
     //to be reviewed - use a price out method
     // at this time the price out method can only be called when all variables are already generated.
-    if ( (factor < ratio) || ( (1/factor) < ratio) )
-        var->setPricedOut();
-    else {
-        var->unsetPricedOut();
-        _colunas4++;
-    }
-
+    //if ( (factor < ratio) || ( (1/factor) < ratio) )
+    //   var->setPricedOut();
+    //else {
+    //    var->unsetPricedOut();
+    //    _colunas4++;
+    //}
+    _colunas4++;
     InsertVariable(var);
     InsertVariableIntoConstraint(var);
 

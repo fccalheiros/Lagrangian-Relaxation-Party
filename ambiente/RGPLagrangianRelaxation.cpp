@@ -16,11 +16,11 @@ RGPLagrangianRelaxation::~RGPLagrangianRelaxation()
 
 
 // This relaxation considers the cardinality constraint of the RGP problem.
-void RGPLagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
+void RGPLagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float InitialCost) {
 
 	int i;
 
-	InicializaRelaxacao(valor);
+	ComputeLagrangianCosts(valor);
 	valor += InitialCost;
 	sol.erase(sol.begin(), sol.end());
 
@@ -55,55 +55,50 @@ void RGPLagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 }
 
 
-// felipe - versão adaptada para usar com o pricing beta - nesse procedimento é necessário verificar se a variável está priced out.
-/*
-void RGPLagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCost) {
+bool RGPLagrangianRelaxation::ColumnGeneration(Solucao& relaxed) {
+	bool isAnyVariablePricedIn = false;
+	const double EPS = 1e-6;
+	VariableIterator bestVar;
+	double bestRC;
+	double limit;
 
-	int i,j ;
+	if (PricingTrigger() || _manager->OptimalFound()) {
+		// Compute reduced costs for remaining variables. Assuming that active variables are already updated in the SolveRelaxation step.
+		ComputeReducedCosts(false);
 
-	InicializaRelaxacao(valor);
-	valor += InitialCost;
-	sol.erase(sol.begin(), sol.end());
+		limit = (*(max_element(relaxed.begin(), relaxed.end(), CompareLagrangian<Variable*>())))->getLagrangianCost();
+		bestRC = limit;
 
-	bool naoOrdena;
-	//naoOrdena = (_iteracoes > 100) && ((_iteracoes % 2) == 0);
-	//naoOrdena = ((_iteracoes % 12) != 0);
-	//if ( _reStart ) naoOrdena = ( (_iteracoes % 10) != 0 ); 
-
-	//felipe - retirar 
-	naoOrdena = false;
-
-	int Cardinality = ((RGPManager*)_manager)->_numeroPontos + 1;
-
-	if (naoOrdena) {
-		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangian <Variable*>());
-		_ordenou = false;
-	}
-	else {
-		_manager->Ordena2(CompareLagrangian <Variable*>());
-		_ordenou = true;
-	}
-
-	sol.reserve(Cardinality);
-	cout << valor << " ** ";
-
-	i = 0;
-	j = 0;
-	while (i < Cardinality) {
-		while (((RGPVariable*)(_manager->_variables[j]))->_isPricedOut) {
-			j++;
+		VariableIterator vFirst, vLast;
+		_manager->GetPricedOutVariablesRange(vFirst, vLast);
+		for (; vFirst != vLast; vFirst++) {
+			double rc = (*vFirst)->getLagrangianCost();
+			// best column
+			if (rc < bestRC) {
+				bestRC = rc;
+				bestVar = vFirst;
+			}
+			if (rc < limit - EPS) {
+				_manager->MarkVariableForPriceIn(vFirst);
+				isAnyVariablePricedIn = true;
+			}
 		}
-		sol.push_back(_manager->_variables[j]);
-		valor += _manager->_variables[j]->_valorLag;
-		i++;
-		j++;
+		if (!isAnyVariablePricedIn && _manager->OptimalFound()) {
+			if (bestRC < limit) {
+				_manager->PriceInVariable(bestVar);
+				return true;
+			}
+		}
+		if (isAnyVariablePricedIn) {
+			_manager->CommitPriceIn();
+			return true;
+		}
 	}
-
-	cout << valor << " ** " << j << endl << endl;
+	return false;
 }
-*/
 
-void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float InitialCost) {
+
+void RGPLagrangianRelaxation::FixVariables(Solucao &solRel, float valor, float InitialCost) {
    
 	float LI = _manager->getLowerBound();
 	float LS = _manager->getUpperBound();
@@ -213,7 +208,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 
 }
 
-/******** Relaxacao com restricao de area em baixo **********/
+/******** SolveRelaxation com restricao de area em baixo **********/
 // este codigo e inativo e devera ser checado
 
 void RGPLagrangianRelaxation::Relaxacao2(Solucao& sol, float& valor, float InitialCost) {
@@ -222,7 +217,7 @@ void RGPLagrangianRelaxation::Relaxacao2(Solucao& sol, float& valor, float Initi
 	int area = ((RGPManager*)_manager)->Area();
 	float areaVar;
 	float somaArea = 0;
-	InicializaRelaxacao(valor);
+	ComputeLagrangianCosts(valor);
 	sol.erase(sol.begin(), sol.end());
 	_manager->Ordena(ComparaArea <Variable*>());
 

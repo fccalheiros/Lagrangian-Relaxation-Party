@@ -156,6 +156,7 @@ void LagrangianManager::GenerateProblem(char* arq) {
     ReadProblem(arq);
     CreateProblem();
     FinalizeProblemCreation();
+    //TestVariableVector();
 }
 
 void LagrangianManager::FinalizeProblemCreation() {
@@ -165,6 +166,7 @@ void LagrangianManager::FinalizeProblemCreation() {
     _zeroFixedVariablesEnd = _variables.end();
 
     CleanupDeletedConstraints();
+	//CommitPriceOut();
 
     for (int i = 0; i < _countConstraints; i++) {
         _constraints[i]->_index = i;
@@ -178,7 +180,7 @@ void LagrangianManager::FinalizeProblemCreation() {
    
 }
 
-void LagrangianManager::CheckBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
+void LagrangianManager::UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
 
     float LI = getLowerBound();
 
@@ -205,32 +207,35 @@ void LagrangianManager::CheckBounds(float valRelaxado, float valHeuristica, vect
 
 void LagrangianManager::Solve(float InitialCost, float KnownBound ) { 
   
-    bool testeParada = false;
-    bool resHeuristica;
-    Solucao relaxada;
-    Solucao heuristica;
-    float valorRelaxado;
-    float valorHeuristica;
+    bool shouldStop = false;
+    bool columnsAdded = false;
+    bool primalFound;
+    Solucao relaxedSolution;
+    Solucao primalSolution;
+    float relaxedValue;
+    float primalValue;
       
     _algo->setLagrangianManager(this);  
     _algo->Inicializacao();
     setBound(KnownBound);
 
-    while ( ! testeParada ) {
+    while ( ! shouldStop ) {
     
         CleanUp();
         CustomProcessing();
-        _algo->Relaxacao(relaxada, valorRelaxado, InitialCost);
-        _algo->FixaVariaveis(relaxada, valorRelaxado, InitialCost);
-        resHeuristica = _algo->Heuristica(relaxada, heuristica, valorHeuristica, InitialCost);
-        CheckBounds(valorRelaxado, valorHeuristica, heuristica, resHeuristica);
-        _algo->GeraCortes(relaxada);
-        _algo->SubGradiente(relaxada);
-        testeParada = _algo->TesteParada();
+        _algo->SolveRelaxation(relaxedSolution, relaxedValue, InitialCost);
+        _algo->FixVariables(relaxedSolution, relaxedValue, InitialCost);
+        primalFound = _algo->RunPrimalHeuristic(relaxedSolution, primalSolution, primalValue, InitialCost);
+        UpdateBounds(relaxedValue, primalValue, primalSolution, primalFound);
+        _algo->GenerateCuts(relaxedSolution);
+        _algo->UpdateSubgradient(relaxedSolution);
+        shouldStop = _algo->CheckStopCondition();
+        columnsAdded = _algo->ColumnGeneration(relaxedSolution);
+		shouldStop = shouldStop && !columnsAdded;  
     }
 
     _algo->Finalizacao();
-    cout << endl << PrintVariableVector(relaxada) << endl;
+    cout << endl << PrintVariableVector(relaxedSolution) << endl;
     FinalStats();
 }
 
@@ -409,6 +414,70 @@ void LagrangianManager::PriceInVariable(VariableIterator var) {
     ++_activeVariablesEnd;
 }
 
+void LagrangianManager::MarkVariableForPriceIn(VariableIterator var) {
+    (*var)->logicalPriceIn();
+}
+void LagrangianManager::MarkVariableForPriceOut(VariableIterator var) {
+    (*var)->logicalPriceOut();
+}
+
+void LagrangianManager::CommitPriceIn() {
+
+    VariableIterator vFirst, vLast, selectedEnd;
+    vFirst = _zeroFixedVariablesEnd;
+    vLast = _variables.end();
+
+    selectedEnd = stable_partition(
+        vFirst,
+        vLast,
+        [](Variable* v) {
+            return v->ShouldBeCommited();
+        }
+    );
+    rotate(
+        _activeVariablesEnd,
+        vFirst,
+        selectedEnd
+    );
+
+    auto count = distance(vFirst, selectedEnd);
+    _activeVariablesEnd += count;
+    _zeroFixedVariablesEnd += count;
+
+    for ( GetActiveVariablesRange(vFirst, vLast); vFirst != vLast; vFirst++) {
+        (*vFirst)->ClearCommitMark();
+	}
+}
+
+void LagrangianManager::CommitPriceOut() {
+
+    VariableIterator aBegin = _variables.begin();
+    VariableIterator aEnd = _activeVariablesEnd;
+
+    auto remainingEnd = std::stable_partition(
+        aBegin,
+        aEnd,
+        [](Variable* v) {
+            return !v->ShouldBeCommited();
+        }
+    );
+
+    auto count = distance(remainingEnd, aEnd);
+
+    rotate(
+        remainingEnd,
+        aEnd,
+        _variables.end()
+    );
+
+    _activeVariablesEnd = remainingEnd;
+    _zeroFixedVariablesEnd -= count;
+
+
+    for (auto it = _zeroFixedVariablesEnd; it != _variables.end(); ++it) {
+        (*it)->ClearCommitMark();
+    }
+}
 
 void LagrangianManager::InsertVariable(Variable *var) {
     size_t i = _variables.size();
@@ -826,29 +895,38 @@ int LagrangianManager::Audit() {
 void LagrangianManager::CleanupDeletedConstraints() {
     
     VariableIterator vIt, vEnd;
-    ConstraintIterator cBegin, cIt;
+    ConstraintIterator cIt, cFirst;
 	
     // Remove from variables
     for (GetActiveVariablesRange(vIt, vEnd); vIt != vEnd; ++vIt) {
 
         auto& constraints = (*vIt)->_constraints;
-
-        for (auto it = constraints.end(); it != constraints.begin();) {
-            --it;
+            
+        for (auto it = constraints.begin(); it != constraints.end(); ) {
             if ((*it)->LogicalDeleted()) {
-                constraints.erase(it);
-                //_nonZeroCount--;
+                it = constraints.erase(it);
+            }
+            else {
+                ++it;
             }
         }
     }
 
 	//remove from regular constraints
-    for (GetConstraintRange(cBegin, cIt); cIt != cBegin;) {
-        --cIt;
-        if ((*cIt)->LogicalDeleted()) {
-            RemoveConstraint(cIt);
+    GetConstraintRange(cFirst, cIt);
+    for (; cIt != _constraints.begin(); ) {
+		auto current = prev(cIt);
+        if ((*current)->LogicalDeleted()) {
+            cIt =_constraints.erase(current);
+            --_countConstraints;
         }
+        else
+        {
+            cIt = current;
+        }
+    
     }
+
 }
 
 void LagrangianManager::CleanUpProblem() {
@@ -1068,6 +1146,25 @@ void LagrangianManager::TestVariableVector(){
         }
         i++;
     }
+
+    i = 1;
+    for (GetPricedOutVariablesRange(vIt, vEnd); vIt != vEnd; vIt++) {
+        if (i % 11 == 0) {
+            MarkVariableForPriceIn(vIt);
+        }	
+        i++;    
+    }
+    CommitPriceIn();
+
+    i = 1;
+    for (GetActiveVariablesRange(vBegin, vIt); vIt != vBegin; vIt--) {
+        if (i % 23 == 0) {
+            MarkVariableForPriceOut(vIt);
+        }
+        i++;
+    }
+    CommitPriceOut();
+
     int active = 0;
     for (GetActiveVariablesRange(vIt, vEnd); vIt != vEnd; vIt++) {
         if ((*vIt)->IsFixed() || (*vIt)->IsPricedOut()) {

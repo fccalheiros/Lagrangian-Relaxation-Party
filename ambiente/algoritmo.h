@@ -36,13 +36,15 @@ class Algoritmo {
   virtual void Finalizacao();
 
 
-  virtual void Relaxacao(Solucao &sol, float &valor, float InitialCost);
-  virtual bool Heuristica(Solucao &solRel, Solucao &solHeu,float &valor, float InitialCost);
-  virtual void GeraCortes(Solucao &solRel);
-  virtual bool Price(Solucao& relaxed);
-  virtual void SubGradiente(Solucao &sol);
-  virtual void FixaVariaveis(Solucao &solRel, float valor, float InitialCost);
-  virtual bool TesteParada();
+  virtual void SolveRelaxation(Solucao& sol, float& valor, float InitialCost) {};
+  virtual bool RunPrimalHeuristic(Solucao& solRel, Solucao& solHeu, float& valor, float InitialCost) { return false; };
+  virtual void GenerateCuts(Solucao& solRel) {} ;
+  virtual bool Price(Solucao& relaxed) { return false; }
+  virtual bool ColumnGeneration(Solucao& relaxed) { return false; }
+  virtual bool PricingTrigger() { return false; }
+  virtual void UpdateSubgradient(Solucao& sol) { };
+  virtual void FixVariables(Solucao& solRel, float valor, float InitialCost) {};
+  virtual bool CheckStopCondition() { return true; }
   virtual Variable* ChooseBranchVariable() { return NULL;  }
 
   virtual Algoritmo* getNew() { return new Algoritmo(_config);  }

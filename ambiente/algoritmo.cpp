@@ -33,10 +33,3 @@ void Algoritmo::Finalizacao() {
 		ElapsedTime(_tempoInicio,_tempoFinal), CPUElapsedTime(_tempoInicioCpu,_tempoFinalCpu), (double)CLOCKS_PER_SEC, _iteracoes);
 }
 
-void Algoritmo::Relaxacao(Solucao &sol, float &valor, float InitialCost){}
-bool Algoritmo::Heuristica(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost) { return false; }
-bool Algoritmo::Price(Solucao& relaxed) { return false;  }
-void Algoritmo::GeraCortes(Solucao &solRel){}
-void Algoritmo::SubGradiente(Solucao &sol) {}
-void Algoritmo::FixaVariaveis(Solucao &solRel, float valor, float InitialCost){}
-bool Algoritmo::TesteParada() { return true; }

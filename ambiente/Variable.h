@@ -13,6 +13,7 @@ class Variable {
 	bool  _fixa = false;
 	bool  _isFixedToZero = false;
 	bool  _isPricedOut = false;
+	bool  _shouldBeCommited = false;
 
  public:
 
@@ -53,6 +54,10 @@ class Variable {
 	void unsetPricedOut() { _isPricedOut = false; }
 	bool IsPricedOut() const { return _isPricedOut; }
 
+	void logicalPriceIn() { _shouldBeCommited = true;  _isPricedOut = false; _isFixedToZero = false; }
+	void logicalPriceOut() { _shouldBeCommited = true;  _isPricedOut = true; _isFixedToZero = false; }
+	void ClearCommitMark() { _shouldBeCommited = false; }
+	bool ShouldBeCommited() const { return _shouldBeCommited; }
 
 	void setCoveredConstraints(int i)  { _linhasCobertas = i; _constraints.reserve(i); }
 	int  getCoveredConstraints() const { return _linhasCobertas; }
