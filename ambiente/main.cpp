@@ -14,7 +14,7 @@ bool linear;
 long int tempoInicio;
 clock_t  tempoInicioCpu;
 
-void StartStats() {
+static void StartStats() {
     tempoInicio = TempoAtual();
     tempoInicioCpu = TempoCpuAtual();
     cout << "------------------------------------------------------------------------------- " << endl;
@@ -24,7 +24,7 @@ void StartStats() {
     cout << "   CLOCKS_PER_SEC: " << CLOCKS_PER_SEC << endl;
     cout << "------------------------------------------------------------------------------- " << endl;
 }
-void EndStats() {
+static void EndStats() {
 
     cout << endl;
     cout << "------------------------------------------------------------------------------- " << endl;
@@ -36,7 +36,7 @@ void EndStats() {
  
 }
 
-bool CheckUsage(int argc, char * argv[])
+static bool CheckUsage(int argc, char * argv[])
 {
     bool ok = true;
     ok =  ok && ( (argc == 3) || (argc == 5) );
@@ -87,7 +87,7 @@ int main2 (int argc, char * argv[]) {
 
     algorithm->setLagrangianManager(manager);
     manager->GenerateProblem(argv[1]);
- 
+
     BBTree bbTree(manager, algorithm, sa, config);
 
     if ( argc == 3 ) { 
@@ -167,6 +167,6 @@ float Psi(bool perturbacao) {
 }
 
 float Custo(int var) {
-    // return (float)gerente->_variables[var]->retCusto() + (float)Psi();
+    // return (float)gerente->_variables[var]->getCost() + (float)Psi();
     return  0; /// apagar
 }

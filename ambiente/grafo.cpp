@@ -182,7 +182,7 @@ void Grafo::Clique(LagrangianManager *mestre, int Minimo) {
         marca[maior] = true;
         tamanho = 1;
 
-        //cout << "Escolhido: " << maior->retNome() << " " << indice << endl;
+        //cout << "Escolhido: " << maior->getName() << " " << indice << endl;
 
         for (indice = 0; indice < _arestas[maior].size(); indice++) {
             candidata = _arestas[maior][indice];
@@ -275,11 +275,11 @@ void Grafo::Imprime() {
     vector <int>::iterator itVizinhos, itVizinhosFim;
 
     for (; i < iFim; i++) {
-        cout << _nos[i]->retNome() << " --- ";
+        cout << _nos[i]->getName() << " --- ";
         itVizinhos    = _arestas[i].begin();
         itVizinhosFim = _arestas[i].end();
         for (; itVizinhos != itVizinhosFim; itVizinhos++) {
-            cout << _nos[*itVizinhos]->retNome() << " ";
+            cout << _nos[*itVizinhos]->getName() << " ";
         }
         cout << _arestas[i].size() << " " << i << " " << iFim << endl;
     }
@@ -288,7 +288,7 @@ void Grafo::Imprime() {
 
 void Grafo::ImprimeNos() {
     for (unsigned int k = 0 ; k < (unsigned int)_numeroNos; k++ ) 
-        cout << _nos[k]->retNome() << " " << _infoNos[k]._pai << " ";
+        cout << _nos[k]->getName() << " " << _infoNos[k]._pai << " ";
     cout << endl;
 }
 
@@ -299,7 +299,7 @@ void Grafo::ImprimeDFS() {
   
   for (it = _dfsPath.begin(); it != _dfsPath.end(); it++ ) {
     no = *it;
-    cout << _nos[no]->retNome() << " " << no << " " << _infoNos[no]._nivel << " " << _infoNos[no]._pai << endl;
+    cout << _nos[no]->getName() << " " << no << " " << _infoNos[no]._nivel << " " << _infoNos[no]._pai << endl;
   }
 
 

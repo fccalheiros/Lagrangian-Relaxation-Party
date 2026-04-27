@@ -37,7 +37,6 @@ Variable* RGPVariable::CopyAndClean(Variable* v) {
 
     if (v == NULL) {
         v = new RGPVariable(this);
-        v->_out = _out;
     }
     else 
     {   

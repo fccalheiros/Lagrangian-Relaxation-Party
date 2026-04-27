@@ -90,7 +90,7 @@ void RGPLagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float Initia
 	i = 0;
 	j = 0;
 	while (i < Cardinality) {
-		while (((RGPVariable*)(_manager->_variables[j]))->_out) {
+		while (((RGPVariable*)(_manager->_variables[j]))->_isPricedOut) {
 			j++;
 		}
 		sol.push_back(_manager->_variables[j]);
@@ -135,7 +135,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 	//at first run a lowcost fixation algorithm
 	//float V2 = LS - (valor - _manager->GetMaxLagrangian(solRel)) - _config->STOP_GAP;
 	VariableIterator vIt, vDummy;
-	_manager->GetActiveVariableRange(vDummy, vIt);
+	_manager->GetActiveVariablesRange(vDummy, vIt);
 	size_t InitialTotal = distance(vDummy, vIt);
 	
 	int CardinalityRestriction =  ((RGPManager*)_manager)->_numeroPontos + 1;  
@@ -146,7 +146,7 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
    
 	int veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2;
 
-	_manager->GetActiveVariableRange(varTeste,varFimTeste);
+	_manager->GetActiveVariablesRange(varTeste,varFimTeste);
 	varInicioTeste  = varTeste;
 	varTesteAnt     = varFimTeste;
 	size_t total    = distance(varTeste, varFimTeste);
@@ -163,11 +163,11 @@ void RGPLagrangianRelaxation::FixaVariaveis(Solucao &solRel, float valor, float 
 		for ( ; varTeste != varFimTeste; ) {
 
 			vTeste = (RGPVariable *) *varTeste;
-			if ( vTeste->_fixaEmZero || vTeste->_fixa ) break; 
+			if ( vTeste->IsFixed() ) break; 
 			soma = _somaMultiplicadores + vTeste->_valorLag + InitialCost;
 			contaVar = 1;
 			vTeste->RetornaSegmentos(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2);
-			_manager->GetActiveVariableRange(var,varFim);
+			_manager->GetActiveVariablesRange(var,varFim);
 			for (; var != varFim; var++ ) {
 				if ( ! ((RGPVariable *)(*var))->Intercepta(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2) ) 
 					if ( (*var)->_nome != vTeste->_nome ) { 
@@ -229,7 +229,7 @@ void RGPLagrangianRelaxation::Relaxacao2(Solucao& sol, float& valor, float Initi
 	while (somaArea < area) {
 		areaVar = (float)((RGPVariable*)_manager->_variables[i])->Area();
 		somaArea += areaVar;
-		//printf("%1.4f ",_manager->_variables[i]->retCustoLag() / areaVar);
+		//printf("%1.4f ",_manager->_variables[i]->getLagrangianCost() / areaVar);
 		if (somaArea < area) {
 			sol.push_back(_manager->_variables[i]);
 			valor += _manager->_variables[i]->_valorLag;

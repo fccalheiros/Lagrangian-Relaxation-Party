@@ -151,15 +151,4 @@ public:
 
 };
 
-template <class T> struct  ComparaFixa  {
-public:
-    ComparaFixa() { }
-
-    bool  operator() (Variable* v1, Variable* v2) {
-
-        return v2->_fixa;
-
-    }
-
-};
 #endif

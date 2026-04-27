@@ -1,13 +1,9 @@
 #include "Variable.h"
 
-
 Variable::Variable(float coef, int nome, short int coveredConstraints,float valorLag):
     _nome(nome),
     _valorFO(coef),
     _valorLag(valorLag),
-    _marca(false),
-    _fixaEmZero(false),
-    _fixa(false),
     _linhasCobertas(coveredConstraints)
 {}
 
@@ -31,9 +27,12 @@ Variable* Variable::CopyAndClean(Variable* v) {
         v->_linhasCobertas = _linhasCobertas;
 
         v->_valorLag = 0;
-        v->_marca = false;
-        v->_fixaEmZero = false;
+        v->_isFixedToZero = false;
         v->_fixa = false;
+		if (_isPricedOut)
+            v->setPricedOut();
+        else 
+			v->unsetPricedOut();
     }
 
     v->_constraints.reserve(_constraints.size());
@@ -45,67 +44,16 @@ Variable* Variable::CopyAndClean(Variable* v) {
 Variable::~Variable() {
 }
 
-int Variable::retNome () const {
-    return _nome;
-}
 
-float Variable::retCusto() const {
-    return _valorFO;
-}
-
-float Variable::retCustoLag() const {
-    return _valorLag;
-}
-
-void Variable::poeNome (int s) {
-    _nome = s;
-}
-
-void Variable::poeCusto(float coef) {
-    _valorFO = coef;
-}
-
-void Variable::poeCustoLag(float custo) {
-    _valorLag = custo;
-}
-
-void Variable::poeRestricao(Constraint *restricao) {
+void Variable::addConstraint(Constraint *constraint) {
     size_t i = _constraints.size();
     size_t j = _constraints.capacity();
     if ( i == j ) {
         i = static_cast<size_t>(i * 1.2);
         _constraints.reserve(i);
     }
-    _constraints.push_back(restricao);
+    _constraints.push_back(constraint);
 }
 
-void Variable::iniciaCustoLag() {
-    _valorLag = _valorFO;
-}
 
-void Variable::FixaEmZero() {
-  _fixaEmZero = true;
-}
-
-void Variable::RetiraFixZero() {
-  _fixaEmZero = false;
-}
-
-bool Variable::EstaFixada() const {
-  return _fixaEmZero;
-}
-
-void Variable::Marca() {
-  _marca = true;
-}
-
-void Variable::Desmarca() {
-  _marca = false;
-}
-
-bool Variable::Valida() const {
-  if ( _fixaEmZero ) return false;
-  if ( _fixa ) return false;
-  return true;
-}
 

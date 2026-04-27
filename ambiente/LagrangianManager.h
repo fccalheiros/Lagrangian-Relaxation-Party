@@ -84,8 +84,6 @@ public:
 
 protected:
 
-    
-
     Direction _direction;
     Configuration* _config;
     size_t _max_sort_depth;
@@ -98,6 +96,7 @@ private:
 
     VariableIterator _activeVariablesEnd;
     VariableIterator _zeroFixedVariablesEnd;
+	//there is no need to a pointer for the end of priced out variables, since they are always at the end of the vector
 
 protected:
 
@@ -131,6 +130,11 @@ public:
     virtual void Solve(float InitialCost, float KnownBound);
 
     void FixVariable(VariableIterator var);
+    void UnfixVariable(VariableIterator var);
+	void PriceOutVariable(VariableIterator var);
+    void PriceInVariable(VariableIterator var);
+
+    void TestVariableVector();
 
     void InsertVariable(Variable *var);
     void InsertConstraint(Constraint *restricao);
@@ -145,8 +149,9 @@ public:
     void MarkConstraintForDeletion(Variable* var);
 
     int  getActiveVariablesCount();
-    void GetActiveVariableRange(VariableIterator &begin, VariableIterator &end);
-	void GetZeroFixedVariableRange(VariableIterator& begin, VariableIterator& end);
+    void GetActiveVariablesRange(VariableIterator &begin, VariableIterator &end);
+	void GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end);
+	void GetPricedOutVariablesRange(VariableIterator& begin, VariableIterator& end);
     void GetConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
     void GetNDConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
     void GetCutsRange(ConstraintIterator &begin, ConstraintIterator &end);
@@ -198,7 +203,7 @@ public:
 
     template <class StrictWeakOrdering> void EstOrdemVariaveis(int posicao, StrictWeakOrdering comp) {
         VariableIterator begin, end;
-		GetActiveVariableRange(begin, end);
+		GetActiveVariablesRange(begin, end);
         if ( distance(begin,end) > 200)
             nth_element(begin, begin + posicao, end, comp);
         else
@@ -208,7 +213,7 @@ public:
     template <class StrictWeakOrdering> void EstOrdemVariaveis2(int posicao, StrictWeakOrdering comp) {
         int p = 4 * posicao;
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end);
+        GetActiveVariablesRange(begin, end);
         if ( distance(begin,end)  > p) {
             nth_element(begin, begin + p, end, comp);
             sort(begin, begin + p, comp);
@@ -220,20 +225,20 @@ public:
 
     template <class StrictWeakOrdering> void Ordena(StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end);
+        GetActiveVariablesRange(begin, end);
         sort(begin, end, comp);
     };
 
     template <class StrictWeakOrdering> void Ordena2(StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end); 
+        GetActiveVariablesRange(begin, end); 
         OrdenaRecursivo(comp, begin, end, 0);
         //if ( ! is_sorted(begin, end ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
 
     template <class StrictWeakOrdering> void Ordena3(StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end); 
+        GetActiveVariablesRange(begin, end); 
         ThreadMergeSort(_pool, comp, begin, end, 0, _max_sort_depth);
         //if ( ! is_sorted(begin, end ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
@@ -292,26 +297,26 @@ public:
 
     template <class RandomAccessIterator, class StrictWeakOrdering> void pop_heap_t(RandomAccessIterator last,StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end);
+        GetActiveVariablesRange(begin, end);
         pop_heap(begin, last, comp);
     }  
 
     template <class StrictWeakOrdering> void make_heap_t(StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end);     
+        GetActiveVariablesRange(begin, end);     
         make_heap(begin, end, comp);
     }
 
     template <class StrictWeakOrdering> void sort_heap_t(StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end);
+        GetActiveVariablesRange(begin, end);
         sort_heap(begin, end, comp);
     }
 
     template <class _Function>
     _Function for_each_variable(_Function __f) {
         VariableIterator begin, end;
-        GetActiveVariableRange(begin, end);
+        GetActiveVariablesRange(begin, end);
         VariavelValida<Variable * , _Function> tmp =
             for_each(begin, end, VariavelValida <Variable *,_Function> (__f) );
             return tmp._f;

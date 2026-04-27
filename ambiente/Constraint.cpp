@@ -165,11 +165,11 @@ void Constraint::Print(FILE* fp) {
 
     if (it == itFim) return;
 
-    fprintf(fp, "x%d", (*it)->retNome());
+    fprintf(fp, "x%d", (*it)->getName());
 
     for (it++; it != itFim; it++) {
         if ((i % 12) == 0) fprintf(fp, "\n");
-        fprintf(fp, " + x%d", (*it)->retNome());
+        fprintf(fp, " + x%d", (*it)->getName());
         i++;
     }
     if (_direction == ConstraintSign::LowerEqual)

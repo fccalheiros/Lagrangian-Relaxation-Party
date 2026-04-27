@@ -250,10 +250,12 @@ void RGPManager::CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter 
     float ratio = stof(_config->getValue("PRICEOUTRATIO"));
     float factor = ((float)segVertical / (float)segHorizontal);
 
+    //to be reviewed - use a price out method
+    // at this time the price out method can only be called when all variables are already generated.
     if ( (factor < ratio) || ( (1/factor) < ratio) )
-        var->_out = true;
+        var->setPricedOut();
     else {
-        var->_out = false;
+        var->unsetPricedOut();
         _colunas4++;
     }
 
@@ -281,7 +283,7 @@ void RGPManager::InsertVariableIntoConstraint(Variable *var1) {
     line = ( _numeroPontos + 1 ) * Iy1;
     for ( Iy=Iy1; Iy < Iy2; Iy++ ) {
         for ( Ix=Ix1; Ix < Ix2; Ix++) {
-            var->poeRestricao( _constraints[static_cast<size_t>(line + Ix)] );
+            var->addConstraint( _constraints[static_cast<size_t>(line + Ix)] );
             _nonZeroCount++;
         }
         line += (_numeroPontos+1);
@@ -310,19 +312,6 @@ void RGPManager::PostGenerationConstraintsReduction() {
     }
 
 } 
-
-//not tested
-void RGPManager::MarcaVariaveis(RGPVariable* var) {
-   
-    Variable *v;
-    VariableIterator it = _variables.begin();
-    for (; it != _variables.end(); it++) {
-        v = (*it);
-        v->_fixa = false;
-        if ( var->Intercepta( v ) ) 
-	        v->_fixa = true;
-    }
-}
 
 
 void RGPManager::Solve(float InitialCost, float KnownBound) {
@@ -403,7 +392,7 @@ void RGPManager::PrintSolution() {
     int x1,y1,x2,y2;
     for (;it != itFim; it++) {
         ((RGPVariable *)(*it))->retRetangulo(x1,y1,x2,y2);
-        fprintf(fp, "x%d -", (*it)->retNome());
+        fprintf(fp, "x%d -", (*it)->getName());
         fprintf(fp,"%d %d %d %d\n",x1,y1,x2,y2);
     }
     fclose(fp);
@@ -419,7 +408,7 @@ void RGPManager::FinalStats() {
     //RGPVariable* var;
     //for (int i = 0; i < 150; i++) {
     //    var = (RGPVariable*)_variables[i];
-    //    cout << i << " : " << var->_nome << " --- " << var->_valorLag << " --- " << var->_out << " --- " << var->retCusto() << " --- "  << var->Area() << endl;
+    //    cout << i << " : " << var->_nome << " --- " << var->_valorLag << " --- " << var->_isPricedOut << " --- " << var->getCost() << " --- "  << var->Area() << endl;
     //}
     cout << endl << "Best Solution Found: " << endl << PrintVariableVector(_best);
 }

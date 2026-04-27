@@ -29,7 +29,7 @@ public:
 template<class T> struct  ImprimeCoeficiente  {
 public:
     ImprimeCoeficiente() {};
-    void operator() (T &var) { cout << var->retCusto() << ' ' << endl; }
+    void operator() (T &var) { cout << var->getCost() << ' ' << endl; }
 };
 
 template<class T> struct  Imprime  {

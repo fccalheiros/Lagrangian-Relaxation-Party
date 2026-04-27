@@ -11,20 +11,19 @@ class RGPManager : public LagrangianManager {
 
  protected:
 
-  Points _instancia;
+    Points _instancia;
 
-  int _faixa;
+    int _faixa;
   
-  int _colunas;
-  int _colunas2;
-  int _colunas3;
-  int _colunas4;
+    int _colunas;
+    int _colunas2;
+    int _colunas3;
+    int _colunas4;
 
-  bool _JaImprimiu;
+    bool _JaImprimiu;
 
 
  public:
-
 
     int _numeroPontos;
 
@@ -60,60 +59,33 @@ class RGPManager : public LagrangianManager {
 
     void CalculaSegmentos(RGPVariable *var, int px1, int py1, int px2, int py2);
 
-    void MarcaVariaveis(RGPVariable *var);
-  
-
     int GuilhotinaRecursivo(int x1, int y1, int x2, int y2);
     int Guilhotina();
 
  private:
 
-  char *novoNome(int x) {
-    int tamanho=0;
-    int salvaX = x;
+    char *novoNome(int x) {
+        int tamanho=0;
+        int salvaX = x;
     
-    while ( x > 0 ) {
-      tamanho++;
-      x = x / 10;
-    }
-    if (tamanho == 0) tamanho++;
+        while ( x > 0 ) {
+            tamanho++;
+            x = x / 10;
+        }
+        if (tamanho == 0) tamanho++;
    
-    x = salvaX;
-    char *res = new char[tamanho+1];
-    res[tamanho] = 0;
-    while ( tamanho > 0 ) {
-      tamanho--;
-      res[tamanho] = '0'+ (x % 10);
-      x = x / 10;
-    }
+        x = salvaX;
+        char *res = new char[tamanho+1];
+        res[tamanho] = 0;
+        while ( tamanho > 0 ) {
+            tamanho--;
+            res[tamanho] = '0'+ (x % 10);
+            x = x / 10;
+        }
     
-    return res;
-  }
+        return res;
+    }
   
 };
-
-class CompFixa  {
-    public:
-        CompFixa() { }
-    
-    bool  operator() (Variable *v1) {  
-      
-        return ! v1->_fixa;
-      
-    }
-
-};
-  
-template <class T> struct  CompFixa2  {
-public:
-    CompFixa2() { } 
-    bool  operator() (Variable *v1, Variable *v2) {     
-        if ( v1->_fixa != v2->_fixa ) 
-            return v2->_fixa;
-        return ( v1->_nome < v2->_nome );
-    }
-};
-
-
 #endif
 

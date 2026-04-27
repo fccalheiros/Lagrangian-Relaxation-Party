@@ -50,8 +50,8 @@ void LagrangianRelaxation::InicializaRelaxacao(float & soma) {
 
   /*
   // Inicializa o custo lagrangiano de cada variavel com seu custo na FO
-  for ( _manager->GetActiveVariableRange(vComeco, vFim); vComeco != vFim; vComeco++ ) 
-     (*vComeco)->iniciaCustoLag();
+  for ( _manager->GetActiveVariablesRange(vComeco, vFim); vComeco != vFim; vComeco++ ) 
+     (*vComeco)->initializeLagrangianCost();
 
   soma = 0;  // Soma dos multiplicadores lagrangianos
 
@@ -72,16 +72,14 @@ void LagrangianRelaxation::InicializaRelaxacao(float & soma) {
     }
   }
   */
-
-  
     soma = 0;  // Soma dos multiplicadores lagrangianos
     for ( _manager->GetConstraintRange(pComeco, pFim) ; pComeco != pFim ; pComeco++)  
         soma += (*pComeco)->_lagrangian * (*pComeco)->getRHS();
 
-    _manager->GetActiveVariableRange(vComeco, vFim);
+    _manager->GetActiveVariablesRange(vComeco, vFim);
     for ( ; vComeco != vFim;) {
         Variable *var = (*vComeco);
-        var->iniciaCustoLag();
+        var->initializeLagrangianCost();
         for (int i = 0; i < var->_linhasCobertas; i++) {
             var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
         }
@@ -113,7 +111,7 @@ void LagrangianRelaxation::Relaxacao(Solucao& sol, float& valor, float InitialCo
     cout << valor << " ** ";
 
     VariableIterator vIt, vEnd;
-    _manager->GetActiveVariableRange(vIt, vEnd);
+    _manager->GetActiveVariablesRange(vIt, vEnd);
 
     if (naoOrdena) {
         _ordenou = false;
@@ -277,14 +275,14 @@ bool LagrangianRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &v
     valor = InitialCost;
 
     VariableIterator begin, It, end;
-    _manager->GetActiveVariableRange(It,end);
+    _manager->GetActiveVariablesRange(It,end);
     while ( ( !particao ) && ( !impossivel ) ) {
         if (valor > LS) return particao;
         var = *It;
-        if ( var->Valida() ) {
+        if ( var->IsValid() ) {
             if ( ! TemIntercessao(solHeu,var) ) {
 	            solHeu.push_back(var);
-	            valor += var->retCusto();
+	            valor += var->getCost();
 	            descobertas -= var->_linhasCobertas;
 	        }	
         }
@@ -294,7 +292,7 @@ bool LagrangianRelaxation::Heuristica(Solucao &solRel, Solucao &solHeu, float &v
         impossivel = (It == end) && ! particao;
     }
 
-    _manager->GetActiveVariableRange(begin, end);
+    _manager->GetActiveVariablesRange(begin, end);
 
     if (particao) {
         cout << "Primal Solution Found: " << valor << " --- " << distance(begin,It) << endl;
@@ -327,7 +325,7 @@ void LagrangianRelaxation::GeraCortes(Solucao &solRel) {
         for (j=i+1; j < tamanho ; j++)
             if ( solRel[i]->Intercepta(solRel[j]) ) {
                 g.InsereAresta(solRel[i],solRel[j]);
-                //cout << "Interceptou: " << solRel[i]->retNome() << " - " << solRel[j]->retNome() << endl;
+                //cout << "Interceptou: " << solRel[i]->getName() << " - " << solRel[j]->getName() << endl;
             }
     }
     //g.Imprime();
@@ -348,13 +346,13 @@ bool LagrangianRelaxation::Price(Solucao& relaxed) {
             max = (*vIt)->_valorLag;
     }
 
-    _manager->GetActiveVariableRange(vIt, vEnd);
+    _manager->GetActiveVariablesRange(vIt, vEnd);
 
     int count = 0;
     for (; vIt != vEnd; vIt++) {
-        if ((*vIt)->retCustoLag() < max && (*vIt)->_out) {
-            cout << "x" << (*vIt)->retNome() << " : " << (*vIt)->retCustoLag() << endl;
-            (*vIt)->_out = false;
+        if ((*vIt)->getLagrangianCost() < max && (*vIt)->IsPricedOut()) {
+            cout << "x" << (*vIt)->getName() << " : " << (*vIt)->getLagrangianCost() << endl;
+            _manager->PriceInVariable(vIt);
             count++;
         }
     }
@@ -396,7 +394,7 @@ Variable* LagrangianRelaxation::ChooseBranchVariableLowLagrangian() {
     VariableIterator vIt, vEnd, vSelected;
     float MIN = _config->PLUS00;
 
-    _manager->GetActiveVariableRange(vIt, vEnd);
+    _manager->GetActiveVariablesRange(vIt, vEnd);
 
     for (; vIt != vEnd; vIt++) {
         if ((*vIt)->_valorLag < MIN) {
@@ -421,7 +419,7 @@ Variable* LagrangianRelaxation::ChooseBranchVariableHighIncumbentCost() {
         vEnd = _manager->_best.end();
 
         for (; vIt != vEnd; vIt++) {
-            _manager->GetActiveVariableRange(vItAll, vEndAll);
+            _manager->GetActiveVariablesRange(vItAll, vEndAll);
             for (; vItAll != vEndAll; vItAll++) {
                 if ((*vIt)->_nome == (*vItAll)->_nome)
                     return (*vIt)->CopyAndClean(NULL);
