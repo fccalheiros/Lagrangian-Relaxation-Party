@@ -12,7 +12,7 @@
 #include "algoritmo.h"
 #include "Configuration.h"
 
-enum class SearchAlgorithm { DFS, BFS };
+enum class SearchAlgorithm { DFS, BFS, NONE };
 
 class BBTreeNode {
   

@@ -88,8 +88,7 @@ BBTree::BBTree(LagrangianManager* manager, Algoritmo* algo, Configuration* confi
 }   
 
 
-BBTree::BBTree(LagrangianManager* manager, Algoritmo* algo,
-    SearchAlgorithm sa, Configuration* config)
+BBTree::BBTree(LagrangianManager* manager, Algoritmo* algo, SearchAlgorithm sa, Configuration* config)
     : BBTree(manager, algo, config) 
 {
     if (sa == SearchAlgorithm::BFS)

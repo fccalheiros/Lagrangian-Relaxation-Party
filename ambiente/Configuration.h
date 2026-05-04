@@ -16,6 +16,7 @@ public:
 	int MAX_ITERATIONS = 10000;
 	int INI_ALFA = 2;
 	int ITERATIONS_CHANGE_ALFA = 400;
+	int ITERATIONS_COLUMN_GENERATION = MAX_ITERATIONS + 1;
 	int STOP_GAP = 2;
 
 	int MAX_DEPTH = 10;
@@ -68,6 +69,7 @@ public:
 
 	bool PARSE(string file);
 	string getValue(string token);
+	int getIntegerValue(string token);
 	int getTokenIndex(string token);
 
 	string Print();

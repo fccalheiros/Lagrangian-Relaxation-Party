@@ -32,7 +32,7 @@ void RGPLagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float 
 	//felipe - nunca ordena - Faz apenas a estatística de ordem com 4 * o número de variáveis da solução ótima
 	naoOrdena = true;
 
-	int Cardinality = ((RGPManager*)_manager)->_numeroPontos + 1;
+	int Cardinality = ((RGPManager*)_manager)->getCardinality();
 
 	if (naoOrdena) {
 		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangian <Variable*>());
@@ -54,49 +54,75 @@ void RGPLagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float 
 	cout << valor << endl << endl;
 }
 
+bool RGPLagrangianRelaxation::ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost) {
 
-bool RGPLagrangianRelaxation::ColumnGeneration(Solucao& relaxed) {
 	bool isAnyVariablePricedIn = false;
 	const double EPS = 1e-6;
-	VariableIterator bestVar;
-	double bestRC;
-	double limit;
+	priority_queue<float> heap;
+	float RelaxedSolutionCost = 0.0;
+	float limit = 0.0;
+	float bestRC;
+	VariableIterator vIt, vLast, bestVar;
 
 	if (PricingTrigger() || _manager->OptimalFound()) {
-		// Compute reduced costs for remaining variables. Assuming that active variables are already updated in the SolveRelaxation step.
-		ComputeReducedCosts(false);
 
-		limit = (*(max_element(relaxed.begin(), relaxed.end(), CompareLagrangian<Variable*>())))->getLagrangianCost();
-		bestRC = limit;
-
-		VariableIterator vFirst, vLast;
-		_manager->GetPricedOutVariablesRange(vFirst, vLast);
-		for (; vFirst != vLast; vFirst++) {
-			double rc = (*vFirst)->getLagrangianCost();
-			// best column
-			if (rc < bestRC) {
-				bestRC = rc;
-				bestVar = vFirst;
+		for (auto it = relaxed.begin(); it != relaxed.end(); it++) {
+			float lagrangianCost = (*it)->getLagrangianCost();
+			heap.push(lagrangianCost);
+			RelaxedSolutionCost += lagrangianCost;
+			if (lagrangianCost > limit) {
+				limit = lagrangianCost;
 			}
-			if (rc < limit - EPS) {
-				_manager->MarkVariableForPriceIn(vFirst);
+		}
+
+
+		_manager->GetPricedOutVariablesRange(vIt, vLast);
+		bestRC = limit;
+		bestVar = vLast;
+
+		for (; vIt != vLast; ++vIt) {
+
+			Variable* var = *vIt;
+
+			var->initializeLagrangianCost();
+			for (int i = 0; i < var->_linhasCobertas; i++) {
+				var->_valorLag -= var->_constraints[i]->_lagrangian;
+			}
+
+			if (var->_valorLag < bestRC) {
+				bestRC = var->_valorLag;
+				bestVar = vIt;
+			}
+
+			if (var->_valorLag < limit - EPS) {
+				cout << "x" << var->getName() << " : " << var->getCost() << " -> " << var->_valorLag << endl;
+				var->logicalPriceIn();
 				isAnyVariablePricedIn = true;
 			}
-		}
-		if (!isAnyVariablePricedIn && _manager->OptimalFound()) {
-			if (bestRC < limit) {
-				_manager->PriceInVariable(bestVar);
-				return true;
+
+			if (var->_valorLag < heap.top()) {
+				RelaxedSolutionCost += var->_valorLag - heap.top();
+				heap.pop();
+				heap.push(var->_valorLag);
 			}
 		}
+
+		if (!isAnyVariablePricedIn && _manager->OptimalFound()) {
+			if (bestRC < limit && bestVar != vLast) {
+				_manager->MarkVariableForPriceIn(bestVar);
+				isAnyVariablePricedIn = true;
+				RelaxedSolutionCost += bestRC - heap.top();
+			}
+		}
+
 		if (isAnyVariablePricedIn) {
 			_manager->CommitPriceIn();
+			newLowerBound = RelaxedSolutionCost + InitialCost + _somaMultiplicadores;
 			return true;
 		}
 	}
 	return false;
 }
-
 
 void RGPLagrangianRelaxation::FixVariables(Solucao &solRel, float valor, float InitialCost) {
    
@@ -133,7 +159,7 @@ void RGPLagrangianRelaxation::FixVariables(Solucao &solRel, float valor, float I
 	_manager->GetActiveVariablesRange(vDummy, vIt);
 	size_t InitialTotal = distance(vDummy, vIt);
 	
-	int CardinalityRestriction =  ((RGPManager*)_manager)->_numeroPontos + 1;  
+	int CardinalityRestriction =  ((RGPManager*)_manager)->getCardinality();  
 	VariableIterator var,varFim,varTeste, varFimTeste, varInicioTeste, varTesteAnt;   
 	RGPVariable * vTeste;
 	float soma;

@@ -90,21 +90,24 @@ protected:
 
     inline void setUpperBound(float UB) { _upperBound = UB; }
     inline void setLowerBound(float LB) { _lowerBound = LB; }
-    inline void setBound(float B)       { if (_direction == Direction::MINIMIZE) setUpperBound(B); 
+    inline void setPrimalBound(float B) { if (_direction == Direction::MINIMIZE) setUpperBound(B); 
                                           else setLowerBound(B); }
+    inline void setDualBound(float B)   { if (_direction == Direction::MINIMIZE) setLowerBound(B); 
+	                                      else setUpperBound(B);}
+    void UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable*>& solHeu, bool resHeuristica);
     inline Direction getDirection()  const  { return _direction; }
 
     void StoreIncumbent(Solucao &sol);
 
-    void UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable*>& solHeu, bool resHeuristica);
-    virtual void ReadProblem(char* arq) {};
-    virtual void CreateProblem() { };
+    virtual void ReadProblem(char* arq) { };
+    virtual void CreateProblem() {};
+	virtual void PostProblemCreationPriceOut() {};
     virtual void InsertVariableIntoConstraint(Variable* var1) {};
     virtual void CustomProcessing() { };
     virtual void PrintSolution() {};
-
     void FinalizeProblemCreation();
  
+	void ResetLagrangianCosts();
 
 public:
 
@@ -141,7 +144,9 @@ public:
 
     void MarkConstraintForDeletion(Variable* var);
 
-    int  getActiveVariablesCount();
+    int  getActiveVariablesCount() { return static_cast<int>(distance(_variables.begin(), _activeVariablesEnd)); }
+    int getZeroFixedVariablesCount() { return static_cast<int>(distance(_activeVariablesEnd, _zeroFixedVariablesEnd)); }
+    int getPricedOutVariablesCount() { return static_cast<int>(distance(_zeroFixedVariablesEnd, _variables.end())); }
     void GetActiveVariablesRange(VariableIterator &begin, VariableIterator &end);
 	void GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end);
 	void GetPricedOutVariablesRange(VariableIterator& begin, VariableIterator& end);
@@ -173,10 +178,11 @@ public:
 
     void CleanupDeletedConstraints();
     void CleanUpProblem();
+    void CleanUp();
     void Restart();
 
     virtual void FinalStats();
-    void CleanUp();
+
     int  Audit();
 
     virtual void SetVariableForBranch(Variable* v, short int value);

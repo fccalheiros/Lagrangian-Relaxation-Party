@@ -8,29 +8,15 @@
 
 #include "Constraint.h"
 #include "LagrangianManager.h"
+#include "BBTree.h"
 
-
-int main2(int argc, char* argv[]);
-void cortes(LagrangianManager* prob, FILE* saida);
-float Psi(bool perturbacao);
-float Custo(int var);
-
-template <class T> struct  SomaMultiplicadores  {
-public:
-    SomaMultiplicadores() { resultado = 2; }
-    void operator() (T &rest) 
-    {  
-            resultado += rest->getLagrangian(); 
-            cout << resultado << " "; 
-    }
-    float resultado;
-};
-
-template<class T> struct  ImprimeCoeficiente  {
-public:
-    ImprimeCoeficiente() {};
-    void operator() (T &var) { cout << var->getCost() << ' ' << endl; }
-};
+int originalMain(int argc, char* argv[]);
+void Cuts(LagrangianManager* prob, FILE* output);
+static void StartStats();
+static void EndStats();
+static bool CheckUsage(int argc, char* argv[]);
+SearchAlgorithm ParseBranchStrategy(const string& strategy);
+Configuration* LoadConfig(const char* configFile);
 
 template<class T> struct  Imprime  {
 public:

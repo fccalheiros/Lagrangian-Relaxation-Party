@@ -28,7 +28,7 @@ void Configuration::Initialization() {
 	InsertContent("BRANCHSTRATEGY", BRANCHSTRATEGY);
 	InsertContent("VARIABLESTRATEGY", VARIABLESTRATEGY);
 	InsertContent("PRICEOUTRATIO", to_string(PRICEOUTRATIO));
-
+	InsertContent("ITERATIONS_COLUMN_GENERATION", to_string(ITERATIONS_COLUMN_GENERATION));
 }
 
 bool Configuration::AdvanceNext() {
@@ -166,6 +166,19 @@ string Configuration::getValue(string token) {
 	return _value[distance(_token.begin(), it)];
 }
 
+int Configuration::getIntegerValue(string token) {
+	string value = getValue(token);
+	if (value.empty())
+		return 0;
+	try {
+		return std::stoi(value);
+	}
+	catch (const std::exception&) {
+		return 0;
+	}
+
+}
+
 int Configuration::getTokenIndex(string token) {
 	vector <string>::iterator it;
 	it = find(_token.begin(), _token.end(), token);
@@ -194,6 +207,7 @@ void Configuration::TryChangeDefaultToken(string token, string value) {
 	if (token.compare("BRANCHSTRATEGY") == 0) {	BRANCHSTRATEGY = (value.compare("BFS") == 0 ? "BFS" : (value.compare("DFS") == 0 ? "DFS" : BRANCHSTRATEGY)); return;}
 	if (token.compare("VARIABLESTRATEGY") == 0) { VARIABLESTRATEGY = (value.compare("HIGHINCUMBENTCOST") == 0 ? "HIGHINCUMBENTCOST" : ((value.compare("LOWLAGRANGIAN") == 0 || value.compare("LOWLAGRANGEAN") == 0) ? "LOWLAGRANGIAN" : VARIABLESTRATEGY)); return; }
 	if (token.compare("PRICEOUTRATIO") == 0) { PRICEOUTRATIO = stof(value); return; }
+	if (token.compare("ITERATIONS_COLUMN_GENERATION") == 0) { ITERATIONS_COLUMN_GENERATION = stoi(value); return; }
 
 }
 

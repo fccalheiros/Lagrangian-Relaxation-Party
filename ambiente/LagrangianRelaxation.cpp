@@ -174,7 +174,7 @@ void LagrangianRelaxation::UpdateSubgradient(Solucao &sol){
         i++;
     }
 
-   /**** Testes para orientar o passo do subgradiente ****/
+    /**** Tests to guide the subgradient step ****/
 
     if ( _ultimoLI == LI ) 
         _naoMudouLI++;
@@ -197,7 +197,7 @@ void LagrangianRelaxation::UpdateSubgradient(Solucao &sol){
         if ( tw < 0 ) tw = -1*tw;
         if (tw == 0) tw = 10;
     }
-    /**** Testes para orientar o passo do subgradiente ****/
+    /**** Tests to guide the subgradient step ****/
 
     i = 0;
     _manager->GetConstraintRange(rest,fim);
@@ -387,10 +387,11 @@ void LagrangianRelaxation::ComputeReducedCosts(bool onlyActiveVariables) {
 
 bool LagrangianRelaxation::PricingTrigger() {
 
-	return (_iteracoes % 200 == 0); // only to test, decide later the best trigger for pricing
+    // only to test, decide later the best trigger for pricing
+	return (_iteracoes % _config->ITERATIONS_COLUMN_GENERATION == 0); 
 }
 
-bool LagrangianRelaxation::ColumnGeneration(Solucao& relaxed) {
+bool LagrangianRelaxation::ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost) {
 	bool isAnyVariablePricedIn = false;
     const double EPS = 1e-6;
     VariableIterator bestVar;

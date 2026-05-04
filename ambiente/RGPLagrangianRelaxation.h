@@ -19,7 +19,7 @@ class RGPLagrangianRelaxation : public LagrangianRelaxation {
 
   virtual void FixVariables(Solucao &solRel, float valor, float InitialCost);
   virtual void SolveRelaxation(Solucao& sol, float& valor, float InitialCost);
-  virtual bool ColumnGeneration(Solucao& relaxed);
+  virtual bool ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost);
 
   void Relaxacao2(Solucao& sol, float& valor, float InitialCost);
 

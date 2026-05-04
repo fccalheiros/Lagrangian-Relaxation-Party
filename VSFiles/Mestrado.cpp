@@ -11,21 +11,24 @@ int main(int argc, char* argv[])
 {
 #ifndef NDEBUG
     argc = 3;
-    string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w50h50n30i10.pt";
+    string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w500h500n200i55.pt";
     argv[1] = &str0[0];
     string str1 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\Configuration.json";
     argv[2] = &str1[0];
 #endif
-    try {
-        return main2(argc, argv);
-    }
-    catch (exception &e) {
-        cout << e.what() << endl;
+    //__try {
+        try {
+            return originalMain(argc, argv);
+        }
+        catch (exception& e) {
+            cout << e.what() << endl << std::flush;
 
-    }
-
+        }
+    //}
+    //__except (EXCEPTION_EXECUTE_HANDLER) {
+    //    cout << "An unexpected error occurred." << std::hex << GetExceptionCode() << std::dec << endl << flush;
+    //}
 }
-
 
 // Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração
 // Depurar programa: F5 ou menu Depurar > Iniciar Depuração

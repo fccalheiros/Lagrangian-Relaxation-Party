@@ -18,7 +18,7 @@ public:
 	virtual bool RunPrimalHeuristic(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost);
 	virtual void GenerateCuts(Solucao &solRel);
 	virtual bool Price(Solucao& relaxed);
-	virtual bool ColumnGeneration(Solucao& relaxed);
+	virtual bool ColumnGeneration(Solucao& relaxed, float &newLowerBound, float InitialCost);
 	virtual bool PricingTrigger();
 	virtual void UpdateSubgradient(Solucao &sol);
 	virtual bool CheckStopCondition();

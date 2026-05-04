@@ -18,9 +18,12 @@ RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direct
     _colunas3(0),
     _colunas4(0),
     _JaImprimiu(true),
-    _numeroPontos(0),
-    _faixa(0)
+    _numPoints(0),
+    _gridSize(0)
 {
+
+    _cutoffForPricing = static_cast<float>(config->getIntegerValue("PRICEOUTCUTOFF"));
+    if (_cutoffForPricing == 0) _cutoffForPricing = config->PLUS00;
 }
 
 RGPManager::RGPManager(RGPManager* m) :
@@ -30,8 +33,8 @@ RGPManager::RGPManager(RGPManager* m) :
     _colunas3(m->_colunas3),
     _colunas4(m->_colunas4),
     _JaImprimiu(m->_JaImprimiu),
-    _numeroPontos(m->_numeroPontos),
-    _faixa(m->_faixa)
+    _numPoints(m->_numPoints),
+    _gridSize(m->_gridSize)
 {
 
 }
@@ -51,11 +54,11 @@ LagrangianManager* RGPManager::CopyAndClean(LagrangianManager* m) {
          m1->_colunas4     = _colunas4;
          m1->_JaImprimiu   = _JaImprimiu;
          m1->_nonZeroCount          = _nonZeroCount;
-         m1->_numeroPontos = _numeroPontos;
-         m1->_faixa        = _faixa;
+         m1->_numPoints = _numPoints;
+         m1->_gridSize        = _gridSize;
     }
 
-    m1->_instancia = _instancia;
+    m1->_instancePoints = _instancePoints;
 
     return LagrangianManager::CopyAndClean(m);
 }
@@ -63,7 +66,7 @@ LagrangianManager* RGPManager::CopyAndClean(LagrangianManager* m) {
 void RGPManager::SetVariableForBranch(Variable* v, short int value) {
     LagrangianManager::SetVariableForBranch(v, value);
     if (value == 1)
-        _numeroPontos--;
+        _numPoints--;
 }
 
 RGPManager::~RGPManager() { }
@@ -78,35 +81,37 @@ void RGPManager::ReadProblem(char *arq) {
         exit(1);
     }
   
-    std::ignore = fscanf(fp,"%d\n",&_numeroPontos);
-    std::ignore = fscanf(fp,"%d\n",&_faixa);
+    std::ignore = fscanf(fp,"%d\n",&_numPoints);
+    std::ignore = fscanf(fp,"%d\n",&_gridSize);
 
-    for (pt=0; pt < _numeroPontos; pt++) {
+    for (pt=0; pt < _numPoints; pt++) {
         std::ignore = fscanf(fp,"%d %d\n",&x,&y);
-        _instancia.Insere(x,y);
+        _instancePoints.Insere(x,y);
     }
     fclose(fp);
 
-    _instancia.FinalizaGrid(0,_faixa,0,_faixa);
+    _instancePoints.FinalizaGrid(0,_gridSize,0,_gridSize);
 
-    cout << _instancia.Print();
+    cout << _instancePoints.Print();
+
+	ExtractInstanceNumber(arq);
     
 }
 
 void RGPManager::CreateProblem() {
     int i;
-    size_t tamanho = static_cast<size_t>((_numeroPontos+1)*(_numeroPontos+1));
+    size_t tamanho = static_cast<size_t>((_numPoints+1)*(_numPoints+1));
     GridIter x1,y1,x2,y2, fimx, fimy;
 
     _constraints.reserve(tamanho + 1);
     for (i=0; i < tamanho; i++) 
         InsertConstraint( new Constraint(1, ConstraintSign::Equal, 0, 0) );        
 
-    _instancia.LimiteGridX(x1,fimx);
+    _instancePoints.LimiteGridX(x1,fimx);
 
     for (; x1 != ( fimx-1 ) ; x1++) {
         for (x2=x1+1; x2 != fimx; x2++) {
-            _instancia.LimiteGridY(y1,fimy);
+            _instancePoints.LimiteGridY(y1,fimy);
             for (; y1 != ( fimy-1 ); y1++) {
                 for (y2=y1+1; y2 != fimy; y2++) {
 	                if ( !VerificaTerminalDentro(x1,y1,x2,y2) ) {
@@ -127,7 +132,7 @@ void RGPManager::CreateProblem() {
     sprintf(msg, "%10.0f", _nonZeroCount);
 
     cout << endl;
-    cout << "Points: " << _numeroPontos << endl;
+    cout << "Points: " << _numPoints << endl;
     cout << "Original Variables: " << _colunas << endl;
     cout << "Variables after first reduction: " << _colunas2 << endl;
     cout << "Variables after second reduction: " << _colunas3 << endl; 
@@ -138,11 +143,24 @@ void RGPManager::CreateProblem() {
     _totalVariaveis = _colunas4;
 }
 
+void RGPManager::PostProblemCreationPriceOut() {
+    VariableIterator it, last;
+     
+     for (GetActiveVariablesRange(it, last); it != last; it++) {
+         if ((*it)->getCost() > _cutoffForPricing) {
+             MarkVariableForPriceOut(it);
+             _colunas4--;
+		 }
+	 }
+	 _totalVariaveis = _colunas4;
+     cout << "Variables after price out: " << _colunas4 << endl;
+}
+
 bool RGPManager::VerificaTerminalDentro(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
     x1++;
     int y;
     for(; x1 != x2; x1 ++) {
-        y = _instancia.retornaY(*x1);
+        y = _instancePoints.retornaY(*x1);
         if ( ( y > *y1) && (y < *y2) )
             return true;  /* Achou terminal dentro do retangulo */
     }
@@ -151,11 +169,11 @@ bool RGPManager::VerificaTerminalDentro(GridIter x1, GridIter y1, GridIter x2, G
 }
 
 bool RGPManager::VerificaTerminalNoCorner(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
-    int y = _instancia.retornaY(*x1);
+    int y = _instancePoints.retornaY(*x1);
     if ( ( y == *y1) || (y == *y2) ) 
         return true;
   
-    y = _instancia.retornaY(*x2);
+    y = _instancePoints.retornaY(*x2);
     if ( (y == *y1) || (y == *y2) ) 
         return true;
 
@@ -164,10 +182,10 @@ bool RGPManager::VerificaTerminalNoCorner(GridIter x1, GridIter y1, GridIter x2,
 }
 
 bool RGPManager::VerificaSteiners(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
-    int cpy1 = _instancia.retornaY(*x1);
-    int cpy2 = _instancia.retornaY(*x2);
-    int cpx1 = _instancia.retornaX(*y1);
-    int cpx2 = _instancia.retornaX(*y2);
+    int cpy1 = _instancePoints.retornaY(*x1);
+    int cpy2 = _instancePoints.retornaY(*x2);
+    int cpx1 = _instancePoints.retornaX(*y1);
+    int cpx2 = _instancePoints.retornaX(*y2);
   
     if ( cpy1 > 0 ) {
         if ( (cpy1 < *y1) && (cpx1 < *x1) && (cpx1 > 0) ) return true;
@@ -192,28 +210,28 @@ bool RGPManager::VerificaSteiners(GridIter x1, GridIter y1, GridIter x2, GridIte
 void RGPManager::CalculaSegmentos(RGPVariable *var, int px1, int py1, int px2, int py2) {
     int vy1, vy2, hx1, hx2;
 
-    vy1 = _instancia.retornaY(px1);
-    if ( (vy1 == -1) || (vy1 == _faixa) ) var->poeVerticalEsq(py1);
-    else if ( vy1 < py1 ) var->poeVerticalEsq( _instancia.retornaYDelta(vy1,-1) );
-    else if ( vy1 > py2 ) var->poeVerticalEsq( _instancia.retornaYDelta(vy1,1) );  
+    vy1 = _instancePoints.retornaY(px1);
+    if ( (vy1 == -1) || (vy1 == _gridSize) ) var->poeVerticalEsq(py1);
+    else if ( vy1 < py1 ) var->poeVerticalEsq( _instancePoints.retornaYDelta(vy1,-1) );
+    else if ( vy1 > py2 ) var->poeVerticalEsq( _instancePoints.retornaYDelta(vy1,1) );  
     else var->poeVerticalEsq( vy1 );
   
-    vy2 = _instancia.retornaY(px2);
-    if ( (vy2 == -1) || (vy2 == _faixa) ) var->poeVerticalDir(py1);
-    else if ( vy2 < py1 ) var->poeVerticalDir( _instancia.retornaYDelta(vy2,-1) );
-    else if ( vy2 > py2 ) var->poeVerticalDir( _instancia.retornaYDelta(vy2,1) );
+    vy2 = _instancePoints.retornaY(px2);
+    if ( (vy2 == -1) || (vy2 == _gridSize) ) var->poeVerticalDir(py1);
+    else if ( vy2 < py1 ) var->poeVerticalDir( _instancePoints.retornaYDelta(vy2,-1) );
+    else if ( vy2 > py2 ) var->poeVerticalDir( _instancePoints.retornaYDelta(vy2,1) );
     else var->poeVerticalDir( vy2 );
   
-    hx1 = _instancia.retornaX(py1);
-    if ( (hx1 == -1) || (hx1 == _faixa) ) var->poeHorizontalSup(px1);
-    else if ( hx1 < px1 ) var->poeHorizontalSup( _instancia.retornaXDelta(hx1,-1) );
-    else if ( hx1 > px2 ) var->poeHorizontalSup( _instancia.retornaXDelta(hx1,1) );
+    hx1 = _instancePoints.retornaX(py1);
+    if ( (hx1 == -1) || (hx1 == _gridSize) ) var->poeHorizontalSup(px1);
+    else if ( hx1 < px1 ) var->poeHorizontalSup( _instancePoints.retornaXDelta(hx1,-1) );
+    else if ( hx1 > px2 ) var->poeHorizontalSup( _instancePoints.retornaXDelta(hx1,1) );
     else var->poeHorizontalSup( hx1 );
 
-    hx2 = _instancia.retornaX(py2);
-    if ( (hx2 == -1) || (hx2 == _faixa) ) var->poeHorizontalInf(px1);
-    else if ( hx2 < px1 ) var->poeHorizontalInf( _instancia.retornaXDelta(hx2,-1) );
-    else if ( hx2 > px2 ) var->poeHorizontalInf( _instancia.retornaXDelta(hx2,1) );
+    hx2 = _instancePoints.retornaX(py2);
+    if ( (hx2 == -1) || (hx2 == _gridSize) ) var->poeHorizontalInf(px1);
+    else if ( hx2 < px1 ) var->poeHorizontalInf( _instancePoints.retornaXDelta(hx2,-1) );
+    else if ( hx2 > px2 ) var->poeHorizontalInf( _instancePoints.retornaXDelta(hx2,1) );
     else var->poeHorizontalInf( hx2 );
   
 }
@@ -229,13 +247,13 @@ void RGPManager::CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter 
     segHorizontal = *x2 - *x1;
     if ( *y1 == 0 ) custo += 2 * segHorizontal;
     else custo += segHorizontal;
-    if ( *y2 == _faixa ) custo += 2 * segHorizontal;
+    if ( *y2 == _gridSize ) custo += 2 * segHorizontal;
     else custo += segHorizontal;
   
     segVertical = *y2 - *y1;
     if ( *x1 == 0 ) custo += 2 * segVertical;
     else custo += segVertical;
-    if ( *x2 == _faixa ) custo += 2 * segVertical;
+    if ( *x2 == _gridSize ) custo += 2 * segVertical;
     else custo += segVertical;
  
     //float fator = (x2-x1) / (y2-y1);
@@ -275,18 +293,18 @@ void RGPManager::InsertVariableIntoConstraint(Variable *var1) {
 
     var->retRetangulo(x1,y1,x2,y2);
 
-    Ix1 = _instancia.retornaIndiceX(x1);
-    Ix2 = _instancia.retornaIndiceX(x2);
-    Iy1 = _instancia.retornaIndiceY(y1);
-    Iy2 = _instancia.retornaIndiceY(y2);
+    Ix1 = _instancePoints.retornaIndiceX(x1);
+    Ix2 = _instancePoints.retornaIndiceX(x2);
+    Iy1 = _instancePoints.retornaIndiceY(y1);
+    Iy2 = _instancePoints.retornaIndiceY(y2);
 
-    line = ( _numeroPontos + 1 ) * Iy1;
+    line = ( _numPoints + 1 ) * Iy1;
     for ( Iy=Iy1; Iy < Iy2; Iy++ ) {
         for ( Ix=Ix1; Ix < Ix2; Ix++) {
             var->addConstraint( _constraints[static_cast<size_t>(line + Ix)] );
             _nonZeroCount++;
         }
-        line += (_numeroPontos+1);
+        line += (_numPoints+1);
     }
 
 }
@@ -296,16 +314,16 @@ void RGPManager::PostGenerationConstraintsReduction() {
     GridIter x, fimx;
     int y,Iy,Ix, index;
 
-    _instancia.LimiteGridX(x,fimx);
+    _instancePoints.LimiteGridX(x,fimx);
     cout << endl;
     cout << "Eliminated Constraints." << endl;
 
     for (x ++; x != ( fimx-1 ) ; x++) {
-        y =  _instancia.retornaY(*x);
-        Ix = _instancia.retornaIndiceX(*x);
-        Iy = _instancia.retornaIndiceY(y);
+        y =  _instancePoints.retornaY(*x);
+        Ix = _instancePoints.retornaIndiceX(*x);
+        Iy = _instancePoints.retornaIndiceY(y);
 
-        index = (_numeroPontos + 1)*Iy + Ix;
+        index = (_numPoints + 1)*Iy + Ix;
 		// delegate memory managemenet to the base class, just mark the constraint for deletion
         _constraints[index]->LogicalDelete();
         cout << "Indice: " << index << " " << *x << " " << y << endl;
@@ -343,8 +361,8 @@ void RGPManager::CustomProcessing() {
 
 int RGPManager::Guilhotina() {
     GridIter x1,x2,y1,y2;
-    _instancia.LimiteGridX(x1,x2);
-    _instancia.LimiteGridY(y1,y2);
+    _instancePoints.LimiteGridX(x1,x2);
+    _instancePoints.LimiteGridY(y1,y2);
     return ( GuilhotinaRecursivo(*x1,*y1,*(--x2),*(--y2)) );
 }
 
@@ -354,8 +372,8 @@ int RGPManager::GuilhotinaRecursivo(int x1, int y1, int x2, int y2) {
     int cv,ch;
     int px,py;
 
-    for ( int i = 1; i <= _numeroPontos ; i ++ ) {
-        _instancia.retornaPontoX(px,py,i);
+    for ( int i = 1; i <= _numPoints ; i ++ ) {
+        _instancePoints.retornaPontoX(px,py,i);
         if ( (px > x1) && ( px < x2 )  && ( py > y1) && (py < y2) ) {
             numeroPontos++;
             cv =  GuilhotinaRecursivo(x1,y1,px,y2);
@@ -372,27 +390,26 @@ int RGPManager::GuilhotinaRecursivo(int x1, int y1, int x2, int y2) {
     return valorCorte;
 }
 
-void RGPManager::PrintSolution() {
+void RGPManager::PrintSolution(string filename) {
 
-    PointsIterator comeco,fim;
-    string file = DefaultFilePrefix() + ".sol";
+    PointsIterator it,last;
 
-    FILE *fp = fopen(file.c_str(),"w");
-    fprintf(fp,"%d\n",_numeroPontos);
-    fprintf(fp,"%d\n",_faixa);
+    FILE *fp = fopen(filename.c_str(),"w");
+    fprintf(fp,"%d\n",_numPoints);
+    fprintf(fp,"%d\n",_gridSize);
 
-    _instancia.LimitePontosX(comeco, fim);
-    for (; comeco != fim; comeco++) {
-        fprintf(fp,"%d %d\n",(*comeco).first,(*comeco).second);
+    _instancePoints.LimitePontosX(it,last);
+    for (; it != last; it++) {
+        fprintf(fp,"%d %d\n",(*it).first,(*it).second);
     }
 
-    VariableIterator it    = _best.begin();
-    VariableIterator itFim = _best.end();
+    VariableIterator vIt    = _best.begin();
+    VariableIterator vLast  = _best.end();
   
     int x1,y1,x2,y2;
-    for (;it != itFim; it++) {
-        ((RGPVariable *)(*it))->retRetangulo(x1,y1,x2,y2);
-        fprintf(fp, "x%d -", (*it)->getName());
+    for (;vIt != vLast; vIt++) {
+        ((RGPVariable *)(*vIt))->retRetangulo(x1,y1,x2,y2);
+        fprintf(fp, "x%d -", (*vIt)->getName());
         fprintf(fp,"%d %d %d %d\n",x1,y1,x2,y2);
     }
     fclose(fp);
@@ -403,19 +420,34 @@ void RGPManager::FinalStats() {
     RGPLagrangianRelaxation* l = (RGPLagrangianRelaxation*)_algo;
     cout << "Vezes 1  = " << l->_vezes1 << endl << "Vezes 2 = " << l->_vezes2 << endl;
     cout << "Fator Maior = " << l->_maximofator << endl;
-    
-    //felipe -- retirar
-    //RGPVariable* var;
-    //for (int i = 0; i < 150; i++) {
-    //    var = (RGPVariable*)_variables[i];
-    //    cout << i << " : " << var->_nome << " --- " << var->_valorLag << " --- " << var->_isPricedOut << " --- " << var->getCost() << " --- "  << var->Area() << endl;
-    //}
     cout << endl << "Best Solution Found: " << endl << PrintVariableVector(_best);
 }
 
 string RGPManager::DefaultFilePrefix() {
-    char arquivo[20] = "";
-    sprintf(arquivo, "w%dh%dn%d", _faixa, _faixa, _numeroPontos);
-    return arquivo;
+    char fileName[20] = "";
+    sprintf(fileName, "w%dh%dn%di%d", _gridSize, _gridSize, _numPoints,_instanceNumber);
+    return fileName;
+}
+
+void RGPManager::ExtractInstanceNumber(const char* filename)  {
+    if (!filename) return;
+
+    const char* p = filename;
+
+    while (*p && *p != 'i') ++p;
+    if (*p != 'i') return;
+
+    ++p; // skip 'i'
+
+    int value = 0;
+    bool found = false;
+
+    while (*p && isdigit(static_cast<unsigned char>(*p))) {
+        found = true;
+        value = value * 10 + (*p - '0');
+        ++p;
+    }
+
+    _instanceNumber = found ? value : 0;
 }
 

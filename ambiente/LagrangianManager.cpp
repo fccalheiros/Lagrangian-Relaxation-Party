@@ -156,6 +156,8 @@ void LagrangianManager::GenerateProblem(char* arq) {
     ReadProblem(arq);
     CreateProblem();
     FinalizeProblemCreation();
+    PostProblemCreationPriceOut();
+    CommitPriceOut();
     //TestVariableVector();
 }
 
@@ -166,7 +168,6 @@ void LagrangianManager::FinalizeProblemCreation() {
     _zeroFixedVariablesEnd = _variables.end();
 
     CleanupDeletedConstraints();
-	//CommitPriceOut();
 
     for (int i = 0; i < _countConstraints; i++) {
         _constraints[i]->_index = i;
@@ -178,6 +179,19 @@ void LagrangianManager::FinalizeProblemCreation() {
     }
 
    
+}
+
+void LagrangianManager::ResetLagrangianCosts() {
+	ConstraintIterator cIt, cEnd;
+    GetConstraintRange(cIt, cEnd);
+    for (; cIt != cEnd; cIt++) {
+		(*cIt)->setLagrangian(0.0f);
+    }
+    GetCutsRange(cIt, cEnd);
+    for (; cIt != cEnd; cIt++) {
+		(*cIt)->setLagrangian(0.0f);
+    }
+	setDualBound(_config->MINUS00);
 }
 
 void LagrangianManager::UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
@@ -214,10 +228,11 @@ void LagrangianManager::Solve(float InitialCost, float KnownBound ) {
     Solucao primalSolution;
     float relaxedValue;
     float primalValue;
+	float newLowerBound;
       
     _algo->setLagrangianManager(this);  
     _algo->Inicializacao();
-    setBound(KnownBound);
+    setPrimalBound(KnownBound);
 
     while ( ! shouldStop ) {
     
@@ -228,9 +243,18 @@ void LagrangianManager::Solve(float InitialCost, float KnownBound ) {
         primalFound = _algo->RunPrimalHeuristic(relaxedSolution, primalSolution, primalValue, InitialCost);
         UpdateBounds(relaxedValue, primalValue, primalSolution, primalFound);
         _algo->GenerateCuts(relaxedSolution);
+        
         _algo->UpdateSubgradient(relaxedSolution);
         shouldStop = _algo->CheckStopCondition();
-        columnsAdded = _algo->ColumnGeneration(relaxedSolution);
+        columnsAdded = _algo->ColumnGeneration(relaxedSolution, newLowerBound, InitialCost);
+        if (columnsAdded) {
+            if (newLowerBound > getLowerBound() /2 ) {
+                setDualBound(newLowerBound);
+			}
+            else {
+                ResetLagrangianCosts();
+            }
+        }
 		shouldStop = shouldStop && !columnsAdded;  
     }
 
@@ -441,6 +465,7 @@ void LagrangianManager::CommitPriceIn() {
     );
 
     auto count = distance(vFirst, selectedEnd);
+    cout << "Commited Price In Variables: " << count << endl;
     _activeVariablesEnd += count;
     _zeroFixedVariablesEnd += count;
 
@@ -552,10 +577,6 @@ void LagrangianManager::RemoveCut(ConstraintIterator &it) {
     delete *it;
     _cuts.erase(it);
     _cutsRemoved++;
-}
-
-int LagrangianManager::getActiveVariablesCount() {
-    return static_cast<int>(distance(_variables.begin(),_activeVariablesEnd));
 }
 
 void LagrangianManager::GetActiveVariablesRange(VariableIterator& begin, VariableIterator& end   )

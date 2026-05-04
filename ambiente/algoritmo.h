@@ -40,7 +40,7 @@ class Algoritmo {
   virtual bool RunPrimalHeuristic(Solucao& solRel, Solucao& solHeu, float& valor, float InitialCost) { return false; };
   virtual void GenerateCuts(Solucao& solRel) {} ;
   virtual bool Price(Solucao& relaxed) { return false; }
-  virtual bool ColumnGeneration(Solucao& relaxed) { return false; }
+  virtual bool ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost) { return false; }
   virtual bool PricingTrigger() { return false; }
   virtual void UpdateSubgradient(Solucao& sol) { };
   virtual void FixVariables(Solucao& solRel, float valor, float InitialCost) {};

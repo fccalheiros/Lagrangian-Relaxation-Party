@@ -2,17 +2,57 @@
 
 #include "main.h"
 #include "Configuration.h"
-
 #include "RGPManager.h"
 #include "RGPLagrangianRelaxation.h"
 #include "grafo.h"
-#include "BBTree.h"
-
-bool perturbacao;
-bool linear;
 
 long int tempoInicio;
 clock_t  tempoInicioCpu;
+
+
+int originalMain (int argc, char * argv[]) {
+
+  if  (! CheckUsage(argc,argv) ) return 1;
+
+    srand(13);
+
+	Configuration* config = LoadConfig(argv[2]);
+    RGPLagrangianRelaxation* algorithm = new RGPLagrangianRelaxation(config);
+    RGPManager *manager = new RGPManager(config, algorithm);
+    algorithm->setLagrangianManager(manager);
+    manager->GenerateProblem(argv[1]);
+
+    SearchAlgorithm sa = ParseBranchStrategy(config->getValue("BRANCHSTRATEGY"));
+    BBTree bbTree(manager, algorithm, sa, config);
+
+    if ( argc == 3 ) { 
+        StartStats();
+        bbTree.GO();
+        EndStats();
+		string prefix = manager->DefaultFilePrefix() + "." + config->getValue("BRANCHSTRATEGY");
+        string filename = prefix + ".txt";
+        bbTree.Print(filename);
+        return 0;
+    }
+
+    if (strcmp(argv[3], "l") == 0) {
+        ofstream file;
+        file.open(argv[4]);
+        file << manager->PrintLP();
+        file.close();
+        return 0;
+    }
+    
+    if (strcmp(argv[3], "c") == 0) {
+        FILE* saida = stdout;
+        saida = fopen(argv[4], "w");
+        Cuts(manager, saida);
+        return 0;
+    }
+ 
+    return 0;
+
+}
 
 static void StartStats() {
     tempoInicio = TempoAtual();
@@ -33,17 +73,17 @@ static void EndStats() {
     cout << "   CPU time: " << TempoCpuPassado(tempoInicioCpu) << endl;
     cout << "   Current CPU time: " << TempoCpuAtual() << endl;
     cout << "------------------------------------------------------------------------------- " << endl;
- 
+    cout << std::flush;
 }
 
-static bool CheckUsage(int argc, char * argv[])
+static bool CheckUsage(int argc, char* argv[])
 {
     bool ok = true;
-    ok =  ok && ( (argc == 3) || (argc == 5) );
+    ok = ok && ((argc == 3) || (argc == 5));
     if (argc == 5) {
         ok = ok && (strcmp(argv[3], "l") or strcmp(argv[3], "c"));
     }
-    if (! ok) {
+    if (!ok) {
         cout << "Usage: " << endl;
         cout << argv[0] << " InstanceFile ConfigurationFile [l|c] [OutputFile]" << endl;
         cout << "   Optional l to genarate linear programming file OutputFile" << endl;
@@ -53,77 +93,38 @@ static bool CheckUsage(int argc, char * argv[])
     return ok;
 }
 
-// 
-// 
-//
+SearchAlgorithm ParseBranchStrategy(const string& strategy) {
+    string upperStrategy = strategy;
+    for (char& c : upperStrategy) {
+        c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+    }
+	if (upperStrategy == "BFS")   return SearchAlgorithm::BFS;
+    if (upperStrategy == "DFS")   return SearchAlgorithm::DFS;
+	if (upperStrategy == "NONE")  return SearchAlgorithm::NONE;
+    return SearchAlgorithm::NONE; // default
+}
 
-int main2 (int argc, char * argv[]) {
+Configuration* LoadConfig(const char* configFile) {
 
-  if  (! CheckUsage(argc,argv) ) return 1;
+    Configuration* config = new Configuration();
 
-    srand(13);
-
-    string configFile = argv[2];
-    Configuration * config = new Configuration();
     try {
         if (!config->PARSE(configFile)) {
             cout << "Unable to Parse File: " << configFile << endl;
             cout << "Using default values: " << endl;
         }
     }
-    catch (exception& e) {
+    catch (const exception& e) {
         cout << e.what() << endl;
         cout << "Unable to Parse File: " << configFile << endl;
         cout << "Using default values: " << endl;
     }
-    
+
     cout << config->Print();
-
-    RGPLagrangianRelaxation* algorithm = new RGPLagrangianRelaxation(config);
-    RGPManager *manager = new RGPManager(config, algorithm);
-    SearchAlgorithm sa = SearchAlgorithm::BFS;
-    if (config->getValue("BRANCHSTRATEGY").compare("DFS") == 0)
-        sa = SearchAlgorithm::DFS;
-
-    algorithm->setLagrangianManager(manager);
-    manager->GenerateProblem(argv[1]);
-
-    BBTree bbTree(manager, algorithm, sa, config);
-
-    if ( argc == 3 ) { 
-
-        StartStats();
-        bbTree.GO();
-
-        string filename = manager->DefaultFilePrefix() + "." + (sa == SearchAlgorithm::BFS ? "BFS" : "DFS") + ".txt";
-        bbTree.Print(filename);
-
-        EndStats();
-        cout << std::flush;
-        return 0;
-    }
-
-    if (strcmp(argv[3], "l") == 0) {
-        ofstream file;
-        file.open(argv[4]);
-        file << manager->PrintLP();
-        file.close();
-        return 0;
-    }
-    
-    if (strcmp(argv[3], "c") == 0) {
-        FILE* saida = stdout;
-        saida = fopen(argv[4], "w");
-        cortes(manager, saida);
-        return 0;
-    }
- 
-    return 0;
-
+    return config;
 }
 
-
-void cortes(LagrangianManager* prob, FILE* saida) {
+void Cuts(LagrangianManager* prob, FILE* output) {
     unsigned int i, j;
     int num = 0;
     vector <int> vars;
@@ -156,17 +157,7 @@ void cortes(LagrangianManager* prob, FILE* saida) {
     g.Imprime();
     g.Clique(prob, 2);
     g.CicloImpar(prob);
-    prob->for_each_cut(Imprime <Constraint*> (saida) );
+    prob->for_each_cut(Imprime <Constraint*> (output) );
     cout << prob->_cuts.size() << endl;
 }
 
-float Psi(bool perturbacao) {
-    if (!perturbacao) return (float)0;
-    float res = (((float)rand() / (float)1048756) - (float)1024) / (float)1E+10;
-    return (float)res;
-}
-
-float Custo(int var) {
-    // return (float)gerente->_variables[var]->getCost() + (float)Psi();
-    return  0; /// apagar
-}

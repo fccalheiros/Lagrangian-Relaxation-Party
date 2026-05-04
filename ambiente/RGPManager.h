@@ -11,9 +11,10 @@ class RGPManager : public LagrangianManager {
 
  protected:
 
-    Points _instancia;
+    Points _instancePoints;
 
-    int _faixa;
+    int _gridSize;
+	int _instanceNumber = 0;
   
     int _colunas;
     int _colunas2;
@@ -21,11 +22,12 @@ class RGPManager : public LagrangianManager {
     int _colunas4;
 
     bool _JaImprimiu;
+    float _cutoffForPricing = 0.0f;
 
 
  public:
 
-    int _numeroPontos;
+    int _numPoints;
 
     RGPManager(Configuration *config);
     RGPManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE);
@@ -38,17 +40,20 @@ class RGPManager : public LagrangianManager {
 
     virtual void SetVariableForBranch(Variable* v, short int value);
     virtual void Solve(float InitialCost, float KnownBound);
-    inline int Area() { return (_faixa*_faixa); }; 
+    inline int Area() { return (_gridSize*_gridSize); }; 
 
     inline virtual string DefaultFilePrefix();
+    void ExtractInstanceNumber(const char* filename);
+    int getCardinality() { return _numPoints + 1; };
 
   
  protected:
   
     virtual void ReadProblem(char *arq);
     virtual void CreateProblem();
+	virtual void PostProblemCreationPriceOut();
     virtual void CustomProcessing();
-    virtual void PrintSolution();
+    virtual void PrintSolution(string filename);
     bool VerificaTerminalDentro(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
     bool VerificaTerminalNoCorner(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
     bool VerificaSteiners(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
