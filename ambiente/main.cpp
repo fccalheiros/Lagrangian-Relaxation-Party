@@ -32,6 +32,8 @@ int originalMain (int argc, char * argv[]) {
 		string prefix = manager->DefaultFilePrefix() + "." + config->getValue("BRANCHSTRATEGY");
         string filename = prefix + ".txt";
         bbTree.Print(filename);
+		filename = prefix + ".sol";
+		manager->PrintSolution(filename);
         return 0;
     }
 

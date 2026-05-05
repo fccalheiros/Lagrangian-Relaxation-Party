@@ -43,8 +43,8 @@ class RGPManager : public LagrangianManager {
     inline int Area() { return (_gridSize*_gridSize); }; 
 
     inline virtual string DefaultFilePrefix();
-    void ExtractInstanceNumber(const char* filename);
     int getCardinality() { return _numPoints + 1; };
+    virtual void PrintSolution(string filename);
 
   
  protected:
@@ -53,12 +53,12 @@ class RGPManager : public LagrangianManager {
     virtual void CreateProblem();
 	virtual void PostProblemCreationPriceOut();
     virtual void CustomProcessing();
-    virtual void PrintSolution(string filename);
-    bool VerificaTerminalDentro(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
-    bool VerificaTerminalNoCorner(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
-    bool VerificaSteiners(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
-    void CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter y2);
+    bool VerificaTerminalDentro(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2);
+    bool VerificaTerminalNoCorner(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2);
+    bool VerificaSteiners(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2);
+    void CreateVariable(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2);
     virtual void InsertVariableIntoConstraint(Variable *var1);
+    void ExtractInstanceNumber(const char* filename);
   
     void PostGenerationConstraintsReduction();
 

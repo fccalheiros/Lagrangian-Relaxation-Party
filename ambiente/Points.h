@@ -9,7 +9,7 @@
 
 using namespace std;
 
-typedef vector<int>::iterator GridIter;
+typedef vector<int>::iterator GridIterator;
 typedef map < int, int>::iterator PointsIterator;
 
 
@@ -55,15 +55,15 @@ protected:
 
     int retornaXDelta (int x, int delta);
     int retornaYDelta (int y, int delta);
-    GridIter retornaIterY(int y);
+    GridIterator retornaIterY(int y);
   
     int retornaIndiceX (int x);
     int retornaIndiceY (int y);
 
     void retornaPontoX(int &x, int &y, int indice);
 
-    void LimiteGridX(GridIter &comeco, GridIter &fim);
-    void LimiteGridY(GridIter &comeco, GridIter &fim);
+    void LimiteGridX(GridIterator &comeco, GridIterator &fim);
+    void LimiteGridY(GridIterator &comeco, GridIterator &fim);
   
     void LimitePontosX(PointsIterator &comeco, PointsIterator &fim);
     void LimitePontosY(PointsIterator &comeco, PointsIterator &fim);  

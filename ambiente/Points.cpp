@@ -57,7 +57,7 @@ int Points::retornaXDelta (int x, int delta) {
 
 int Points::retornaIndiceY(int y) {
 
-  GridIter it = lower_bound(_gridY.begin(),_gridY.end(),y);
+  GridIterator it = lower_bound(_gridY.begin(),_gridY.end(),y);
   
   return (int)( distance(_gridY.begin(),it));
 }
@@ -74,16 +74,16 @@ int Points::retornaYDelta (int y, int delta) {
 
 }
 
-GridIter Points::retornaIterY(int y) {
+GridIterator Points::retornaIterY(int y) {
    return ( lower_bound(_gridY.begin(),_gridY.end(),y) );
 }
 
-void Points::LimiteGridX(GridIter &comeco, GridIter &fim){
+void Points::LimiteGridX(GridIterator &comeco, GridIterator &fim){
   comeco = _gridX.begin();
   fim    = _gridX.end();
 }
 
-void Points::LimiteGridY(GridIter &comeco, GridIter &fim){
+void Points::LimiteGridY(GridIterator &comeco, GridIterator &fim){
   comeco = _gridY.begin();
   fim    = _gridY.end();
 }
@@ -134,7 +134,7 @@ string Points::Print() {
     }
     work << "X Grid" << endl;
 
-    GridIter it2 = _gridX.begin();
+    GridIterator it2 = _gridX.begin();
     for (; it2 != _gridX.end(); it2++)
         work << *it2 << " ";
     work << endl;

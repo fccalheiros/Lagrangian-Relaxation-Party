@@ -17,17 +17,17 @@ class RGPLagrangianRelaxation : public LagrangianRelaxation {
   int _vezes2;
   float _maximofator;
 
-  virtual void FixVariables(Solucao &solRel, float valor, float InitialCost);
-  virtual void SolveRelaxation(Solucao& sol, float& valor, float InitialCost);
-  virtual bool ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost);
+  virtual void FixVariables(VariableSet &solRel, float valor, float InitialCost);
+  virtual void SolveRelaxation(VariableSet& sol, float& valor, float InitialCost);
+  virtual bool ColumnGeneration(VariableSet& relaxed, float& newLowerBound, float InitialCost);
 
-  void Relaxacao2(Solucao& sol, float& valor, float InitialCost);
+  void Relaxacao2(VariableSet& sol, float& valor, float InitialCost);
 
   virtual Algoritmo* getNew() { return new RGPLagrangianRelaxation(_config); }
   
 protected:
 
-    inline virtual bool TemIntercessao(Solucao& solHeu, Variable* var);
+    inline virtual bool TemIntercessao(VariableSet& solHeu, Variable* var);
 };
 
 

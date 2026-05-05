@@ -1,7 +1,6 @@
 #ifndef _LagrangianManager_H
 #define _LagrangianManager_H
 
-
 #define _CRT_SECURE_NO_WARNINGS
 
 using namespace std;
@@ -19,300 +18,407 @@ using namespace std;
 #include "algoritmo.h"
 #include "SortThreadPool.h"
 
-
+// =====================
+// Type aliases
+// =====================
 typedef vector<Variable*>::iterator VariableIterator;
 typedef vector<Constraint*>::iterator ConstraintIterator;
-typedef vector<Variable*> VariableSet;
 
+// =====================
+// Enums
+// =====================
 enum class Direction {
     MAXIMIZE,
     MINIMIZE
 };
 
-/*****************************************************/
-
-template<class Tp, class _Function> struct RestricaoAtiva 
-{
+// =====================
+// Helper functor wrapper
+// =====================
+template<class Tp, class _Function>
+struct RestricaoAtiva {
 public:
-    RestricaoAtiva(_Function f) : _f(f) { };
+    RestricaoAtiva(_Function f) : _f(f) {}
 
-    void operator() (Tp& restricao) {
+    void operator()(Tp& restricao) {
         _f(restricao);
-    };
+    }
+
     _Function _f;
 };
 
-/*****************************************************/
-
-
+// ============================================================
+// LagrangianManager
+// ============================================================
 class LagrangianManager {
 
 public:
-
+    // ========================================================
+    // Core data
+    // ========================================================
     vector<Variable*> _variables;
+
     vector<Constraint*> _constraints;
     vector<Constraint*> _constraintsND;
     vector<Constraint*> _cuts;
 
-    vector<Variable*> _best;
+    vector<Variable*> _incumbentSolution;
 
     Algoritmo* _algo;
 
+    // ========================================================
+    // Counters
+    // ========================================================
     int _countConstraints;
     int _countConstraintsND;
 
     int _cutsInserted;
     int _cutsFound;
     int _cutsRemoved;
+
     int _totalVariaveis;
     int _countFixed;
     int _countFixedPartial;
-    
+
     double _nonZeroCount = 0;
 
 protected:
-
+    // ========================================================
+    // Configuration
+    // ========================================================
     Direction _direction;
     Configuration* _config;
+
+    // Sorting control
     size_t _max_sort_depth;
     SortThreadPool _pool;
 
 private:
-
+    // ========================================================
+    // Bounds
+    // ========================================================
     float _upperBound;
     float _lowerBound;
 
+    // ========================================================
+    // Variable partition (CRITICAL STRUCTURE)
+    //
+    // [begin, _activeVariablesEnd)         -> active
+    // [_activeVariablesEnd, _zeroFixedVariablesEnd) -> fixed zero
+    // [_zeroFixedVariablesEnd, end)       -> priced out
+    // ========================================================
     VariableIterator _activeVariablesEnd;
     VariableIterator _zeroFixedVariablesEnd;
-	//there is no need to a pointer for the end of priced out variables, since they are always at the end of the vector
 
 protected:
+    
+    // ========================================================
+    // Internal logic
+    // ========================================================
+    void UpdateBounds(float valRelaxado, float valHeuristica,
+        vector<Variable*>& solHeu, bool resHeuristica);
 
-    inline void setUpperBound(float UB) { _upperBound = UB; }
-    inline void setLowerBound(float LB) { _lowerBound = LB; }
-    inline void setPrimalBound(float B) { if (_direction == Direction::MINIMIZE) setUpperBound(B); 
-                                          else setLowerBound(B); }
-    inline void setDualBound(float B)   { if (_direction == Direction::MINIMIZE) setLowerBound(B); 
-	                                      else setUpperBound(B);}
-    void UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable*>& solHeu, bool resHeuristica);
-    inline Direction getDirection()  const  { return _direction; }
+    void StoreIncumbent(VariableSet& sol);
+    void AddToIncumbent(Variable* var);
+    void ResetLagrangianCosts();
 
-    void StoreIncumbent(Solucao &sol);
+    // Hooks
+    virtual void ReadProblem(char* arq) {}
+    virtual void CreateProblem() {}
+    virtual void PostProblemCreationPriceOut() {}
+    virtual void InsertVariableIntoConstraint(Variable* var1) {}
+    virtual void CustomProcessing() {}
 
-    virtual void ReadProblem(char* arq) { };
-    virtual void CreateProblem() {};
-	virtual void PostProblemCreationPriceOut() {};
-    virtual void InsertVariableIntoConstraint(Variable* var1) {};
-    virtual void CustomProcessing() { };
-    virtual void PrintSolution() {};
     void FinalizeProblemCreation();
- 
-	void ResetLagrangianCosts();
 
 public:
+    // ========================================================
+	// Constructors / Initialization
+    // ========================================================
+    LagrangianManager(Configuration* config);
 
-    LagrangianManager(Configuration *config);
-    LagrangianManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE, size_t max_sort_depth = 4 );
+    LagrangianManager(Configuration* config,
+        Algoritmo* algo,
+        Direction direction = Direction::MINIMIZE,
+        size_t max_sort_depth = 4);
+
     LagrangianManager(LagrangianManager* m);
+
     virtual LagrangianManager* CopyAndClean(LagrangianManager* m);
 
     virtual ~LagrangianManager();
 
+    inline void SetAlgorithm(Algoritmo* algo) { _algo = algo; }
+
+    // ========================================================
+    // Solve
+    // ========================================================
     virtual void Solve(float InitialCost, float KnownBound);
 
+    inline bool OptimalFound() {
+        return ((getUpperBound() - getLowerBound()) < _config->STOP_GAP);
+    }
+    // ========================================================
+    // Bound helpers
+    // ========================================================
+    inline void setUpperBound(float UB) { _upperBound = UB; }
+    inline void setLowerBound(float LB) { _lowerBound = LB; }
+
+    inline void setPrimalBound(float B) {
+        if (_direction == Direction::MINIMIZE) setUpperBound(B);
+        else setLowerBound(B);
+    }
+
+    inline void setDualBound(float B) {
+        if (_direction == Direction::MINIMIZE) setLowerBound(B);
+        else setUpperBound(B);
+    }
+
+    inline float getUpperBound() const { return _upperBound; }
+    inline float getLowerBound() const { return _lowerBound; }
+
+    inline float getPrimalBound() const {
+        if (_direction == Direction::MINIMIZE) return getUpperBound();
+        else return getLowerBound();
+    }
+
+    inline float getDualBound() const {
+        if (_direction == Direction::MINIMIZE) return getLowerBound();
+        else return getUpperBound();
+    }
+
+    inline Direction getDirection() const { return _direction; }
+
+    // ========================================================
+    // Variable operations
+    // ========================================================
     void FixVariable(VariableIterator var);
     void UnfixVariable(VariableIterator var);
-	void PriceOutVariable(VariableIterator var);
+
+    void PriceOutVariable(VariableIterator var);
     void PriceInVariable(VariableIterator var);
-	void MarkVariableForPriceIn(VariableIterator var);
-	void MarkVariableForPriceOut(VariableIterator var);
+
+    void MarkVariableForPriceIn(VariableIterator var);
+    void MarkVariableForPriceOut(VariableIterator var);
 
     void CommitPriceIn();
-	void CommitPriceOut();
+    void CommitPriceOut();
 
     void TestVariableVector();
 
-    void InsertVariable(Variable *var);
-    void InsertConstraint(Constraint *restricao);
-    void InsertConstraintND(Constraint *restricao);
-    void InsertCut(Constraint *constraint);
+    // ========================================================
+    // Insert / Remove
+    // ========================================================
+    void InsertVariable(Variable* var);
 
-    void RemoveVariable(VariableIterator &it);
-    void RemoveConstraint(ConstraintIterator &it);
-    void RemoveConstraintND(ConstraintIterator &it);
-    void RemoveCut(ConstraintIterator &it);
+    void InsertConstraint(Constraint* restricao);
+    void InsertConstraintND(Constraint* restricao);
+    void InsertCut(Constraint* constraint);
+
+    void RemoveVariable(VariableIterator& it);
+    void RemoveConstraint(ConstraintIterator& it);
+    void RemoveConstraintND(ConstraintIterator& it);
+    void RemoveCut(ConstraintIterator& it);
 
     void MarkConstraintForDeletion(Variable* var);
 
-    int  getActiveVariablesCount() { return static_cast<int>(distance(_variables.begin(), _activeVariablesEnd)); }
-    int getZeroFixedVariablesCount() { return static_cast<int>(distance(_activeVariablesEnd, _zeroFixedVariablesEnd)); }
-    int getPricedOutVariablesCount() { return static_cast<int>(distance(_zeroFixedVariablesEnd, _variables.end())); }
-    void GetActiveVariablesRange(VariableIterator &begin, VariableIterator &end);
-	void GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end);
-	void GetPricedOutVariablesRange(VariableIterator& begin, VariableIterator& end);
-    void GetConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
-    void GetNDConstraintRange(ConstraintIterator &begin, ConstraintIterator &end);
-    void GetCutsRange(ConstraintIterator &begin, ConstraintIterator &end);
+    // ========================================================
+    // Ranges
+    // ========================================================
+    int getActiveVariablesCount() {
+        return static_cast<int>(distance(_variables.begin(), _activeVariablesEnd));
+    }
 
-    Constraint * getConstraint (int i);
-    Constraint * getConstraintND (int i);
-    Constraint * getCut (int i);
-  
+    int getZeroFixedVariablesCount() {
+        return static_cast<int>(distance(_activeVariablesEnd, _zeroFixedVariablesEnd));
+    }
+
+    int getPricedOutVariablesCount() {
+        return static_cast<int>(distance(_zeroFixedVariablesEnd, _variables.end()));
+    }
+
+    void GetActiveVariablesRange(VariableIterator& begin, VariableIterator& end);
+    void GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end);
+    void GetPricedOutVariablesRange(VariableIterator& begin, VariableIterator& end);
+
+    void GetConstraintRange(ConstraintIterator& begin, ConstraintIterator& end);
+    void GetNDConstraintRange(ConstraintIterator& begin, ConstraintIterator& end);
+    void GetCutsRange(ConstraintIterator& begin, ConstraintIterator& end);
+
+    // ========================================================
+    // Access
+    // ========================================================
+    Constraint* getConstraint(int i);
+    Constraint* getConstraintND(int i);
+    Constraint* getCut(int i);
+
+    // ========================================================
+	// B&B utilities
+    // ========================================================
+    void StoreIncumbentfromBranchAndBound(VariableSet& set) { StoreIncumbent(set); }
+    void AddToIncumbentfromBranchAndBound(Variable* var) { AddToIncumbent(var); }
+    virtual void SetVariableForBranch(Variable* v, short int value);
+
+    // ========================================================
+    // Memory / lifecycle
+    // ========================================================
     void FreeMemory();
-    void GenerateProblem(char *arq);
- 
-    inline float getUpperBound() const { return _upperBound;  }
-    inline float getLowerBound() const { return _lowerBound;  }
-    inline float getBound() const { if (_direction == Direction::MINIMIZE) return getUpperBound(); else return getLowerBound(); }
-
-    inline void SetAlgorithm(Algoritmo* algo) { _algo = algo; }
-    inline float TotalRunTime() const { return _algo->TotalRunTime();  }
-
-    void CoveredConstraints(Variable *var, vector <Constraint *> &linhas);
-
-    void ImprimeLP(FILE *saida);
-    string PrintLP();
-    void PrintLP(string filename);
-    string PrintVariableVector(Solucao s);
-    void PrintLagrangian();
+    void GenerateProblem(char* arq);
 
     void CleanupDeletedConstraints();
     void CleanUpProblem();
     void CleanUp();
     void Restart();
 
+    // ========================================================
+    // Debug / output
+    // ========================================================
+    void CoveredConstraints(Variable* var, vector<Constraint*>& linhas);
+
+    void ImprimeLP(FILE* saida);
+    string PrintLP();
+    void PrintLP(string filename);
+    string PrintVariableVector(VariableSet s);
+    void PrintLagrangian();
+    virtual void PrintSolution() {};
     virtual void FinalStats();
-
-    int  Audit();
-
-    virtual void SetVariableForBranch(Variable* v, short int value);
-
-    inline bool OptimalFound() { return ( (getUpperBound() - getLowerBound()) < _config->STOP_GAP); }
+    inline float TotalRunTime() const { return _algo->TotalRunTime(); }
 
     inline virtual string DefaultFilePrefix() { return "LagrangianManager"; }
 
-    void CheckConstraints(Solucao& sol);
+    void CheckConstraints(VariableSet& sol);
 
-     float GetMaxLagrangian(VariableSet sol) {
-         VariableIterator it = max_element(sol.begin(),sol.end(), CompareLagrangian <Variable*>());
-         return (*it)->_valorLag;
-     }
- 
+    float GetMaxLagrangian(VariableSet sol) {
+        VariableIterator it = max_element(sol.begin(), sol.end(), CompareLagrangian<Variable*>());
+        return (*it)->_valorLag;
+    }
+
 public:
+    // ==================
+    // Sorting utilities 
+    // ==================
+    int max_sort_size_thread = 2500;
+    int max_sort_size = 64;
 
-    template <class StrictWeakOrdering> void EstOrdemVariaveis(int posicao, StrictWeakOrdering comp) {
+    template <class StrictWeakOrdering>
+    void EstOrdemVariaveis(int posicao, StrictWeakOrdering comp) {
         VariableIterator begin, end;
-		GetActiveVariablesRange(begin, end);
-        if ( distance(begin,end) > 200)
+        GetActiveVariablesRange(begin, end);
+        if (distance(begin, end) > 200)
             nth_element(begin, begin + posicao, end, comp);
         else
             sort(begin, end, comp);
-    };
+    }
 
-    template <class StrictWeakOrdering> void EstOrdemVariaveis2(int posicao, StrictWeakOrdering comp) {
+    template <class StrictWeakOrdering>
+    void EstOrdemVariaveis2(int posicao, StrictWeakOrdering comp) {
         int p = 4 * posicao;
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        if ( distance(begin,end)  > p) {
+        if (distance(begin, end) > p) {
             nth_element(begin, begin + p, end, comp);
             sort(begin, begin + p, comp);
         }
         else
             sort(begin, end, comp);
-    };
+    }
 
-
-    template <class StrictWeakOrdering> void Ordena(StrictWeakOrdering comp) {
+    template <class StrictWeakOrdering>
+    void Ordena(StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
         sort(begin, end, comp);
-    };
-
-    template <class StrictWeakOrdering> void Ordena2(StrictWeakOrdering comp) {
-        VariableIterator begin, end;
-        GetActiveVariablesRange(begin, end); 
-        OrdenaRecursivo(comp, begin, end, 0);
-        //if ( ! is_sorted(begin, end ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
     }
 
-    template <class StrictWeakOrdering> void Ordena3(StrictWeakOrdering comp) {
-        VariableIterator begin, end;
-        GetActiveVariablesRange(begin, end); 
-        ThreadMergeSort(_pool, comp, begin, end, 0, _max_sort_depth);
-        //if ( ! is_sorted(begin, end ,comp) ) { cout << "OPS !!!" << endl; exit(1); }
-    }
-
-    // parâmetros configuráveis
-    int max_sort_size_thread = 2500; // mínimo para usar outra thread
-    int max_sort_size = 64;  // mínimo para usar std::sort
-
-    template <class StrictWeakOrdering> void OrdenaRecursivo(StrictWeakOrdering comp, VariableIterator inicio, VariableIterator fim, int profundidade) {
-        if ( ( profundidade < 15 ) && ( (fim-inicio) > max_sort_size ) ) {
-            int meio =  (int)((fim - inicio)/2);
-            OrdenaRecursivo(comp, inicio, inicio+meio+1, profundidade+1);
-            OrdenaRecursivo(comp, inicio+meio+1, fim, profundidade+1);
-            VariableIterator it = lower_bound( inicio, inicio+meio+1, *(inicio+meio+1), comp);
-            inplace_merge(it, inicio+meio+1 , fim , comp);
-        }
-        else sort (inicio, fim, comp);
-    };
-    
     template <class StrictWeakOrdering>
-    void ThreadMergeSort(SortThreadPool& pool, StrictWeakOrdering comp,
-        VariableIterator begin, VariableIterator end, int depth, size_t max_depth) {
+    void Ordena2(StrictWeakOrdering comp) {
+        VariableIterator begin, end;
+        GetActiveVariablesRange(begin, end);
+        OrdenaRecursivo(comp, begin, end, 0);
+    }
+
+    template <class StrictWeakOrdering>
+    void Ordena3(StrictWeakOrdering comp) {
+        VariableIterator begin, end;
+        GetActiveVariablesRange(begin, end);
+        ThreadMergeSort(_pool, comp, begin, end, 0, _max_sort_depth);
+    }
+
+    template <class StrictWeakOrdering>
+    void OrdenaRecursivo(StrictWeakOrdering comp, VariableIterator inicio, VariableIterator fim, int profundidade) {
+        if ((profundidade < 15) && ((fim - inicio) > max_sort_size)) {
+            int meio = (int)((fim - inicio) / 2);
+            OrdenaRecursivo(comp, inicio, inicio + meio + 1, profundidade + 1);
+            OrdenaRecursivo(comp, inicio + meio + 1, fim, profundidade + 1);
+
+            VariableIterator it = lower_bound(inicio, inicio + meio + 1,
+                *(inicio + meio + 1), comp);
+
+            inplace_merge(it, inicio + meio + 1, fim, comp);
+        }
+        else {
+            sort(inicio, fim, comp);
+        }
+    }
+
+    template <class StrictWeakOrdering>
+    void ThreadMergeSort(SortThreadPool& pool,
+        StrictWeakOrdering comp,
+        VariableIterator begin,
+        VariableIterator end,
+        int depth,
+        size_t max_depth) {
+
         auto size = end - begin;
 
-        DWORD tid = GetCurrentThreadId();
-        // OutputDebugStringA((std::string("Execução na Thread: ") + std::to_string(tid) + " " +  std::to_string(depth) + "\r\n").c_str());
         if (size <= max_sort_size) {
             std::sort(begin, end, comp);
             return;
         }
 
         VariableIterator mid = begin + size / 2;
+
         if (size > max_sort_size_thread && depth < max_depth) {
-			// first half in new thread
             auto fut = pool.enqueue([this, &pool, comp, begin, mid, depth, max_depth] {
                 ThreadMergeSort(pool, comp, begin, mid, depth + 1, max_depth);
                 });
 
-            // secont half in current thread
             ThreadMergeSort(pool, comp, mid, end, depth + 1, max_depth);
-            fut.get(); // espera thread terminar
+            fut.get();
         }
         else {
-			// threadless execution
             OrdenaRecursivo(comp, begin, mid, depth + 1);
             OrdenaRecursivo(comp, mid, end, depth + 1);
         }
 
-        // Optimized merge works well in a quasi-sorted array
         VariableIterator it = std::lower_bound(begin, mid, *mid, comp);
         std::inplace_merge(it, mid, end, comp);
-
-        //OutputDebugStringA((std::string("Fim Thread: ") + std::to_string(tid) + " " + std::to_string(depth) + "\r\n").c_str());
-
     }
 
-    template <class RandomAccessIterator, class StrictWeakOrdering> void pop_heap_t(RandomAccessIterator last,StrictWeakOrdering comp) {
+    template <class RandomAccessIterator, class StrictWeakOrdering>
+    void pop_heap_t(RandomAccessIterator last, StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
         pop_heap(begin, last, comp);
-    }  
+    }
 
-    template <class StrictWeakOrdering> void make_heap_t(StrictWeakOrdering comp) {
+    template <class StrictWeakOrdering>
+    void make_heap_t(StrictWeakOrdering comp) {
         VariableIterator begin, end;
-        GetActiveVariablesRange(begin, end);     
+        GetActiveVariablesRange(begin, end);
         make_heap(begin, end, comp);
     }
 
-    template <class StrictWeakOrdering> void sort_heap_t(StrictWeakOrdering comp) {
+    template <class StrictWeakOrdering>
+    void sort_heap_t(StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
         sort_heap(begin, end, comp);
     }
 
-  
+    // ========================================================
+    // Iterators helpers
+    // ========================================================
     template <class F>
     F for_each_variable(F f) {
         VariableIterator begin, end;
@@ -322,30 +428,30 @@ public:
 
     template <class _Function>
     _Function for_each_constraint(_Function __f) {
-		ConstraintIterator begin, end;
-		GetConstraintRange(begin, end);
-        RestricaoAtiva<Constraint *,_Function> tmp =
-            for_each(begin, end, RestricaoAtiva <Constraint* ,_Function> (__f) );
+        ConstraintIterator begin, end;
+        GetConstraintRange(begin, end);
+        RestricaoAtiva<Constraint*, _Function> tmp =
+            for_each(begin, end, RestricaoAtiva<Constraint*, _Function>(__f));
         return tmp._f;
-    };
+    }
 
     template <class _Function>
     _Function for_each_non_dualized_constraint(_Function __f) {
         ConstraintIterator begin, end;
-		GetNDConstraintRange(begin, end);
-        RestricaoAtiva<Constraint *,_Function> tmp =
-            for_each(begin, end, RestricaoAtiva <Constraint* ,_Function> (__f) );
+        GetNDConstraintRange(begin, end);
+        RestricaoAtiva<Constraint*, _Function> tmp =
+            for_each(begin, end, RestricaoAtiva<Constraint*, _Function>(__f));
         return tmp._f;
-    };
+    }
 
     template <class _Function>
     _Function for_each_cut(_Function __f) {
         ConstraintIterator begin, end;
-        GetCutsRange(begin, end); 
-        RestricaoAtiva<Constraint *,_Function> tmp =
-            for_each(begin, end, RestricaoAtiva <Constraint* ,_Function> (__f) );
+        GetCutsRange(begin, end);
+        RestricaoAtiva<Constraint*, _Function> tmp =
+            for_each(begin, end, RestricaoAtiva<Constraint*, _Function>(__f));
         return tmp._f;
-    };
-
+    }
 };
+
 #endif

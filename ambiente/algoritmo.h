@@ -7,7 +7,7 @@
 #include "Time.h"
 #include "Configuration.h"
 
-typedef vector<Variable *> Solucao;
+typedef vector<Variable *> VariableSet;
 
 class LagrangianManager;
 
@@ -36,14 +36,14 @@ class Algoritmo {
   virtual void Finalizacao();
 
 
-  virtual void SolveRelaxation(Solucao& sol, float& valor, float InitialCost) {};
-  virtual bool RunPrimalHeuristic(Solucao& solRel, Solucao& solHeu, float& valor, float InitialCost) { return false; };
-  virtual void GenerateCuts(Solucao& solRel) {} ;
-  virtual bool Price(Solucao& relaxed) { return false; }
-  virtual bool ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost) { return false; }
+  virtual void SolveRelaxation(VariableSet& sol, float& valor, float InitialCost) {};
+  virtual bool RunPrimalHeuristic(VariableSet& solRel, VariableSet& solHeu, float& valor, float InitialCost) { return false; };
+  virtual void GenerateCuts(VariableSet& solRel) {} ;
+  virtual bool Price(VariableSet& relaxed) { return false; }
+  virtual bool ColumnGeneration(VariableSet& relaxed, float& newLowerBound, float InitialCost) { return false; }
   virtual bool PricingTrigger() { return false; }
-  virtual void UpdateSubgradient(Solucao& sol) { };
-  virtual void FixVariables(Solucao& solRel, float valor, float InitialCost) {};
+  virtual void UpdateSubgradient(VariableSet& sol) { };
+  virtual void FixVariables(VariableSet& solRel, float valor, float InitialCost) {};
   virtual bool CheckStopCondition() { return true; }
   virtual Variable* ChooseBranchVariable() { return NULL;  }
 

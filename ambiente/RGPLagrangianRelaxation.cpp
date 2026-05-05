@@ -16,7 +16,7 @@ RGPLagrangianRelaxation::~RGPLagrangianRelaxation()
 
 
 // This relaxation considers the cardinality constraint of the RGP problem.
-void RGPLagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float InitialCost) {
+void RGPLagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float InitialCost) {
 
 	int i;
 
@@ -54,7 +54,7 @@ void RGPLagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float 
 	cout << valor << endl << endl;
 }
 
-bool RGPLagrangianRelaxation::ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost) {
+bool RGPLagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newLowerBound, float InitialCost) {
 
 	bool isAnyVariablePricedIn = false;
 	const double EPS = 1e-6;
@@ -124,7 +124,7 @@ bool RGPLagrangianRelaxation::ColumnGeneration(Solucao& relaxed, float& newLower
 	return false;
 }
 
-void RGPLagrangianRelaxation::FixVariables(Solucao &solRel, float valor, float InitialCost) {
+void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, float InitialCost) {
    
 	float LI = _manager->getLowerBound();
 	float LS = _manager->getUpperBound();
@@ -227,17 +227,13 @@ void RGPLagrangianRelaxation::FixVariables(Solucao &solRel, float valor, float I
 		 }
    }
    cout << "Total: " << InitialTotal << endl;
-  
-   //int cont = _manager->Audit();
-   //if ( cont > 0  ) 
-   //  cout << "Falhou a auditoria... " <<  cont << endl;
 
 }
 
 /******** SolveRelaxation com restricao de area em baixo **********/
 // este codigo e inativo e devera ser checado
 
-void RGPLagrangianRelaxation::Relaxacao2(Solucao& sol, float& valor, float InitialCost) {
+void RGPLagrangianRelaxation::Relaxacao2(VariableSet& sol, float& valor, float InitialCost) {
 
 	int i = 0;
 	int area = ((RGPManager*)_manager)->Area();
@@ -270,7 +266,7 @@ void RGPLagrangianRelaxation::Relaxacao2(Solucao& sol, float& valor, float Initi
 
 // Virtual implementation that runs faster than the base class one
 // Both must give the same result.
-bool RGPLagrangianRelaxation::TemIntercessao(Solucao& solHeu, Variable* var) {
+bool RGPLagrangianRelaxation::TemIntercessao(VariableSet& solHeu, Variable* var) {
 
 	int veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY, hiX1, hiX2;
 	((RGPVariable*)var)->RetornaSegmentos(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY, hiX1, hiX2);

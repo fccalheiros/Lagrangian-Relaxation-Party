@@ -154,6 +154,11 @@ bool BBTree::StopTest() {
  
         if (UB < node->_upperBound) {
             node->_upperBound = UB;
+			node->_manager->StoreIncumbentfromBranchAndBound(lastNode->_manager->_incumbentSolution);
+            if (lastNode->_value == 1) {
+				node->_manager->AddToIncumbentfromBranchAndBound(node->_branchVariable);
+			}
+
             if ( (UB - node->_lowerBound) < _config->STOP_GAP) {
                 node->_optimalFound = true;
                 pruneSubTree(node);
@@ -217,7 +222,7 @@ void BBTree::ExecuteNextNode() {
     _nodes[_current]._lowerBound = _nodes[_current]._manager->getLowerBound();
     _nodes[_current]._upperBound = _nodes[_current]._manager->getUpperBound();
     _nodes[_current]._optimalFound = _nodes[_current]._manager->OptimalFound();
-    _nodes[_current]._originalBound = _nodes[_current]._manager->getBound();
+    _nodes[_current]._originalBound = _nodes[_current]._manager->getPrimalBound();
     _nodes[_current]._totalRunTime = _nodes[_current]._manager->TotalRunTime();
 
     int node = getFather(_current);

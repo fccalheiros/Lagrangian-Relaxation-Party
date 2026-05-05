@@ -101,7 +101,7 @@ void RGPManager::ReadProblem(char *arq) {
 void RGPManager::CreateProblem() {
     int i;
     size_t tamanho = static_cast<size_t>((_numPoints+1)*(_numPoints+1));
-    GridIter x1,y1,x2,y2, fimx, fimy;
+    GridIterator x1,y1,x2,y2, fimx, fimy;
 
     _constraints.reserve(tamanho + 1);
     for (i=0; i < tamanho; i++) 
@@ -156,7 +156,7 @@ void RGPManager::PostProblemCreationPriceOut() {
      cout << "Variables after price out: " << _colunas4 << endl;
 }
 
-bool RGPManager::VerificaTerminalDentro(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
+bool RGPManager::VerificaTerminalDentro(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2) {
     x1++;
     int y;
     for(; x1 != x2; x1 ++) {
@@ -168,7 +168,7 @@ bool RGPManager::VerificaTerminalDentro(GridIter x1, GridIter y1, GridIter x2, G
     return false;
 }
 
-bool RGPManager::VerificaTerminalNoCorner(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
+bool RGPManager::VerificaTerminalNoCorner(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2) {
     int y = _instancePoints.retornaY(*x1);
     if ( ( y == *y1) || (y == *y2) ) 
         return true;
@@ -181,7 +181,7 @@ bool RGPManager::VerificaTerminalNoCorner(GridIter x1, GridIter y1, GridIter x2,
     return false;
 }
 
-bool RGPManager::VerificaSteiners(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
+bool RGPManager::VerificaSteiners(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2) {
     int cpy1 = _instancePoints.retornaY(*x1);
     int cpy2 = _instancePoints.retornaY(*x2);
     int cpx1 = _instancePoints.retornaX(*y1);
@@ -237,7 +237,7 @@ void RGPManager::CalculaSegmentos(RGPVariable *var, int px1, int py1, int px2, i
 }
 
 
-void RGPManager::CreateVariable(GridIter x1, GridIter y1, GridIter x2, GridIter y2) {
+void RGPManager::CreateVariable(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2) {
     int custo = 0;
     int segHorizontal, segVertical;
   
@@ -311,7 +311,7 @@ void RGPManager::InsertVariableIntoConstraint(Variable *var1) {
 
 void RGPManager::PostGenerationConstraintsReduction() {
 
-    GridIter x, fimx;
+    GridIterator x, fimx;
     int y,Iy,Ix, index;
 
     _instancePoints.LimiteGridX(x,fimx);
@@ -360,7 +360,7 @@ void RGPManager::CustomProcessing() {
 
 
 int RGPManager::Guilhotina() {
-    GridIter x1,x2,y1,y2;
+    GridIterator x1,x2,y1,y2;
     _instancePoints.LimiteGridX(x1,x2);
     _instancePoints.LimiteGridY(y1,y2);
     return ( GuilhotinaRecursivo(*x1,*y1,*(--x2),*(--y2)) );
@@ -403,8 +403,8 @@ void RGPManager::PrintSolution(string filename) {
         fprintf(fp,"%d %d\n",(*it).first,(*it).second);
     }
 
-    VariableIterator vIt    = _best.begin();
-    VariableIterator vLast  = _best.end();
+    VariableIterator vIt    = _incumbentSolution.begin();
+    VariableIterator vLast  = _incumbentSolution.end();
   
     int x1,y1,x2,y2;
     for (;vIt != vLast; vIt++) {
@@ -420,7 +420,7 @@ void RGPManager::FinalStats() {
     RGPLagrangianRelaxation* l = (RGPLagrangianRelaxation*)_algo;
     cout << "Vezes 1  = " << l->_vezes1 << endl << "Vezes 2 = " << l->_vezes2 << endl;
     cout << "Fator Maior = " << l->_maximofator << endl;
-    cout << endl << "Best Solution Found: " << endl << PrintVariableVector(_best);
+    cout << endl << "Best Solution Found: " << endl << PrintVariableVector(_incumbentSolution);
 }
 
 string RGPManager::DefaultFilePrefix() {

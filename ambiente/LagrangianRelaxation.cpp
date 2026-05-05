@@ -94,7 +94,7 @@ void LagrangianRelaxation::ComputeLagrangianCosts(float & multiplierSum) {
 }
 
 // generic relaxation without any non dualized constraint
-void LagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float InitialCost) {
+void LagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float InitialCost) {
 
     ComputeLagrangianCosts(valor);
     valor += InitialCost;
@@ -131,7 +131,7 @@ void LagrangianRelaxation::SolveRelaxation(Solucao& sol, float& valor, float Ini
 
 
 
-void LagrangianRelaxation::UpdateSubgradient(Solucao &sol){ 
+void LagrangianRelaxation::UpdateSubgradient(VariableSet &sol){ 
     int i = 0;
     int var;
     ConstraintIterator rest,fim, restLixo;
@@ -230,7 +230,7 @@ void LagrangianRelaxation::UpdateSubgradient(Solucao &sol){
 /* Comeco da heuristica para obtencao de solucao viavel */
 /********************************************************/
 
-bool LagrangianRelaxation::TemIntercessao(Solucao &solHeu, Variable *var) {
+bool LagrangianRelaxation::TemIntercessao(VariableSet &solHeu, Variable *var) {
 
     for (unsigned int i=0; i < solHeu.size(); i++) {
 
@@ -250,7 +250,7 @@ void LagrangianRelaxation::InicializacoesHeuristica() {
 
 }
 
-bool LagrangianRelaxation::RunPrimalHeuristic(Solucao &solRel, Solucao &solHeu, float &valor, float InitialCost) {
+bool LagrangianRelaxation::RunPrimalHeuristic(VariableSet &solRel, VariableSet &solHeu, float &valor, float InitialCost) {
   
     //return false;
  
@@ -299,7 +299,7 @@ bool LagrangianRelaxation::RunPrimalHeuristic(Solucao &solRel, Solucao &solHeu, 
 }
 
 
-void LagrangianRelaxation::GenerateCuts(Solucao &solRel) {
+void LagrangianRelaxation::GenerateCuts(VariableSet &solRel) {
 
     if (!_config->CUT_GENERATION) return;
 
@@ -326,7 +326,7 @@ void LagrangianRelaxation::GenerateCuts(Solucao &solRel) {
     g.CicloImpar(_manager);
 }
 
-bool LagrangianRelaxation::Price(Solucao& relaxed) {
+bool LagrangianRelaxation::Price(VariableSet& relaxed) {
 
     if (! _manager->OptimalFound()) return false;
 
@@ -391,7 +391,7 @@ bool LagrangianRelaxation::PricingTrigger() {
 	return (_iteracoes % _config->ITERATIONS_COLUMN_GENERATION == 0); 
 }
 
-bool LagrangianRelaxation::ColumnGeneration(Solucao& relaxed, float& newLowerBound, float InitialCost) {
+bool LagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newLowerBound, float InitialCost) {
 	bool isAnyVariablePricedIn = false;
     const double EPS = 1e-6;
     VariableIterator bestVar;
@@ -479,13 +479,13 @@ Variable* LagrangianRelaxation::ChooseBranchVariableHighIncumbentCost() {
     VariableIterator vIt, vEnd, vSelected;
     VariableIterator vItAll, vEndAll;
 
-    if (_manager->_best.size() > 0) {
+    if (_manager->_incumbentSolution.size() > 0) {
 
-        sort(_manager->_best.begin(), _manager->_best.end(), GreaterCost <Variable*>());
+        sort(_manager->_incumbentSolution.begin(), _manager->_incumbentSolution.end(), GreaterCost <Variable*>());
 
         VariableIterator vIt, vEnd;
-        vIt = _manager->_best.begin();
-        vEnd = _manager->_best.end();
+        vIt = _manager->_incumbentSolution.begin();
+        vEnd = _manager->_incumbentSolution.end();
 
         for (; vIt != vEnd; vIt++) {
             _manager->GetActiveVariablesRange(vItAll, vEndAll);

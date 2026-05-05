@@ -88,10 +88,10 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
 
         //Insert the copied variable in best solution vector if it was in the source manager best solution.
 
-        VariableIterator bestSolutionIt = _best.begin();
-        for (; bestSolutionIt != _best.end(); bestSolutionIt++)
+        VariableIterator bestSolutionIt = _incumbentSolution.begin();
+        for (; bestSolutionIt != _incumbentSolution.end(); bestSolutionIt++)
             if ((*bestSolutionIt)->_nome == v->_nome) {
-                m->_best.push_back(v->CopyAndClean(NULL));
+                m->_incumbentSolution.push_back(v->CopyAndClean(NULL));
                 break;
             }
     }
@@ -224,8 +224,8 @@ void LagrangianManager::Solve(float InitialCost, float KnownBound ) {
     bool shouldStop = false;
     bool columnsAdded = false;
     bool primalFound;
-    Solucao relaxedSolution;
-    Solucao primalSolution;
+    VariableSet relaxedSolution;
+    VariableSet primalSolution;
     float relaxedValue;
     float primalValue;
 	float newLowerBound;
@@ -279,11 +279,11 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
     if (vBranch == vEnd) return;
 
     //remove branch variable from Primal Solution 
-    vIt = _best.begin();
-    vEnd = _best.end();
+    vIt = _incumbentSolution.begin();
+    vEnd = _incumbentSolution.end();
     for (; vIt != vEnd; vIt++) {
         if ((*vBranch)->_nome == (*vIt)->_nome) {
-            _best.erase(vIt);
+            _incumbentSolution.erase(vIt);
             break;
         }
     }
@@ -757,7 +757,7 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
     fflush(saida);
 }
 
-string LagrangianManager::PrintVariableVector(Solucao s) {
+string LagrangianManager::PrintVariableVector(VariableSet s) {
     stringstream work;
 
     VariableIterator vIt = s.begin();
@@ -900,17 +900,6 @@ void LagrangianManager::CleanUp() {
         _totalVariaveis -= _countFixedPartial;
         _countFixedPartial = 0;
     }
-}
-
-int LagrangianManager::Audit() {
-    int i;
-    int res = 0;
-    i = getActiveVariablesCount();
-    for ( ; i < (int) _variables.size() ; i++ ) {
-        if ( ! _variables[i]->IsFixed() ) 
-        res++;
-    }
-    return res;
 }
 
 void LagrangianManager::CleanupDeletedConstraints() {
@@ -1103,22 +1092,26 @@ void LagrangianManager::FinalStats() {
 
 }
 
-void LagrangianManager::StoreIncumbent(Solucao &sol) {
+void LagrangianManager::StoreIncumbent(VariableSet &sol) {
 
     VariableIterator It;
     
-    for (It = _best.begin(); It != _best.end(); It++)
+    for (It = _incumbentSolution.begin(); It != _incumbentSolution.end(); It++)
         delete* It;
 
-    _best.erase(_best.begin(), _best.end());
+    _incumbentSolution.erase(_incumbentSolution.begin(), _incumbentSolution.end());
 
     for (It = sol.begin(); It != sol.end(); It++)
-        _best.push_back((*It)->CopyAndClean(NULL));
+        _incumbentSolution.push_back((*It)->CopyAndClean(NULL));
 
 }
 
+void LagrangianManager::AddToIncumbent(Variable *var) {
+    _incumbentSolution.push_back(var->CopyAndClean(NULL));
+}
 
-void LagrangianManager::CheckConstraints(Solucao& sol) {
+
+void LagrangianManager::CheckConstraints(VariableSet& sol) {
 
     ConstraintIterator rest, fim, restLixo;
     VariableIterator vIt, vEnd;
