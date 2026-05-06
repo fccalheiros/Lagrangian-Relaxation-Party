@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Arquivos de Cabeçalho">
+    <Filter Include="Arquivos de Cabeï¿½alho">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
@@ -12,52 +12,55 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\ambiente\main.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\LagrangianManager.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\Variable.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\Constraint.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\restricao_hash.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\BBTree.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\RGPVariable.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\Points.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\LagrangianRelaxation.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\algoritmo.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\Time.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\RGPLagrangianRelaxation.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\grafo.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\RGPManager.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\Configuration.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\SortThreadPool.h">
-      <Filter>Arquivos de Cabeçalho</Filter>
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ambiente\PartitionedVector.h">
+      <Filter>Arquivos de Cabeï¿½alho</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

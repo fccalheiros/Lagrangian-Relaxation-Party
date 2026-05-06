@@ -273,7 +273,7 @@ bool LagrangianRelaxation::RunPrimalHeuristic(VariableSet &solRel, VariableSet &
     while ( ( !particao ) && ( !impossivel ) ) {
         if (valor > LS) return particao;
         var = *It;
-        if ( var->IsValid() ) {
+        if ( var->IsActive() ) {
             if ( ! TemIntercessao(solHeu,var) ) {
 	            solHeu.push_back(var);
 	            valor += var->getCost();

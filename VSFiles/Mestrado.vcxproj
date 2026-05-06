@@ -160,6 +160,7 @@
     <ClInclude Include="..\ambiente\Configuration.h" />
     <ClInclude Include="..\ambiente\grafo.h" />
     <ClInclude Include="..\ambiente\LagrangianRelaxation.h" />
+    <ClInclude Include="..\ambiente\PartitionedVector.h" />
     <ClInclude Include="..\ambiente\RGPLagrangianRelaxation.h" />
     <ClInclude Include="..\ambiente\main.h" />
     <ClInclude Include="..\ambiente\LagrangianManager.h" />

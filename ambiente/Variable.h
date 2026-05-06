@@ -49,7 +49,7 @@ class Variable {
 	void FixToZero() { _isFixedToZero = true; }
 	void UnFix() { _fixa = false; _isFixedToZero = false; }
 	bool IsFixed() const { return _fixa || _isFixedToZero; }
-	bool IsValid() const { return !_isFixedToZero && !_fixa; }
+	bool IsActive() const { return !_isFixedToZero && !_fixa && !_isPricedOut; }
 	void setPricedOut() { _isPricedOut = true; }
 	void unsetPricedOut() { _isPricedOut = false; }
 	bool IsPricedOut() const { return _isPricedOut; }
@@ -73,6 +73,40 @@ class Variable {
 
 	bool operator==(const Variable* v) { return this->_nome == v->_nome; }
 
+};
+
+struct VariablePartitionPolicy {
+
+	void OnMoveToFixed(Variable* v) {
+		v->FixToZero();
+		v->unsetPricedOut();
+	}
+
+	void OnMoveToActive(Variable* v) {
+		v->UnFix();
+		v->unsetPricedOut();
+	}
+
+	void OnMoveToPricedOut(Variable* v) {
+		v->setPricedOut();
+		v->UnFix();
+	}
+
+	void OnCommit(Variable* v) {
+		v->ClearCommitMark();
+	}
+
+	bool IsActive(Variable* v) const {
+		return v->IsActive();
+	}
+
+	bool IsFixed(Variable* v) const {
+		return v->IsFixed();
+	}
+
+	bool IsPricedOut(Variable* v) const {
+		return v->IsPricedOut();
+	}
 };
 
 #endif
