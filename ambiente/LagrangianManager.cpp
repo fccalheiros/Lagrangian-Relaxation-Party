@@ -99,8 +99,7 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
     //cuts are not copied
 
     m->setUpperBound(getUpperBound());
-    m->_activeVariablesEnd = m->_variables.end();
-    m->_zeroFixedVariablesEnd = m->_variables.end();
+    m->_variables.InitAllActive();
 
     return m;
 }
@@ -142,13 +141,10 @@ void LagrangianManager::FreeMemory() {
         delete* proLixo;
     }
 
-    vector <Variable*>().swap(_variables);
+    _variables.clear();
     vector<Constraint*>().swap(_constraints);
     vector<Constraint*>().swap(_constraintsND);
     vector<Constraint*>().swap(_cuts);
-
-    _activeVariablesEnd = _variables.end();
-    _zeroFixedVariablesEnd = _variables.end();
 
 }
 
@@ -164,8 +160,7 @@ void LagrangianManager::GenerateProblem(char* arq) {
 void LagrangianManager::FinalizeProblemCreation() {
 
     _variables.shrink_to_fit();
-    _activeVariablesEnd = _variables.end();
-    _zeroFixedVariablesEnd = _variables.end();
+    _variables.InitAllActive();
 
     CleanupDeletedConstraints();
 
@@ -360,11 +355,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
             _constraintsND[i]->_index = i;
         }
 
-        _activeVariablesEnd    = _variables.end();
-
-        // It is not clear whether all fixed variables have been removed at this point.
-        // If not, they may become part of the active set after branching.
-		_zeroFixedVariablesEnd = _variables.end();
+		_variables.InitAllActive();
 
     }
 
@@ -373,10 +364,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
 
 
 void LagrangianManager::FixVariable(VariableIterator var) {
-    (*var)->FixToZero();
-    _activeVariablesEnd--;
-    iter_swap(var,_activeVariablesEnd);
-
+    _variables.MoveActiveToFixed(var);
     _countFixed++;
     _countFixedPartial++;
 }
@@ -385,57 +373,25 @@ void LagrangianManager::UnfixVariable(VariableIterator var) {
     auto* v = *var;
 
     // Do nothing if variable is not fixed
-    if (!v->IsFixed())
-        return;
+    if (!v->IsFixed()) return;
 
-    v->UnFix();
-
-    // Move variable into the active region
-    auto it = _activeVariablesEnd;
-    iter_swap(var, it);
-
-    // Expand active region
-    ++_activeVariablesEnd;
+    _variables.MoveFixedToActive(var);
 
     _countFixed--;
     _countFixedPartial--;
 }
 
 void LagrangianManager::PriceOutVariable(VariableIterator var) {
-    (*var)->setPricedOut();
-
-    // Move variable out of the active region
-    _activeVariablesEnd--;
-    iter_swap(var, _activeVariablesEnd);
-
-    // After the swap, the target variable is now at _activeVariablesEnd
-    auto it = _activeVariablesEnd;
-
-    // Move variable from zero-fixed region into priced-out region
-    _zeroFixedVariablesEnd--;
-    iter_swap(it, _zeroFixedVariablesEnd);
+    _variables.MoveActiveToPricedOut(var);
 }
 
 void LagrangianManager::PriceInVariable(VariableIterator var) {
     auto* v = *var;
 
     // Do nothing if variable is not priced-out
-    if (!v->IsPricedOut())
-        return;
-    v->unsetPricedOut();
+    if (!v->IsPricedOut()) return;
 
-    // Step 1: move from priced-out into zero-fixed region
-    auto itZF = _zeroFixedVariablesEnd;
-    iter_swap(var, itZF);
-    ++_zeroFixedVariablesEnd;
-
-    // After swap, variable is now at previous zeroFixed end
-    auto it = prev(_zeroFixedVariablesEnd);
-
-    // Step 2: move from zero-fixed into active region
-    auto itActive = _activeVariablesEnd;
-    iter_swap(it, itActive);
-    ++_activeVariablesEnd;
+    _variables.MovePricedOutToActive(var);
 }
 
 void LagrangianManager::MarkVariableForPriceIn(VariableIterator var) {
@@ -447,61 +403,24 @@ void LagrangianManager::MarkVariableForPriceOut(VariableIterator var) {
 
 void LagrangianManager::CommitPriceIn() {
 
-    VariableIterator vFirst, vLast, selectedEnd;
-    vFirst = _zeroFixedVariablesEnd;
-    vLast = _variables.end();
-
-    selectedEnd = stable_partition(
-        vFirst,
-        vLast,
+    auto count = _variables.CommitPriceIn(
         [](Variable* v) {
             return v->ShouldBeCommited();
         }
     );
-    rotate(
-        _activeVariablesEnd,
-        vFirst,
-        selectedEnd
-    );
 
-    auto count = distance(vFirst, selectedEnd);
     cout << "Commited Price In Variables: " << count << endl;
-    _activeVariablesEnd += count;
-    _zeroFixedVariablesEnd += count;
-
-    for ( GetActiveVariablesRange(vFirst, vLast); vFirst != vLast; vFirst++) {
-        (*vFirst)->ClearCommitMark();
-	}
 }
 
 void LagrangianManager::CommitPriceOut() {
 
-    VariableIterator aBegin = _variables.begin();
-    VariableIterator aEnd = _activeVariablesEnd;
-
-    auto remainingEnd = std::stable_partition(
-        aBegin,
-        aEnd,
+    auto count = _variables.CommitPriceOut(
         [](Variable* v) {
-            return !v->ShouldBeCommited();
+            return v->ShouldBeCommited();
         }
     );
 
-    auto count = distance(remainingEnd, aEnd);
-
-    rotate(
-        remainingEnd,
-        aEnd,
-        _variables.end()
-    );
-
-    _activeVariablesEnd = remainingEnd;
-    _zeroFixedVariablesEnd -= count;
-
-
-    for (auto it = _zeroFixedVariablesEnd; it != _variables.end(); ++it) {
-        (*it)->ClearCommitMark();
-    }
+    cout << "Commited Price Out Variables: " << count << endl;
 }
 
 void LagrangianManager::InsertVariable(Variable *var) {
@@ -581,17 +500,20 @@ void LagrangianManager::RemoveCut(ConstraintIterator &it) {
 
 void LagrangianManager::GetActiveVariablesRange(VariableIterator& begin, VariableIterator& end   )
 {
-    begin = _variables.begin();    
-    end = _activeVariablesEnd;
+    auto range = _variables.ActiveRange();
+    begin = range.first;
+    end = range.second;
 }
 void LagrangianManager::GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end) {
-    begin = _activeVariablesEnd;
-	end = _zeroFixedVariablesEnd;
+    auto range = _variables.FixedRange();
+    begin = range.first;
+    end = range.second;
 }
 
 void LagrangianManager::GetPricedOutVariablesRange(VariableIterator& begin, VariableIterator& end) {
-    begin = _zeroFixedVariablesEnd;
-    end = _variables.end();
+    auto range = _variables.PricedOutRange();
+    begin = range.first;
+    end = range.second;
 }
 
 void LagrangianManager::GetConstraintRange(ConstraintIterator &begin, ConstraintIterator &end){
@@ -1028,8 +950,7 @@ void LagrangianManager::CleanUpProblem() {
             break;
     }
  
-    _activeVariablesEnd = _variables.end();
-	_zeroFixedVariablesEnd = _variables.end();
+    _variables.InitAllActive();
 
     GetCutsRange(cIt, cItEnd);
     finish = (cIt == cItEnd);

@@ -409,7 +409,7 @@ void RGPManager::PrintSolution(string filename) {
     int x1,y1,x2,y2;
     for (;vIt != vLast; vIt++) {
         ((RGPVariable *)(*vIt))->retRetangulo(x1,y1,x2,y2);
-        fprintf(fp, "x%d -", (*vIt)->getName());
+        fprintf(fp, "x%d - ", (*vIt)->getName());
         fprintf(fp,"%d %d %d %d\n",x1,y1,x2,y2);
     }
     fclose(fp);

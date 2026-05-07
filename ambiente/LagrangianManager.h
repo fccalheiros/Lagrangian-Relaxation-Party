@@ -17,11 +17,15 @@ using namespace std;
 #include "Constraint.h"
 #include "algoritmo.h"
 #include "SortThreadPool.h"
+#include "PartitionedVector.h"
 
 // =====================
 // Type aliases
 // =====================
-typedef vector<Variable*>::iterator VariableIterator;
+
+using VariableVector = PartitionedVector<Variable*, VariablePartitionPolicy>;
+using VariableIterator = VariableVector::iterator;
+
 typedef vector<Constraint*>::iterator ConstraintIterator;
 
 // =====================
@@ -56,7 +60,8 @@ public:
     // ========================================================
     // Core data
     // ========================================================
-    vector<Variable*> _variables;
+    
+    VariableVector _variables;
 
     vector<Constraint*> _constraints;
     vector<Constraint*> _constraintsND;
@@ -99,16 +104,6 @@ private:
     // ========================================================
     float _upperBound;
     float _lowerBound;
-
-    // ========================================================
-    // Variable partition (CRITICAL STRUCTURE)
-    //
-    // [begin, _activeVariablesEnd)         -> active
-    // [_activeVariablesEnd, _zeroFixedVariablesEnd) -> fixed zero
-    // [_zeroFixedVariablesEnd, end)       -> priced out
-    // ========================================================
-    VariableIterator _activeVariablesEnd;
-    VariableIterator _zeroFixedVariablesEnd;
 
 protected:
     
@@ -225,17 +220,9 @@ public:
     // ========================================================
     // Ranges
     // ========================================================
-    int getActiveVariablesCount() {
-        return static_cast<int>(distance(_variables.begin(), _activeVariablesEnd));
-    }
-
-    int getZeroFixedVariablesCount() {
-        return static_cast<int>(distance(_activeVariablesEnd, _zeroFixedVariablesEnd));
-    }
-
-    int getPricedOutVariablesCount() {
-        return static_cast<int>(distance(_zeroFixedVariablesEnd, _variables.end()));
-    }
+    int getActiveVariablesCount()    { return _variables.ActiveCount();    }
+    int getZeroFixedVariablesCount() { return _variables.FixedCount();     }
+    int getPricedOutVariablesCount() { return _variables.PricedOutCount(); }
 
     void GetActiveVariablesRange(VariableIterator& begin, VariableIterator& end);
     void GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end);
