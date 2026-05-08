@@ -1,9 +1,12 @@
 // Mestrado.cpp : Main function resides here
 //
+#ifndef _HAS_STD_BYTE
+#define _HAS_STD_BYTE 0
+#endif
 
 #include <iostream>
 #include <string>
-using namespace std;
+
 
 #include "../ambiente/main.h"
 
@@ -16,18 +19,15 @@ int main(int argc, char* argv[])
     string str1 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\Configuration.json";
     argv[2] = &str1[0];
 #endif
-    //__try {
+
         try {
             return originalMain(argc, argv);
         }
         catch (exception& e) {
-            cout << e.what() << endl << std::flush;
+            std::cout << e.what() << endl << std::flush;
 
         }
-    //}
-    //__except (EXCEPTION_EXECUTE_HANDLER) {
-    //    cout << "An unexpected error occurred." << std::hex << GetExceptionCode() << std::dec << endl << flush;
-    //}
+
 }
 
 // Executar programa: Ctrl + F5 ou Menu Depurar > Iniciar Sem Depuração

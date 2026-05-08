@@ -1,6 +1,10 @@
 #ifndef _RGPManager_H
 #define _RGPManager_H
 
+#ifndef _HAS_STD_BYTE
+#define _HAS_STD_BYTE 0
+#endif
+
 #include "LagrangianManager.h"
 #include "Points.h"
 #include "RGPVariable.h"

@@ -17,11 +17,13 @@ class Algoritmo {
   
   LagrangianManager * _manager;
   Configuration * _config;
+  Timer _timer;
 
  public:
 
   long int _tempoInicio;
   clock_t  _tempoInicioCpu;
+  
 
   long int _tempoFinal;
   clock_t _tempoFinalCpu;
@@ -49,7 +51,7 @@ class Algoritmo {
 
   virtual Algoritmo* getNew() { return new Algoritmo(_config);  }
 
-  inline float TotalRunTime() const { return ElapsedTime(_tempoInicio, _tempoFinal); }
+  inline double TotalRunTime() const { return _timer.ElapsedSeconds(); }
 
 };
 

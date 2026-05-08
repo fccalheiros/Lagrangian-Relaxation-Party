@@ -1,10 +1,9 @@
-#include <stdio.h>
-#include <algorithm>
-
 #include "LagrangianRelaxation.h"
 #include "Constraint.h"
 #include "grafo.h"
 
+#include <stdio.h>
+#include <algorithm>
 
 /************ Comeco da LagrangianRelaxation *********************/
 
@@ -102,8 +101,6 @@ void LagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float
 
     bool naoOrdena = (_iteracoes > 100) && ((_iteracoes % 2) == 0);
 
-    cout << valor << " ** ";
-
     VariableIterator vIt, vEnd;
     _manager->GetActiveVariablesRange(vIt, vEnd);
 
@@ -126,7 +123,7 @@ void LagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float
         
     }
 
-    cout << valor << endl << endl;
+    cout << endl;
 }
 
 

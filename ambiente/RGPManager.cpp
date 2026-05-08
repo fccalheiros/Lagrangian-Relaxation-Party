@@ -351,9 +351,6 @@ void RGPManager::CustomProcessing() {
         _JaImprimiu = true;
 
         cout << "Gerou arquivo com lp reduzido" << endl;
-        cout << TempoPassado(_algo->_tempoInicio) << endl;
-        cout << TempoCpuPassado(_algo->_tempoInicioCpu) << endl;
-        cout << TempoCpuAtual << endl;
 
     }
 }

@@ -2,14 +2,15 @@
 #define ARVOREBB_H
 
 #define _CRT_SECURE_NO_WARNINGS
+#define _HAS_STD_BYTE 0
 
 #include <vector> 
 #include <iostream>
 #include <string>
 
+#include "algoritmo.h"
 #include "Variable.h"
 #include "LagrangianManager.h"
-#include "algoritmo.h"
 #include "Configuration.h"
 
 enum class SearchAlgorithm { DFS, BFS, NONE };
@@ -44,7 +45,7 @@ class BBTreeNode {
     bool _executed;
     bool _pruned;
 
-    float _totalRunTime;
+    double _totalRunTime;
 
     LagrangianManager* _manager;
     Algoritmo* _algo;

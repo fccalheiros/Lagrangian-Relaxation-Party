@@ -1,6 +1,10 @@
 #ifndef GRAFO_H
 #define GRAFO_H
 
+#ifndef _HAS_STD_BYTE
+#define _HAS_STD_BYTE 0
+#endif
+
 #include <map>
 #include <list>
 #include <vector>

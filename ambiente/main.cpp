@@ -1,14 +1,13 @@
-#include <fstream>
-
 #include "main.h"
+
 #include "Configuration.h"
 #include "RGPManager.h"
 #include "RGPLagrangianRelaxation.h"
 #include "grafo.h"
 
-long int tempoInicio;
-clock_t  tempoInicioCpu;
+#include <fstream>
 
+Timer globalTimer;
 
 int originalMain (int argc, char * argv[]) {
 
@@ -57,23 +56,18 @@ int originalMain (int argc, char * argv[]) {
 }
 
 static void StartStats() {
-    tempoInicio = TempoAtual();
-    tempoInicioCpu = TempoCpuAtual();
+	globalTimer.Reset();    
     cout << "------------------------------------------------------------------------------- " << endl;
-    cout << "Branch & Bound starting stats" << endl;
-    cout << "   Starting time: " << tempoInicio << endl;
-    cout << "   CPU starting time: " << tempoInicioCpu << endl;
-    cout << "   CLOCKS_PER_SEC: " << CLOCKS_PER_SEC << endl;
+    cout << "Branch & Bound starting " << endl;
     cout << "------------------------------------------------------------------------------- " << endl;
 }
 static void EndStats() {
-
+    cout << fixed << setprecision(3);
     cout << endl;
     cout << "------------------------------------------------------------------------------- " << endl;
     cout << "Branch & Bound finish stats" << endl;
-    cout << "   Execution time: " << TempoPassado(tempoInicio) << endl;
-    cout << "   CPU time: " << TempoCpuPassado(tempoInicioCpu) << endl;
-    cout << "   Current CPU time: " << TempoCpuAtual() << endl;
+    cout << "   Execution time: " << globalTimer.ElapsedSeconds()  << endl;
+    cout << "   CPU time: " << globalTimer.CpuElapsedSeconds() << endl;
     cout << "------------------------------------------------------------------------------- " << endl;
     cout << std::flush;
 }

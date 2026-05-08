@@ -3,6 +3,11 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+#ifndef _HAS_STD_BYTE
+#define _HAS_STD_BYTE 0
+#endif
+
+
 using namespace std;
 
 #include <stdio.h>
@@ -269,7 +274,7 @@ public:
     void PrintLagrangian();
     virtual void PrintSolution() {};
     virtual void FinalStats();
-    inline float TotalRunTime() const { return _algo->TotalRunTime(); }
+    inline double TotalRunTime() const { return _algo->TotalRunTime(); }
 
     inline virtual string DefaultFilePrefix() { return "LagrangianManager"; }
 

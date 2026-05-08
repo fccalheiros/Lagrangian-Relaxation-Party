@@ -1,6 +1,10 @@
 #ifndef __MAIN_H
 #define __MAIN_H
 
+#ifndef _HAS_STD_BYTE
+#define _HAS_STD_BYTE 0
+#endif
+
 #include <stdlib.h>
 #include <iostream>
 

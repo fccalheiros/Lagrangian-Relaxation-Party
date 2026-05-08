@@ -74,7 +74,6 @@
     <ClCompile Include="..\ambiente\RGPLagrangianRelaxation.cpp" />
     <ClCompile Include="..\ambiente\LagrangianRelaxation.cpp" />
     <ClCompile Include="..\ambiente\algoritmo.cpp" />
-    <ClCompile Include="..\ambiente\Time.cpp" />
     <ClCompile Include="..\ambiente\RGPVariable.cpp" />
     <ClCompile Include="..\ambiente\Variable.cpp" />
     <ClCompile Include="..\ambiente\Constraint.cpp" />

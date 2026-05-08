@@ -44,14 +44,13 @@ void RGPLagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, fl
 	}
 
 	sol.reserve(Cardinality);
-	cout << valor << " ** ";
 
 	for (i = 0; i < Cardinality; i++) {
 		Variable* var = (Variable*)(_manager->_variables[i]);
 		sol.push_back(var);
 		valor += var->_valorLag;
 	}
-	cout << valor << endl << endl;
+	cout << endl;
 }
 
 bool RGPLagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newLowerBound, float InitialCost) {
@@ -129,8 +128,11 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 	float LI = _manager->getLowerBound();
 	float LS = _manager->getUpperBound();
 	
-	cout << _iteracoes << " : " << LS << " --- " << LI << " --- " << valor << " ---> " << _alfa << endl;
-	cout << "Variables : " << _manager->_countFixed << " " << _manager->getActiveVariablesCount() << " " << _manager->_variables.size() << endl;
+	cout << _iteracoes << " : " << LS << " --- " << LI 
+		<< " --- " << _somaMultiplicadores + InitialCost << " --- " << valor 
+		<< " ---> " << _alfa << endl;
+	cout << "Variables : " << _manager->_countFixed << " " 
+<< _manager->getActiveVariablesCount() << " " << _manager->_variables.size() << endl;
 
 
 	if ( valor < LI ) 
