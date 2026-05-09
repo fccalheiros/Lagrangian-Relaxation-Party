@@ -5,6 +5,8 @@
 #define _HAS_STD_BYTE 0
 #endif
 
+#include <string>
+
 #include "LagrangianManager.h"
 #include "Points.h"
 #include "RGPVariable.h"
@@ -46,9 +48,9 @@ class RGPManager : public LagrangianManager {
     virtual void Solve(float InitialCost, float KnownBound);
     inline int Area() { return (_gridSize*_gridSize); }; 
 
-    inline virtual string DefaultFilePrefix();
+    inline virtual std::string DefaultFilePrefix();
     int getCardinality() { return _numPoints + 1; };
-    virtual void PrintSolution(string filename);
+    virtual void PrintSolution(std::string filename);
 
   
  protected:
@@ -97,4 +99,6 @@ class RGPManager : public LagrangianManager {
   
 };
 #endif
+
+
 

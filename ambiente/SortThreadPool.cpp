@@ -2,7 +2,7 @@
 #include "Windows.h"
 #include <sstream>
 
-using namespace std;
+
 
 SortThreadPool::SortThreadPool() : stop(false) {
     Initialize(std::thread::hardware_concurrency());

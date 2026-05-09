@@ -29,13 +29,13 @@ class Grafo {
 
  protected:
 
-	map <Variable*, int, lessVariavel <Variable*>> _nosVariaveis;
+	std::map <Variable*, int, lessVariavel <Variable*>> _nosVariaveis;
 
-	vector <GraphNode> _infoNos;
-	vector <Variable *> _nos;
-	list <int> _dfsPath;
+	std::vector <GraphNode> _infoNos;
+	std::vector <Variable *> _nos;
+	std::list <int> _dfsPath;
 
-	vector < vector < int > > _arestas;
+	std::vector < std::vector < int > > _arestas;
 
 	short int _proximo;
 	short int _numeroNos;
@@ -68,3 +68,5 @@ class Grafo {
 };
 
 #endif
+
+

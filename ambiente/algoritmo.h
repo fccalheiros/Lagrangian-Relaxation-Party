@@ -7,7 +7,7 @@
 #include "Time.h"
 #include "Configuration.h"
 
-typedef vector<Variable *> VariableSet;
+typedef std::vector<Variable *> VariableSet;
 
 class LagrangianManager;
 

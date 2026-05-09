@@ -50,14 +50,14 @@ void RGPLagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, fl
 		sol.push_back(var);
 		valor += var->_valorLag;
 	}
-	cout << endl;
+	std::cout << std::endl;
 }
 
 bool RGPLagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newLowerBound, float InitialCost) {
 
 	bool isAnyVariablePricedIn = false;
 	const double EPS = 1e-6;
-	priority_queue<float> heap;
+	std::priority_queue<float> heap;
 	float RelaxedSolutionCost = 0.0;
 	float limit = 0.0;
 	float bestRC;
@@ -94,7 +94,7 @@ bool RGPLagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newL
 			}
 
 			if (var->_valorLag < limit - EPS) {
-				cout << "x" << var->getName() << " : " << var->getCost() << " -> " << var->_valorLag << endl;
+				std::cout << "x" << var->getName() << " : " << var->getCost() << " -> " << var->_valorLag << std::endl;
 				var->logicalPriceIn();
 				isAnyVariablePricedIn = true;
 			}
@@ -128,11 +128,11 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 	float LI = _manager->getLowerBound();
 	float LS = _manager->getUpperBound();
 	
-	cout << _iteracoes << " : " << LS << " --- " << LI 
+	std::cout << _iteracoes << " : " << LS << " --- " << LI 
 		<< " --- " << _somaMultiplicadores + InitialCost << " --- " << valor 
-		<< " ---> " << _alfa << endl;
-	cout << "Variables : " << _manager->_countFixed << " " 
-<< _manager->getActiveVariablesCount() << " " << _manager->_variables.size() << endl;
+		<< " ---> " << _alfa << std::endl;
+	std::cout << "Variables : " << _manager->_countFixed << " " 
+<< _manager->getActiveVariablesCount() << " " << _manager->_variables.size() << std::endl;
 
 
 	if ( valor < LI ) 
@@ -144,7 +144,7 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 	if ( ( LS - valor)  < (float)_config->STOP_GAP ) 
 			return;
 
-	cout << "** Fixa Variaveis **" << endl;
+	std::cout << "** Fixa Variaveis **" << std::endl;
 
 	if (! _ordenou)  {
 		_manager->Ordena3( CompareLagrangian <Variable *> () );
@@ -159,7 +159,7 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 	//float V2 = LS - (valor - _manager->GetMaxLagrangian(solRel)) - _config->STOP_GAP;
 	VariableIterator vIt, vDummy;
 	_manager->GetActiveVariablesRange(vDummy, vIt);
-	size_t InitialTotal = distance(vDummy, vIt);
+	size_t InitialTotal = std::distance(vDummy, vIt);
 	
 	int CardinalityRestriction =  ((RGPManager*)_manager)->getCardinality();  
 	VariableIterator var,varFim,varTeste, varFimTeste, varInicioTeste, varTesteAnt;   
@@ -172,7 +172,7 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 	_manager->GetActiveVariablesRange(varTeste,varFimTeste);
 	varInicioTeste  = varTeste;
 	varTesteAnt     = varFimTeste;
-	size_t total    = distance(varTeste, varFimTeste);
+	size_t total    = std::distance(varTeste, varFimTeste);
 	float passo     = _config->STEP_TRY_FIX;
 	float acumulado = passo;
 	bool fixou      = true;
@@ -207,8 +207,8 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 			}
 			else {
 				if (contaVar != CardinalityRestriction) {
-					cout << "Dif2: " ;
-					cout << "x" << vTeste->_nome << " ++ " << soma << " ++ " << contaVar << " ++ " << valor << endl;
+					std::cout << "Dif2: " ;
+					std::cout << "x" << vTeste->_nome << " ++ " << soma << " ++ " << contaVar << " ++ " << valor << std::endl;
 				}
 				varTeste++;  	
 			}
@@ -216,19 +216,19 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 	} // end while
 
    if ( contaFixadas > 0 ) {
-		cout << "Fixadas: " << contaFixadas << endl;
+		std::cout << "Fixadas: " << contaFixadas << std::endl;
 		float porc = (float)((float)contaFixadas/(float)InitialTotal); 
 		if ( porc > _maximofator ) { 
 			_maximofator = porc;
-			cout << "Maior porcentual " << porc << endl;
+			std::cout << "Maior porcentual " << porc << std::endl;
 		}
-		else cout << "Porcentual " << porc << endl;
+		else std::cout << "Porcentual " << porc << std::endl;
 		if ( _primeira ) { 
-			cout << "Primeira Fixacao - Fator =  " << LI/LS << endl; 
+			std::cout << "Primeira Fixacao - Fator =  " << LI/LS << std::endl; 
 			_primeira = false;
 		 }
    }
-   cout << "Total: " << InitialTotal << endl;
+   std::cout << "Total: " << InitialTotal << std::endl;
 
 }
 
@@ -260,8 +260,8 @@ void RGPLagrangianRelaxation::Relaxacao2(VariableSet& sol, float& valor, float I
 			valor += _valorFracionario * _manager->_variables[i]->_valorLag;
 		}
 	}
-	//cout << endl;
-	//cout << "TAMANHO :" << sol.size() << endl;
+	//std::cout << std::endl;
+	//std::cout << "TAMANHO :" << sol.size() << std::endl;
 }
 
 

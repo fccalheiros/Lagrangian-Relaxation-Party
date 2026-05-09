@@ -2,7 +2,7 @@
 #include "Constraint.h"
 
 
-typedef map <Variable*, int, lessVariavel <Variable*>>::iterator GraphNodeIterator;
+typedef std::map <Variable*, int, lessVariavel <Variable*>>::iterator GraphNodeIterator;
 
 int contacortes = 0;
 
@@ -98,8 +98,8 @@ void Grafo::DFS(int no) {
   int prof;
   int noTeste;
 
-  list <int> fila;  
-  vector <bool> marca ( _numeroNos);
+  std::list <int> fila;  
+  std::vector <bool> marca ( _numeroNos);
 
   for (indice=0; indice < _numeroNos; indice++) { 
      marca[indice] = false;
@@ -147,7 +147,7 @@ void Grafo::Clique(LagrangianManager *mestre, int Minimo) {
         _aumentou = false;
     }
 
-    vector <bool> marca( _numeroNos );
+    std::vector <bool> marca( _numeroNos );
     Constraint* cut;
     bool fim = false;
 
@@ -182,7 +182,7 @@ void Grafo::Clique(LagrangianManager *mestre, int Minimo) {
         marca[maior] = true;
         tamanho = 1;
 
-        //cout << "Escolhido: " << maior->getName() << " " << indice << endl;
+        //std::cout << "Escolhido: " << maior->getName() << " " << indice << std::endl;
 
         for (indice = 0; indice < _arestas[maior].size(); indice++) {
             candidata = _arestas[maior][indice];
@@ -269,38 +269,41 @@ void Grafo::Imprime() {
         _aumentou = false;
     }
 
-    cout << _numeroNos << endl;
+    std::cout << _numeroNos << std::endl;
     unsigned int i = 0;
     unsigned int iFim = _numeroNos; 
-    vector <int>::iterator itVizinhos, itVizinhosFim;
+    std::vector <int>::iterator itVizinhos, itVizinhosFim;
 
     for (; i < iFim; i++) {
-        cout << _nos[i]->getName() << " --- ";
+        std::cout << _nos[i]->getName() << " --- ";
         itVizinhos    = _arestas[i].begin();
         itVizinhosFim = _arestas[i].end();
         for (; itVizinhos != itVizinhosFim; itVizinhos++) {
-            cout << _nos[*itVizinhos]->getName() << " ";
+            std::cout << _nos[*itVizinhos]->getName() << " ";
         }
-        cout << _arestas[i].size() << " " << i << " " << iFim << endl;
+        std::cout << _arestas[i].size() << " " << i << " " << iFim << std::endl;
     }
 
 }
 
 void Grafo::ImprimeNos() {
     for (unsigned int k = 0 ; k < (unsigned int)_numeroNos; k++ ) 
-        cout << _nos[k]->getName() << " " << _infoNos[k]._pai << " ";
-    cout << endl;
+        std::cout << _nos[k]->getName() << " " << _infoNos[k]._pai << " ";
+    std::cout << std::endl;
 }
 
 void Grafo::ImprimeDFS() {
   Imprime();
   int no;
-  list <int>::const_iterator it;
+  std::list <int>::const_iterator it;
   
   for (it = _dfsPath.begin(); it != _dfsPath.end(); it++ ) {
     no = *it;
-    cout << _nos[no]->getName() << " " << no << " " << _infoNos[no]._nivel << " " << _infoNos[no]._pai << endl;
+    std::cout << _nos[no]->getName() << " " << no << " " << _infoNos[no]._nivel << " " << _infoNos[no]._pai << std::endl;
   }
 
 
 }
+
+
+

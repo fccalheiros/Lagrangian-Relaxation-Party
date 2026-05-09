@@ -71,7 +71,7 @@ void RGPVariable::retRetangulo(int &x1, int &y1, int &x2, int &y2) {
 }
 
 void RGPVariable::ImprimeRetangulo() {
-  cout << _x1 << " " << _y1 << " " << _x2 << " " << _y2;
+  std::cout << _x1 << " " << _y1 << " " << _x2 << " " << _y2;
 }
 
 

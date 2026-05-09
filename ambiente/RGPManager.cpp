@@ -3,8 +3,9 @@
 #include "RGPLagrangianRelaxation.h"
 
 #include <stdio.h>
+#include <tuple>
 
-using namespace std;
+
 
 RGPManager::RGPManager(Configuration* config)
     : RGPManager(config, nullptr, Direction::MINIMIZE) 
@@ -92,7 +93,7 @@ void RGPManager::ReadProblem(char *arq) {
 
     _instancePoints.FinalizaGrid(0,_gridSize,0,_gridSize);
 
-    cout << _instancePoints.Print();
+    std::cout << _instancePoints.Print();
 
 	ExtractInstanceNumber(arq);
     
@@ -131,14 +132,14 @@ void RGPManager::CreateProblem() {
     char msg[20] = "";
     sprintf(msg, "%10.0f", _nonZeroCount);
 
-    cout << endl;
-    cout << "Points: " << _numPoints << endl;
-    cout << "Original Variables: " << _colunas << endl;
-    cout << "Variables after first reduction: " << _colunas2 << endl;
-    cout << "Variables after second reduction: " << _colunas3 << endl; 
-    cout << "Starting Variables: " << _colunas4 << endl; 
-    cout << "Constraints: " << _constraints.size() << endl;
-    cout << "Not Nulls: " << msg << endl;
+    std::cout << std::endl;
+    std::cout << "Points: " << _numPoints << std::endl;
+    std::cout << "Original Variables: " << _colunas << std::endl;
+    std::cout << "Variables after first reduction: " << _colunas2 << std::endl;
+    std::cout << "Variables after second reduction: " << _colunas3 << std::endl; 
+    std::cout << "Starting Variables: " << _colunas4 << std::endl; 
+    std::cout << "Constraints: " << _constraints.size() << std::endl;
+    std::cout << "Not Nulls: " << msg << std::endl;
 
     _totalVariaveis = _colunas4;
 }
@@ -153,7 +154,7 @@ void RGPManager::PostProblemCreationPriceOut() {
 		 }
 	 }
 	 _totalVariaveis = _colunas4;
-     cout << "Variables after price out: " << _colunas4 << endl;
+     std::cout << "Variables after price out: " << _colunas4 << std::endl;
 }
 
 bool RGPManager::VerificaTerminalDentro(GridIterator x1, GridIterator y1, GridIterator x2, GridIterator y2) {
@@ -315,8 +316,8 @@ void RGPManager::PostGenerationConstraintsReduction() {
     int y,Iy,Ix, index;
 
     _instancePoints.LimiteGridX(x,fimx);
-    cout << endl;
-    cout << "Eliminated Constraints." << endl;
+    std::cout << std::endl;
+    std::cout << "Eliminated Constraints." << std::endl;
 
     for (x ++; x != ( fimx-1 ) ; x++) {
         y =  _instancePoints.retornaY(*x);
@@ -326,7 +327,7 @@ void RGPManager::PostGenerationConstraintsReduction() {
         index = (_numPoints + 1)*Iy + Ix;
 		// delegate memory managemenet to the base class, just mark the constraint for deletion
         _constraints[index]->LogicalDelete();
-        cout << "Indice: " << index << " " << *x << " " << y << endl;
+        std::cout << "Indice: " << index << " " << *x << " " << y << std::endl;
     }
 
 } 
@@ -343,14 +344,14 @@ void RGPManager::Solve(float InitialCost, float KnownBound) {
 void RGPManager::CustomProcessing() {
     if ( (!_JaImprimiu) && (  _colunas3 - _countFixed < 50000 ) )  {
 
-        string file = DefaultFilePrefix() + ".lp";
+        std::string file = DefaultFilePrefix() + ".lp";
         FILE *saida = fopen(file.c_str(),"w");
         ImprimeLP(saida);
         fclose(saida);
 
         _JaImprimiu = true;
 
-        cout << "Gerou arquivo com lp reduzido" << endl;
+        std::cout << "Gerou arquivo com lp reduzido" << std::endl;
 
     }
 }
@@ -387,7 +388,7 @@ int RGPManager::GuilhotinaRecursivo(int x1, int y1, int x2, int y2) {
     return valorCorte;
 }
 
-void RGPManager::PrintSolution(string filename) {
+void RGPManager::PrintSolution(std::string filename) {
 
     PointsIterator it,last;
 
@@ -415,12 +416,12 @@ void RGPManager::PrintSolution(string filename) {
 void RGPManager::FinalStats() {
     LagrangianManager::FinalStats();
     RGPLagrangianRelaxation* l = (RGPLagrangianRelaxation*)_algo;
-    cout << "Vezes 1  = " << l->_vezes1 << endl << "Vezes 2 = " << l->_vezes2 << endl;
-    cout << "Fator Maior = " << l->_maximofator << endl;
-    cout << endl << "Best Solution Found: " << endl << PrintVariableVector(_incumbentSolution);
+    std::cout << "Vezes 1  = " << l->_vezes1 << std::endl << "Vezes 2 = " << l->_vezes2 << std::endl;
+    std::cout << "Fator Maior = " << l->_maximofator << std::endl;
+    std::cout << std::endl << "Best Solution Found: " << std::endl << PrintVariableVector(_incumbentSolution);
 }
 
-string RGPManager::DefaultFilePrefix() {
+std::string RGPManager::DefaultFilePrefix() {
     char fileName[20] = "";
     sprintf(fileName, "w%dh%dn%di%d", _gridSize, _gridSize, _numPoints,_instanceNumber);
     return fileName;
@@ -447,4 +448,5 @@ void RGPManager::ExtractInstanceNumber(const char* filename)  {
 
     _instanceNumber = found ? value : 0;
 }
+
 

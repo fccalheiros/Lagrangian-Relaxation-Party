@@ -1,7 +1,6 @@
 #ifndef ARVOREBB_H
 #define ARVOREBB_H
 
-#define _CRT_SECURE_NO_WARNINGS
 #define _HAS_STD_BYTE 0
 
 #include <vector> 
@@ -83,8 +82,8 @@ public:
 
     void GO();
 
-    string Print();
-    void Print(string filename);
+    std::string Print();
+    void Print(std::string filename);
     
  protected:
 
@@ -93,7 +92,7 @@ public:
     short int _nodesExecuted;
 
 
-    vector <BBTreeNode> _nodes;
+    std::vector <BBTreeNode> _nodes;
     Configuration *_config;
 
 protected:
@@ -112,8 +111,9 @@ protected:
     inline void cleanUpNode(int node);
     inline void cleanUpNode(BBTreeNode* node);
 
-    void PrintBFS(int node, string & output);
+    void PrintBFS(int node, std::string & output);
     void SetFantasyNumber(int node, int& number);
 };
 
 #endif
+

@@ -1,14 +1,13 @@
 #ifndef _LagrangianManager_H
 #define _LagrangianManager_H
 
-#define _CRT_SECURE_NO_WARNINGS
 
 #ifndef _HAS_STD_BYTE
 #define _HAS_STD_BYTE 0
 #endif
 
 
-using namespace std;
+
 
 #include <stdio.h>
 #include <iostream>
@@ -31,7 +30,7 @@ using namespace std;
 using VariableVector = PartitionedVector<Variable*, VariablePartitionPolicy>;
 using VariableIterator = VariableVector::iterator;
 
-typedef vector<Constraint*>::iterator ConstraintIterator;
+typedef std::vector<Constraint*>::iterator ConstraintIterator;
 
 // =====================
 // Enums
@@ -68,11 +67,11 @@ public:
     
     VariableVector _variables;
 
-    vector<Constraint*> _constraints;
-    vector<Constraint*> _constraintsND;
-    vector<Constraint*> _cuts;
+    std::vector<Constraint*> _constraints;
+    std::vector<Constraint*> _constraintsND;
+    std::vector<Constraint*> _cuts;
 
-    vector<Variable*> _incumbentSolution;
+    std::vector<Variable*> _incumbentSolution;
 
     Algoritmo* _algo;
 
@@ -116,7 +115,7 @@ protected:
     // Internal logic
     // ========================================================
     void UpdateBounds(float valRelaxado, float valHeuristica,
-        vector<Variable*>& solHeu, bool resHeuristica);
+        std::vector<Variable*>& solHeu, bool resHeuristica);
 
     void StoreIncumbent(VariableSet& sol);
     void AddToIncumbent(Variable* var);
@@ -265,23 +264,23 @@ public:
     // ========================================================
     // Debug / output
     // ========================================================
-    void CoveredConstraints(Variable* var, vector<Constraint*>& linhas);
+    void CoveredConstraints(Variable* var, std::vector<Constraint*>& linhas);
 
     void ImprimeLP(FILE* saida);
-    string PrintLP();
-    void PrintLP(string filename);
-    string PrintVariableVector(VariableSet s);
+    std::string PrintLP();
+    void PrintLP(std::string filename);
+    std::string PrintVariableVector(VariableSet s);
     void PrintLagrangian();
     virtual void PrintSolution() {};
     virtual void FinalStats();
     inline double TotalRunTime() const { return _algo->TotalRunTime(); }
 
-    inline virtual string DefaultFilePrefix() { return "LagrangianManager"; }
+    inline virtual std::string DefaultFilePrefix() { return "LagrangianManager"; }
 
     void CheckConstraints(VariableSet& sol);
 
     float GetMaxLagrangian(VariableSet sol) {
-        VariableIterator it = max_element(sol.begin(), sol.end(), CompareLagrangian<Variable*>());
+        VariableIterator it = std::max_element(sol.begin(), sol.end(), CompareLagrangian<Variable*>());
         return (*it)->_valorLag;
     }
 
@@ -296,10 +295,10 @@ public:
     void EstOrdemVariaveis(int posicao, StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        if (distance(begin, end) > 200)
-            nth_element(begin, begin + posicao, end, comp);
+        if (std::distance(begin, end) > 200)
+            std::nth_element(begin, begin + posicao, end, comp);
         else
-            sort(begin, end, comp);
+            std::sort(begin, end, comp);
     }
 
     template <class StrictWeakOrdering>
@@ -307,19 +306,19 @@ public:
         int p = 4 * posicao;
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        if (distance(begin, end) > p) {
-            nth_element(begin, begin + p, end, comp);
-            sort(begin, begin + p, comp);
+        if (std::distance(begin, end) > p) {
+            std::nth_element(begin, begin + p, end, comp);
+            std::sort(begin, begin + p, comp);
         }
         else
-            sort(begin, end, comp);
+            std::sort(begin, end, comp);
     }
 
     template <class StrictWeakOrdering>
     void Ordena(StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        sort(begin, end, comp);
+        std::sort(begin, end, comp);
     }
 
     template <class StrictWeakOrdering>
@@ -343,13 +342,13 @@ public:
             OrdenaRecursivo(comp, inicio, inicio + meio + 1, profundidade + 1);
             OrdenaRecursivo(comp, inicio + meio + 1, fim, profundidade + 1);
 
-            VariableIterator it = lower_bound(inicio, inicio + meio + 1,
+            VariableIterator it = std::lower_bound(inicio, inicio + meio + 1,
                 *(inicio + meio + 1), comp);
 
-            inplace_merge(it, inicio + meio + 1, fim, comp);
+            std::inplace_merge(it, inicio + meio + 1, fim, comp);
         }
         else {
-            sort(inicio, fim, comp);
+            std::sort(inicio, fim, comp);
         }
     }
 
@@ -391,21 +390,21 @@ public:
     void pop_heap_t(RandomAccessIterator last, StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        pop_heap(begin, last, comp);
+        std::pop_heap(begin, last, comp);
     }
 
     template <class StrictWeakOrdering>
     void make_heap_t(StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        make_heap(begin, end, comp);
+        std::make_heap(begin, end, comp);
     }
 
     template <class StrictWeakOrdering>
     void sort_heap_t(StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        sort_heap(begin, end, comp);
+        std::sort_heap(begin, end, comp);
     }
 
     // ========================================================
@@ -447,3 +446,4 @@ public:
 };
 
 #endif
+

@@ -51,7 +51,7 @@ Constraint::~Constraint()
 int Constraint::Degree() {
     VariableIterator it, itFim;
     ConstraintIterators(it, itFim);
-    return static_cast<int>(distance(it,itFim));
+    return static_cast<int>(std::distance(it,itFim));
 }
 
 
@@ -80,7 +80,7 @@ void Constraint::SortVariablesByName()
     VariableIterator it;
     VariableIterator itFim;
     ConstraintIterators(it, itFim);
-    sort(it, itFim, CompareNames <Variable*>());
+    std::sort(it, itFim, CompareNames <Variable*>());
 }
 
 void Constraint::CleanUpConstraint() {
@@ -127,7 +127,7 @@ bool Constraint::Compare(Constraint* other) {
 
 }
 
-float Constraint::getIntercession(vector <Variable*>& sol)
+float Constraint::getIntercession(std::vector <Variable*>& sol)
 {
     float count = 0;
     size_t solSize = sol.size();
@@ -135,7 +135,7 @@ float Constraint::getIntercession(vector <Variable*>& sol)
     VariableIterator begin, end;
 
     for (ConstraintIterators(begin, end), i = 0; i < solSize; i++) {
-        begin = lower_bound(begin, end, sol[i], CompareNames <Variable*>());
+        begin = std::lower_bound(begin, end, sol[i], CompareNames <Variable*>());
         if (begin == end) return count;
         if ((*begin)->_nome == sol[i]->_nome)
             count++;
@@ -185,11 +185,11 @@ void Constraint::PrintBeasley() {
     VariableIterator it, itFim;
     
     ConstraintIterators(it, itFim);
-    cout << distance(it,itFim);
+    std::cout << std::distance(it,itFim);
 
     for (; it != itFim; it++) {
-        if ((i % 12) == 0) cout << "\n";
-        cout << (((*it)->_nome) + 1) << " ";
+        if ((i % 12) == 0) std::cout << "\n";
+        std::cout << (((*it)->_nome) + 1) << " ";
         i++;
     }
 }

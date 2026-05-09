@@ -1,4 +1,4 @@
-ï»¿#include "LagrangianManager.h"
+#include "LagrangianManager.h"
 #include "algoritmo.h"
 #include <sstream>
 #include <iomanip>
@@ -34,7 +34,7 @@ LagrangianManager::LagrangianManager(LagrangianManager* m)
     : LagrangianManager(m->_config, m->_algo, m->_direction, m->_max_sort_depth)
 {
     _nonZeroCount = m->_nonZeroCount;
-    _totalVariaveis = m->_totalVariaveis; // ajuste especÃ­fico
+    _totalVariaveis = m->_totalVariaveis; // ajuste específico
 }
 
 
@@ -142,9 +142,9 @@ void LagrangianManager::FreeMemory() {
     }
 
     _variables.clear();
-    vector<Constraint*>().swap(_constraints);
-    vector<Constraint*>().swap(_constraintsND);
-    vector<Constraint*>().swap(_cuts);
+    std::vector<Constraint*>().swap(_constraints);
+    std::vector<Constraint*>().swap(_constraintsND);
+    std::vector<Constraint*>().swap(_cuts);
 
 }
 
@@ -189,7 +189,7 @@ void LagrangianManager::ResetLagrangianCosts() {
 	setDualBound(_config->MINUS00);
 }
 
-void LagrangianManager::UpdateBounds(float valRelaxado, float valHeuristica, vector <Variable *> &solHeu, bool resHeuristica){
+void LagrangianManager::UpdateBounds(float valRelaxado, float valHeuristica, std::vector <Variable *> &solHeu, bool resHeuristica){
 
     float LI = getLowerBound();
 
@@ -254,7 +254,7 @@ void LagrangianManager::Solve(float InitialCost, float KnownBound ) {
     }
 
     _algo->Finalizacao();
-    cout << endl << PrintVariableVector(relaxedSolution) << endl;
+    std::cout << std::endl << PrintVariableVector(relaxedSolution) << std::endl;
     FinalStats();
 }
 
@@ -409,7 +409,7 @@ void LagrangianManager::CommitPriceIn() {
         }
     );
 
-    cout << "Commited Price In Variables: " << count << endl;
+    std::cout << "Commited Price In Variables: " << count << std::endl;
 }
 
 void LagrangianManager::CommitPriceOut() {
@@ -420,7 +420,7 @@ void LagrangianManager::CommitPriceOut() {
         }
     );
 
-    cout << "Commited Price Out Variables: " << count << endl;
+    std::cout << "Commited Price Out Variables: " << count << std::endl;
 }
 
 void LagrangianManager::InsertVariable(Variable *var) {
@@ -456,7 +456,7 @@ void LagrangianManager::MarkConstraintForDeletion(Variable* var) {
         set++;
     }
     _countConstraints = static_cast<int>(_constraints.size() - set);
-    cout << "Restricoes Marcadas: " << set << endl;
+    std::cout << "Restricoes Marcadas: " << set << std::endl;
 }
 
 
@@ -543,7 +543,7 @@ Constraint * LagrangianManager::getCut (int i) {
     return _cuts[i];
 }
 
-void LagrangianManager::CoveredConstraints(Variable *var, vector <Constraint *> &linhas) {
+void LagrangianManager::CoveredConstraints(Variable *var, std::vector <Constraint *> &linhas) {
 
     ConstraintIterator rest,fim;
 
@@ -569,10 +569,10 @@ void LagrangianManager::PrintLagrangian() {
         var = _variables[i];
         if ( ! var->IsFixed() ) {
             j++;
-            if ( (j % 12) == 0 )  cout << endl;
-            if ( ! prim )  cout << " + ";
+            if ( (j % 12) == 0 )  std::cout << std::endl;
+            if ( ! prim )  std::cout << " + ";
                 prim = false;
-            cout << var->_valorLag << " x" << _variables[i]->getName();
+            std::cout << var->_valorLag << " x" << _variables[i]->getName();
         }
     }
 }
@@ -623,7 +623,7 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
        fprintf(saida," = %2.2f\n",rest->getRHS()); 
     }
    //***********
-    vector < vector <int> > matriz;
+    std::vector < std::vector <int> > matriz;
     matriz.resize(_constraints.size());
     VariableIterator  vComeco, vFim;
 
@@ -679,26 +679,26 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
     fflush(saida);
 }
 
-string LagrangianManager::PrintVariableVector(VariableSet s) {
-    stringstream work;
+std::string LagrangianManager::PrintVariableVector(VariableSet s) {
+    std::stringstream work;
 
     VariableIterator vIt = s.begin();
     for (; vIt != s.end(); vIt++) {
-        work << "x" << (*vIt)->getName() << " : " << (*vIt)->getCost() << " : " << (*vIt)->getLagrangianCost() <<  endl;
+        work << "x" << (*vIt)->getName() << " : " << (*vIt)->getCost() << " : " << (*vIt)->getLagrangianCost() <<  std::endl;
     }
     return work.str();
 }
 
-void LagrangianManager::PrintLP(string filename) {
-    ofstream file;
+void LagrangianManager::PrintLP(std::string filename) {
+    std::ofstream file;
     file.open(filename);
     file << PrintLP();
     file.close();
 }
 
-string LagrangianManager::PrintLP() {
+std::string LagrangianManager::PrintLP() {
   
-    stringstream work;
+    std::stringstream work;
 
     unsigned int i = 0;
     int j;
@@ -707,7 +707,7 @@ string LagrangianManager::PrintLP() {
 
     Ordena(CompareNames <Variable*>());
 
-    work << "minimize" << endl;
+    work << "minimize" << std::endl;
 
     j = 0;
     first = true;
@@ -716,14 +716,14 @@ string LagrangianManager::PrintLP() {
         if (!var->IsFixed()) {
             j++;
             if ((j % 12) == 0)
-                work << endl;
+                work << std::endl;
             if (!first)
                 work << " + ";
             first = false;
             work << std::fixed << std::setprecision(0) << var->getCost() << " x" << var->getName();
         }
     }
-    work << endl << "subject to" << endl;
+    work << std::endl << "subject to" << std::endl;
 
 
     Constraint* rest;
@@ -743,14 +743,14 @@ string LagrangianManager::PrintLP() {
                 work << "x" << var->getName();
                 j++;
                 if ((j % 12) == 0)
-                    work << endl;
+                    work << std::endl;
             }
         }
-        work << " = " << std::fixed << std::setprecision(0) << rest->getRHS() << endl;
+        work << " = " << std::fixed << std::setprecision(0) << rest->getRHS() << std::endl;
 
     }
     //***********
-    vector < vector <int> > matrix;
+    std::vector < std::vector <int> > matrix;
     matrix.resize(_constraints.size());
     VariableIterator  vComeco, vFim;
 
@@ -771,9 +771,9 @@ string LagrangianManager::PrintLP() {
             first = false;
             work << "x" << matrix[i][j];
             if (((j + 1) % 12) == 0)
-                work << endl;
+                work << std::endl;
         }
-        work << " = 1" << endl;
+        work << " = 1" << std::endl;
     }
     //********
 
@@ -791,24 +791,24 @@ string LagrangianManager::PrintLP() {
                 work << "x" << var->getName();
                 j++;
                 if ((j % 12) == 0)
-                    work << endl;
+                    work << std::endl;
             }
         }
-        work << " <= " << std::fixed << std::setprecision(0) << rest->getRHS() << endl;
+        work << " <= " << std::fixed << std::setprecision(0) << rest->getRHS() << std::endl;
     }
-    work << "binary" << endl;
+    work << "binary" << std::endl;
     j = 0;
     for (i = 0; i < _variables.size(); i++) {
         var = _variables[i];
         if (!var->IsFixed()) {
             j++;
             if ((j % 12) == 0)  
-                work << endl;
+                work << std::endl;
             work << "x" << var->getName() << " ";
         }
     }
-    work << "end" << endl;
-    work << flush;
+    work << "end" << std::endl;
+    work << std::flush;
     return work.str();
 }
 
@@ -847,7 +847,7 @@ void LagrangianManager::CleanupDeletedConstraints() {
 	//remove from regular constraints
     GetConstraintRange(cFirst, cIt);
     for (; cIt != _constraints.begin(); ) {
-		auto current = prev(cIt);
+		auto current = std::prev(cIt);
         if ((*current)->LogicalDeleted()) {
             cIt =_constraints.erase(current);
             --_countConstraints;
@@ -968,7 +968,7 @@ void LagrangianManager::CleanUpProblem() {
             if (!finish) cItEnd--;
     }  
 
-    cout << "CUTS after reduction: " << _cuts.size() << endl;
+    std::cout << "CUTS after reduction: " << _cuts.size() << std::endl;
 }
 
 void LagrangianManager::Restart() {
@@ -1004,7 +1004,7 @@ void LagrangianManager::FinalStats() {
     else {
         printf("Optimality not proved \n");    
 
-        //string file = DefaultFilePrefix() + ".lp";
+        //std::string file = DefaultFilePrefix() + ".lp";
         //FILE *saida = fopen(file.c_str(),"w");
         //ImprimeLP(saida);
         //fclose(saida);
@@ -1038,7 +1038,7 @@ void LagrangianManager::CheckConstraints(VariableSet& sol) {
     VariableIterator vIt, vEnd;
     size_t i = 0;
     size_t size = _constraints.size() + _cuts.size();
-    vector <bool> Check(size);
+    std::vector <bool> Check(size);
 
     float maxCost = sol[sol.size() - 1]->getLagrangianCost();
 
@@ -1063,7 +1063,7 @@ void LagrangianManager::CheckConstraints(VariableSet& sol) {
 
     for (i = 0; i < size; i++) {
         if (! Check[i])
-            cout << "Constraint: " << i <<  endl;
+            std::cout << "Constraint: " << i <<  std::endl;
         
     }
 
@@ -1103,8 +1103,8 @@ void LagrangianManager::TestVariableVector(){
     int active = 0;
     for (GetActiveVariablesRange(vIt, vEnd); vIt != vEnd; vIt++) {
         if ((*vIt)->IsFixed() || (*vIt)->IsPricedOut()) {
-            cout << endl << "Achei uma variÃ¡vel errada na zona de ativas: ";
-            cout << (*vIt)->IsFixed() << " - " << (*vIt)->IsPricedOut();
+            std::cout << std::endl << "Achei uma variável errada na zona de ativas: ";
+            std::cout << (*vIt)->IsFixed() << " - " << (*vIt)->IsPricedOut();
             return;
         }
         active++;
@@ -1113,8 +1113,8 @@ void LagrangianManager::TestVariableVector(){
     int fixed = 0;
     for (GetZeroFixedVariablesRange(vIt, vEnd); vIt != vEnd; vIt++) {
         if (!(*vIt)->IsFixed() || (*vIt)->IsPricedOut()) {
-            cout << endl << "Achei uma variÃ¡vel errada na zona de fixas" << endl;
-            cout << (*vIt)->IsFixed() << " - " << (*vIt)->IsPricedOut() ;
+            std::cout << std::endl << "Achei uma variável errada na zona de fixas" << std::endl;
+            std::cout << (*vIt)->IsFixed() << " - " << (*vIt)->IsPricedOut() ;
             return;
         }
         fixed++;
@@ -1123,11 +1123,12 @@ void LagrangianManager::TestVariableVector(){
     int pricedout = 0;
     for (GetPricedOutVariablesRange(vIt, vEnd); vIt != vEnd; vIt++) {
         if ((*vIt)->IsFixed() || !(*vIt)->IsPricedOut()) {
-            cout << endl << "Achei uma variÃ¡vel errada na zona de priced out" << endl;
-            cout << (*vIt)->IsFixed() << " - " << (*vIt)->IsPricedOut();
+            std::cout << std::endl << "Achei uma variável errada na zona de priced out" << std::endl;
+            std::cout << (*vIt)->IsFixed() << " - " << (*vIt)->IsPricedOut();
             return;
         }
         pricedout++;
     }
-    cout << endl << "vector ok. Active: " << active << " Fixed: " << fixed << " PricedOut: " << pricedout << endl;
+    std::cout << std::endl << "vector ok. Active: " << active << " Fixed: " << fixed << " PricedOut: " << pricedout << std::endl;
 }
+

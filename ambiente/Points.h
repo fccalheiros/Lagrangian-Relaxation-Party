@@ -7,10 +7,10 @@
 #include <vector>
 #include <iostream>
 
-using namespace std;
 
-typedef vector<int>::iterator GridIterator;
-typedef map < int, int>::iterator PointsIterator;
+
+typedef std::vector<int>::iterator GridIterator;
+typedef std::map < int, int>::iterator PointsIterator;
 
 
 
@@ -36,12 +36,12 @@ class Points {
   
 protected:
 
-    map < int, int > _px;
-    map < int, int > _py;
+    std::map < int, int > _px;
+    std::map < int, int > _py;
 
-    vector <int> _gridX;
-    vector <int> _gridXespelho;
-    vector <int> _gridY;
+    std::vector <int> _gridX;
+    std::vector <int> _gridXespelho;
+    std::vector <int> _gridY;
 
  public:
 
@@ -70,8 +70,11 @@ protected:
 
     void FinalizaGrid(int inix, int fimx, int iniy, int fimy);
 
-    string Print();
+    std::string Print();
 
 };
 
 #endif
+
+
+

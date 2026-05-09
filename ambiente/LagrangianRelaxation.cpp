@@ -123,7 +123,7 @@ void LagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float
         
     }
 
-    cout << endl;
+    std::cout << std::endl;
 }
 
 
@@ -138,8 +138,8 @@ void LagrangianRelaxation::UpdateSubgradient(VariableSet &sol){
     int solSize = static_cast<int>(sol.size());
 
     int tamanho = static_cast<int>(_manager->_constraints.size() + _manager->_cuts.size());
-    cout << "CUTS: " << _manager->_cuts.size() << endl; 
-    vector <float> Gw(tamanho);
+    std::cout << "CUTS: " << _manager->_cuts.size() << std::endl; 
+    std::vector <float> Gw(tamanho);
     float moduloGw = 0;
 
     _iteracoes++;
@@ -286,10 +286,10 @@ bool LagrangianRelaxation::RunPrimalHeuristic(VariableSet &solRel, VariableSet &
     _manager->GetActiveVariablesRange(begin, end);
 
     if (particao) {
-        cout << "Primal Solution Found: " << valor << " --- " << distance(begin,It) << endl;
+        std::cout << "Primal Solution Found: " << valor << " --- " << std::distance(begin,It) << std::endl;
     }
     else
-        cout << "Primal Solution Fail:  " << descobertas << " Cost: " << valor << " --- " << distance(begin, It) << endl;
+        std::cout << "Primal Solution Fail:  " << descobertas << " Cost: " << valor << " --- " << std::distance(begin, It) << std::endl;
   
     return particao;
 
@@ -315,7 +315,7 @@ void LagrangianRelaxation::GenerateCuts(VariableSet &solRel) {
         for (j=i+1; j < tamanho ; j++)
             if ( solRel[i]->Intercepta(solRel[j]) ) {
                 g.InsereAresta(solRel[i],solRel[j]);
-                //cout << "Interceptou: " << solRel[i]->getName() << " - " << solRel[j]->getName() << endl;
+                //std::cout << "Interceptou: " << solRel[i]->getName() << " - " << solRel[j]->getName() << std::endl;
             }
     }
     //g.Imprime();
@@ -341,12 +341,12 @@ bool LagrangianRelaxation::Price(VariableSet& relaxed) {
     int count = 0;
     for (; vIt != vEnd; vIt++) {
         if ((*vIt)->getLagrangianCost() < max && (*vIt)->IsPricedOut()) {
-            cout << "x" << (*vIt)->getName() << " : " << (*vIt)->getLagrangianCost() << endl;
+            std::cout << "x" << (*vIt)->getName() << " : " << (*vIt)->getLagrangianCost() << std::endl;
             _manager->PriceInVariable(vIt);
             count++;
         }
     }
-    cout << "Pricing Variables Included: " << count << endl;
+    std::cout << "Pricing Variables Included: " << count << std::endl;
     return true;
  }
 
@@ -400,7 +400,7 @@ bool LagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newLowe
 		
         VariableIterator vFirst, vLast;
         _manager->GetPricedOutVariablesRange(vFirst, vLast);
-		if (distance(vFirst, vLast) == 0) return false;
+		if (std::distance(vFirst, vLast) == 0) return false;
         for ( ; vFirst != vLast; vFirst++) {
             double rc = (*vFirst)->getLagrangianCost();
             // best column
@@ -478,7 +478,7 @@ Variable* LagrangianRelaxation::ChooseBranchVariableHighIncumbentCost() {
 
     if (_manager->_incumbentSolution.size() > 0) {
 
-        sort(_manager->_incumbentSolution.begin(), _manager->_incumbentSolution.end(), GreaterCost <Variable*>());
+        std::sort(_manager->_incumbentSolution.begin(), _manager->_incumbentSolution.end(), GreaterCost <Variable*>());
 
         VariableIterator vIt, vEnd;
         vIt = _manager->_incumbentSolution.begin();

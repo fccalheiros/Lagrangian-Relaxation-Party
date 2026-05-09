@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iostream>
 
-using namespace std;
+
 
 enum class ConstraintSign {
 	LowerEqual = 1,  // ?
@@ -13,13 +13,13 @@ enum class ConstraintSign {
 	GreaterEqual = 3   // ?
 };
 
-typedef vector<Variable*>::iterator VariableIterator;
+typedef std::vector<Variable*>::iterator VariableIterator;
 
 class Constraint {
 
 public:
 
-	vector <Variable *> _variables;
+	std::vector <Variable *> _variables;
 	float _lagrangian;
 	short int _index;
 
@@ -46,13 +46,13 @@ public:
 	virtual void InsertVariable(Variable* var, float coef);
 	void  RemoveVariable(VariableIterator & it);
 
-	float getIntercession(vector <Variable*>& sol);
+	float getIntercession(std::vector <Variable*>& sol);
 
 	int Degree();
 
 	void Print(FILE* fp = stdout);
 	void PrintBeasley();
-	virtual void Print() { cout << "Base Class Constraint dont implement Print Method." << endl; };
+	virtual void Print() { std::cout << "Base Class Constraint dont implement Print Method." << std::endl; };
 
 	void SortVariablesByName();
 	void ConstraintIterators(VariableIterator& begin, VariableIterator& end);

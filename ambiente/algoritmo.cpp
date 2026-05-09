@@ -1,7 +1,7 @@
 #include "algoritmo.h"
 #include <iostream>
 
-using namespace std;
+
 
 Algoritmo::Algoritmo(Configuration * config) :
 	_manager(0),

@@ -7,6 +7,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <string>
 
 #pragma warning(disable:4996)
 
@@ -19,7 +20,7 @@ void Cuts(LagrangianManager* prob, FILE* output);
 static void StartStats();
 static void EndStats();
 static bool CheckUsage(int argc, char* argv[]);
-SearchAlgorithm ParseBranchStrategy(const string& strategy);
+SearchAlgorithm ParseBranchStrategy(const std::string& strategy);
 Configuration* LoadConfig(const char* configFile);
 
 template<class T> struct  Imprime  {
@@ -33,3 +34,4 @@ public:
 
 
 #endif
+

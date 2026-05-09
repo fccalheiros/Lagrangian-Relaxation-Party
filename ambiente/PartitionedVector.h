@@ -1,4 +1,4 @@
-﻿#ifndef _PARTITIONED_VECTOR_H
+#ifndef _PARTITIONED_VECTOR_H
 #define _PARTITIONED_VECTOR_H
 
 #include <vector>
@@ -249,7 +249,7 @@ public:
     }
 
     // =====================================================
-    // BATCH: PRICED_OUT → ACTIVE
+    // BATCH: PRICED_OUT ? ACTIVE
     // (equivalent to CommitPriceIn)
     // =====================================================
 
@@ -277,7 +277,7 @@ public:
     }
 
     // =====================================================
-    // BATCH: ACTIVE → PRICED_OUT
+    // BATCH: ACTIVE ? PRICED_OUT
     // (equivalent to CommitPriceOut)
     // =====================================================
 

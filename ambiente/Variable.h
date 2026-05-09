@@ -2,10 +2,10 @@
 #define _VARIABLE_H
 #include <vector>
 
-using namespace std;
+
 
 class Constraint;
-typedef vector<Constraint*>::iterator ConstraintIterator;
+typedef std::vector<Constraint*>::iterator ConstraintIterator;
 
 class Variable {
 
@@ -23,7 +23,7 @@ class Variable {
 
 
 	short int _linhasCobertas;
-	vector <Constraint *> _constraints;
+	std::vector <Constraint *> _constraints;
 
  public:
   

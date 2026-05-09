@@ -6,6 +6,9 @@
 #include "grafo.h"
 
 #include <fstream>
+#include <iomanip>
+#include <tuple>
+#include <cctype>
 
 Timer globalTimer;
 
@@ -28,8 +31,8 @@ int originalMain (int argc, char * argv[]) {
         StartStats();
         bbTree.GO();
         EndStats();
-		string prefix = manager->DefaultFilePrefix() + "." + config->getValue("BRANCHSTRATEGY");
-        string filename = prefix + ".txt";
+		std::string prefix = manager->DefaultFilePrefix() + "." + config->getValue("BRANCHSTRATEGY");
+        std::string filename = prefix + ".txt";
         bbTree.Print(filename);
 		filename = prefix + ".sol";
 		manager->PrintSolution(filename);
@@ -37,7 +40,7 @@ int originalMain (int argc, char * argv[]) {
     }
 
     if (strcmp(argv[3], "l") == 0) {
-        ofstream file;
+        std::ofstream file;
         file.open(argv[4]);
         file << manager->PrintLP();
         file.close();
@@ -57,19 +60,19 @@ int originalMain (int argc, char * argv[]) {
 
 static void StartStats() {
 	globalTimer.Reset();    
-    cout << "------------------------------------------------------------------------------- " << endl;
-    cout << "Branch & Bound starting " << endl;
-    cout << "------------------------------------------------------------------------------- " << endl;
+    std::cout << "------------------------------------------------------------------------------- " << std::endl;
+    std::cout << "Branch & Bound starting " << std::endl;
+    std::cout << "------------------------------------------------------------------------------- " << std::endl;
 }
 static void EndStats() {
-    cout << fixed << setprecision(3);
-    cout << endl;
-    cout << "------------------------------------------------------------------------------- " << endl;
-    cout << "Branch & Bound finish stats" << endl;
-    cout << "   Execution time: " << globalTimer.ElapsedSeconds()  << endl;
-    cout << "   CPU time: " << globalTimer.CpuElapsedSeconds() << endl;
-    cout << "------------------------------------------------------------------------------- " << endl;
-    cout << std::flush;
+    std::cout << std::fixed << std::setprecision(3);
+    std::cout << std::endl;
+    std::cout << "------------------------------------------------------------------------------- " << std::endl;
+    std::cout << "Branch & Bound finish stats" << std::endl;
+    std::cout << "   Execution time: " << globalTimer.ElapsedSeconds()  << std::endl;
+    std::cout << "   CPU time: " << globalTimer.CpuElapsedSeconds() << std::endl;
+    std::cout << "------------------------------------------------------------------------------- " << std::endl;
+    std::cout << std::flush;
 }
 
 static bool CheckUsage(int argc, char* argv[])
@@ -80,17 +83,17 @@ static bool CheckUsage(int argc, char* argv[])
         ok = ok && (strcmp(argv[3], "l") or strcmp(argv[3], "c"));
     }
     if (!ok) {
-        cout << "Usage: " << endl;
-        cout << argv[0] << " InstanceFile ConfigurationFile [l|c] [OutputFile]" << endl;
-        cout << "   Optional l to genarate linear programming file OutputFile" << endl;
-        cout << "   Optional c to genarate cuts to file OutputFile --- whose usefulness I don't remember " << endl;
+        std::cout << "Usage: " << std::endl;
+        std::cout << argv[0] << " InstanceFile ConfigurationFile [l|c] [OutputFile]" << std::endl;
+        std::cout << "   Optional l to genarate linear programming file OutputFile" << std::endl;
+        std::cout << "   Optional c to genarate cuts to file OutputFile --- whose usefulness I don't remember " << std::endl;
     }
 
     return ok;
 }
 
-SearchAlgorithm ParseBranchStrategy(const string& strategy) {
-    string upperStrategy = strategy;
+SearchAlgorithm ParseBranchStrategy(const std::string& strategy) {
+    std::string upperStrategy = strategy;
     for (char& c : upperStrategy) {
         c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
     }
@@ -106,34 +109,34 @@ Configuration* LoadConfig(const char* configFile) {
 
     try {
         if (!config->PARSE(configFile)) {
-            cout << "Unable to Parse File: " << configFile << endl;
-            cout << "Using default values: " << endl;
+            std::cout << "Unable to Parse File: " << configFile << std::endl;
+            std::cout << "Using default values: " << std::endl;
         }
     }
-    catch (const exception& e) {
-        cout << e.what() << endl;
-        cout << "Unable to Parse File: " << configFile << endl;
-        cout << "Using default values: " << endl;
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
+        std::cout << "Unable to Parse File: " << configFile << std::endl;
+        std::cout << "Using default values: " << std::endl;
     }
 
-    cout << config->Print();
+    std::cout << config->Print();
     return config;
 }
 
 void Cuts(LagrangianManager* prob, FILE* output) {
     unsigned int i, j;
     int num = 0;
-    vector <int> vars;
+    std::vector <int> vars;
 
     prob->_constraints.erase(prob->_constraints.begin(), prob->_constraints.end());
-    cout << "li sol" << endl;
+    std::cout << "li sol" << std::endl;
     FILE* fp = fopen("sol", "r");
     std::ignore = fscanf(fp, "%d", &num);
     while (num != -1) {
         vars.push_back(num);
-        cout << num << " ";
+        std::cout << num << " ";
         //    ((RGPVariable *)prob->_variables[num])->ImprimeRetangulo();
-        cout << endl;
+        std::cout << std::endl;
         std::ignore = fscanf(fp, "%d", &num);
     }
     fclose(fp);
@@ -154,6 +157,7 @@ void Cuts(LagrangianManager* prob, FILE* output) {
     g.Clique(prob, 2);
     g.CicloImpar(prob);
     prob->for_each_cut(Imprime <Constraint*> (output) );
-    cout << prob->_cuts.size() << endl;
+    std::cout << prob->_cuts.size() << std::endl;
 }
+
 

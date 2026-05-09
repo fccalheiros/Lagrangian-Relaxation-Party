@@ -20,7 +20,7 @@ void Points::Insere(int x, int y) {
 
 int Points::retornaX (int y) {
  
-    map<int, int>::const_iterator it = _py.find(y);
+    std::map<int, int>::const_iterator it = _py.find(y);
 
     if ( it != _py.end() ) 
     return ( (*it).second );
@@ -29,7 +29,7 @@ int Points::retornaX (int y) {
 
 int Points::retornaY(int x) {
 
-    map<int, int>::const_iterator it = _px.find(x);
+    std::map<int, int>::const_iterator it = _px.find(x);
     if (it != _px.end())
         return ((*it).second);
     return -1;
@@ -57,9 +57,9 @@ int Points::retornaXDelta (int x, int delta) {
 
 int Points::retornaIndiceY(int y) {
 
-  GridIterator it = lower_bound(_gridY.begin(),_gridY.end(),y);
+  GridIterator it = std::lower_bound(_gridY.begin(),_gridY.end(),y);
   
-  return (int)( distance(_gridY.begin(),it));
+  return (int)( std::distance(_gridY.begin(),it));
 }
 
 void Points::retornaPontoX(int& x, int& y, int indice) {
@@ -75,7 +75,7 @@ int Points::retornaYDelta (int y, int delta) {
 }
 
 GridIterator Points::retornaIterY(int y) {
-   return ( lower_bound(_gridY.begin(),_gridY.end(),y) );
+   return ( std::lower_bound(_gridY.begin(),_gridY.end(),y) );
 }
 
 void Points::LimiteGridX(GridIterator &comeco, GridIterator &fim){
@@ -110,8 +110,8 @@ void Points::FinalizaGrid(int inix, int fimx, int iniy, int fimy) {
     _gridXespelho.reserve(_gridY.size());
     _gridXespelho.push_back(iniy);
 
-    sort(_gridX.begin(),_gridX.end());
-    sort(_gridY.begin(),_gridY.end());
+    std::sort(_gridX.begin(),_gridX.end());
+    std::sort(_gridY.begin(),_gridY.end());
 
     PointsIterator it = _px.begin();
     for (; it != _px.end();it++) {
@@ -122,28 +122,30 @@ void Points::FinalizaGrid(int inix, int fimx, int iniy, int fimy) {
 
 }
 
-string Points::Print() {
+std::string Points::Print() {
 
-    stringstream work;
+    std::stringstream work;
 
-    work << "Points " << endl;
+    work << "Points " << std::endl;
 
     PointsIterator it = _px.begin();
     for (; it != _px.end(); it++) {
-        work << (*it).first << " " << (*it).second << endl;
+        work << (*it).first << " " << (*it).second << std::endl;
     }
-    work << "X Grid" << endl;
+    work << "X Grid" << std::endl;
 
     GridIterator it2 = _gridX.begin();
     for (; it2 != _gridX.end(); it2++)
         work << *it2 << " ";
-    work << endl;
+    work << std::endl;
 
-    work<< "Y Grid" << endl;
+    work<< "Y Grid" << std::endl;
     it2 = _gridY.begin();
     for (; it2 != _gridY.end(); it2++)
         work << *it2 << " ";
-    work << endl;
+    work << std::endl;
 
     return work.str();
 }
+
+

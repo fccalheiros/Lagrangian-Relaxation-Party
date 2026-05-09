@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include "Constraint.h"
 
-using namespace std;
+
 
 template <class T = Variable*>
 struct lessVariavel {
@@ -20,17 +20,5 @@ struct eqVariavel {
         }
 
 };
-
-inline size_t __stl_hash_variavel(const Variable* __v)
-{
-  return (size_t) __v->_nome;
-}
-
-
-template<> struct hash<Variable *>                             // Alterada de _STL_TEMPLATE_NULL para template <>
-{
-    size_t operator()(const Variable* __v) const { return __stl_hash_variavel(__v); }
-};
-                                                                 // Incluida
 
 #endif

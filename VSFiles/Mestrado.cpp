@@ -14,17 +14,17 @@ int main(int argc, char* argv[])
 {
 #ifndef NDEBUG
     argc = 3;
-    string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w500h500n200i55.pt";
+    std::string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w500h500n200i55.pt";
     argv[1] = &str0[0];
-    string str1 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\Configuration.json";
+    std::string str1 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\Configuration.json";
     argv[2] = &str1[0];
 #endif
 
         try {
             return originalMain(argc, argv);
         }
-        catch (exception& e) {
-            std::cout << e.what() << endl << std::flush;
+        catch (std::exception& e) {
+            std::cout << e.what() << std::endl << std::flush;
 
         }
 

@@ -6,7 +6,7 @@
 #include <vector>
 #include <string>
 
-using namespace std;
+
 
 class Configuration
 {
@@ -37,18 +37,18 @@ public:
 
 	float PRICEOUTRATIO = 0;
 
-	string BRANCHSTRATEGY = "BFS";                  // BFS or DFS
-	string VARIABLESTRATEGY = "HIGHINCUMBENTCOST"; // HIGHINCUMBENTCOST or LOWLAGRANGIAN
+	std::string BRANCHSTRATEGY = "BFS";                  // BFS or DFS
+	std::string VARIABLESTRATEGY = "HIGHINCUMBENTCOST"; // HIGHINCUMBENTCOST or LOWLAGRANGIAN
 
 
 
 
 protected:
 
-	vector <string> _token;
-	vector <string> _value;
+	std::vector <std::string> _token;
+	std::vector <std::string> _value;
 
-	string _fileText;
+	std::string _fileText;
 
 	bool AdvanceNext();
 
@@ -57,8 +57,8 @@ protected:
 	bool ParseContent();
 	bool ParseElement();
 
-	void InsertContent(string token, string value);
-	void TryChangeDefaultToken(string token, string value);
+	void InsertContent(std::string token, std::string value);
+	void TryChangeDefaultToken(std::string token, std::string value);
 	void Initialization();
 
 	size_t _pointer;
@@ -67,27 +67,27 @@ public:
 
 	Configuration();
 
-	bool PARSE(string file);
-	string getValue(string token);
-	int getIntegerValue(string token);
-	int getTokenIndex(string token);
+	bool PARSE(std::string file);
+	std::string getValue(std::string token);
+	int getIntegerValue(std::string token);
+	int getTokenIndex(std::string token);
 
-	string Print();
+	std::string Print();
 
 
 protected:
 
-	inline void ltrim(string& s) {
+	inline void ltrim(std::string& s) {
 		s.erase(s.begin(), 
 			find_if(s.begin(), s.end(), [](unsigned char ch) { return !isspace(ch); })
 		);
 	}
 
-	inline void rtrim(string& s) {
+	inline void rtrim(std::string& s) {
 		s.erase(find_if(s.rbegin(), s.rend(), [](unsigned char ch) { return !isspace(ch); }).base(), s.end());
 	}
 
-	inline void trim(string& s) {
+	inline void trim(std::string& s) {
 		ltrim(s);
 		rtrim(s);
 	}
