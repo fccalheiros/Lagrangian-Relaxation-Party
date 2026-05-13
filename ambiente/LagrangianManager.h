@@ -1,14 +1,6 @@
 #ifndef _LagrangianManager_H
 #define _LagrangianManager_H
 
-
-#ifndef _HAS_STD_BYTE
-#define _HAS_STD_BYTE 0
-#endif
-
-
-
-
 #include <stdio.h>
 #include <iostream>
 #include <vector>
@@ -20,7 +12,7 @@
 #include "Variable.h"
 #include "Constraint.h"
 #include "algoritmo.h"
-#include "SortThreadPool.h"
+#include "ParallelSort.h"
 #include "PartitionedVector.h"
 
 // =====================
@@ -100,7 +92,7 @@ protected:
 
     // Sorting control
     size_t _max_sort_depth;
-    SortThreadPool _pool;
+    std::shared_ptr<ParallelSorter> _sorter;
 
 private:
     // ========================================================
@@ -134,12 +126,14 @@ public:
     // ========================================================
 	// Constructors / Initialization
     // ========================================================
-    LagrangianManager(Configuration* config);
+    LagrangianManager(Configuration* config, std::shared_ptr<ParallelSorter> sorter);
 
     LagrangianManager(Configuration* config,
         Algoritmo* algo,
+        std::shared_ptr<ParallelSorter> sorter,
         Direction direction = Direction::MINIMIZE,
-        size_t max_sort_depth = 4);
+        size_t max_sort_depth = 4
+    );
 
     LagrangianManager(LagrangianManager* m);
 
@@ -224,9 +218,9 @@ public:
     // ========================================================
     // Ranges
     // ========================================================
-    int getActiveVariablesCount()    { return _variables.ActiveCount();    }
-    int getZeroFixedVariablesCount() { return _variables.FixedCount();     }
-    int getPricedOutVariablesCount() { return _variables.PricedOutCount(); }
+    int getActiveVariablesCount() const { return _variables.ActiveCount(); }
+    int getZeroFixedVariablesCount() const { return _variables.FixedCount();     }
+    int getPricedOutVariablesCount() const { return _variables.PricedOutCount(); }
 
     void GetActiveVariablesRange(VariableIterator& begin, VariableIterator& end);
     void GetZeroFixedVariablesRange(VariableIterator& begin, VariableIterator& end);
@@ -288,102 +282,24 @@ public:
     // ==================
     // Sorting utilities 
     // ==================
-    int max_sort_size_thread = 2500;
-    int max_sort_size = 64;
 
     template <class StrictWeakOrdering>
-    void EstOrdemVariaveis(int posicao, StrictWeakOrdering comp) {
+    void NthElementCustom(int rank, StrictWeakOrdering comp) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        if (std::distance(begin, end) > 200)
-            std::nth_element(begin, begin + posicao, end, comp);
-        else
-            std::sort(begin, end, comp);
-    }
-
-    template <class StrictWeakOrdering>
-    void EstOrdemVariaveis2(int posicao, StrictWeakOrdering comp) {
-        int p = 4 * posicao;
-        VariableIterator begin, end;
-        GetActiveVariablesRange(begin, end);
-        if (std::distance(begin, end) > p) {
-            std::nth_element(begin, begin + p, end, comp);
-            std::sort(begin, begin + p, comp);
+        if (std::distance(begin, end) > rank) {
+            std::nth_element(begin, begin + rank, end, comp);
+            std::sort(begin, begin + rank, comp);
         }
         else
             std::sort(begin, end, comp);
     }
 
     template <class StrictWeakOrdering>
-    void Ordena(StrictWeakOrdering comp) {
+    void SortActiveVariables(StrictWeakOrdering comp, SortMode mode = SortMode::SEQUENTIAL_MERGE) {
         VariableIterator begin, end;
         GetActiveVariablesRange(begin, end);
-        std::sort(begin, end, comp);
-    }
-
-    template <class StrictWeakOrdering>
-    void Ordena2(StrictWeakOrdering comp) {
-        VariableIterator begin, end;
-        GetActiveVariablesRange(begin, end);
-        OrdenaRecursivo(comp, begin, end, 0);
-    }
-
-    template <class StrictWeakOrdering>
-    void Ordena3(StrictWeakOrdering comp) {
-        VariableIterator begin, end;
-        GetActiveVariablesRange(begin, end);
-        ThreadMergeSort(_pool, comp, begin, end, 0, _max_sort_depth);
-    }
-
-    template <class StrictWeakOrdering>
-    void OrdenaRecursivo(StrictWeakOrdering comp, VariableIterator inicio, VariableIterator fim, int profundidade) {
-        if ((profundidade < 15) && ((fim - inicio) > max_sort_size)) {
-            int meio = (int)((fim - inicio) / 2);
-            OrdenaRecursivo(comp, inicio, inicio + meio + 1, profundidade + 1);
-            OrdenaRecursivo(comp, inicio + meio + 1, fim, profundidade + 1);
-
-            VariableIterator it = std::lower_bound(inicio, inicio + meio + 1,
-                *(inicio + meio + 1), comp);
-
-            std::inplace_merge(it, inicio + meio + 1, fim, comp);
-        }
-        else {
-            std::sort(inicio, fim, comp);
-        }
-    }
-
-    template <class StrictWeakOrdering>
-    void ThreadMergeSort(SortThreadPool& pool,
-        StrictWeakOrdering comp,
-        VariableIterator begin,
-        VariableIterator end,
-        int depth,
-        size_t max_depth) {
-
-        auto size = end - begin;
-
-        if (size <= max_sort_size) {
-            std::sort(begin, end, comp);
-            return;
-        }
-
-        VariableIterator mid = begin + size / 2;
-
-        if (size > max_sort_size_thread && depth < max_depth) {
-            auto fut = pool.enqueue([this, &pool, comp, begin, mid, depth, max_depth] {
-                ThreadMergeSort(pool, comp, begin, mid, depth + 1, max_depth);
-                });
-
-            ThreadMergeSort(pool, comp, mid, end, depth + 1, max_depth);
-            fut.get();
-        }
-        else {
-            OrdenaRecursivo(comp, begin, mid, depth + 1);
-            OrdenaRecursivo(comp, mid, end, depth + 1);
-        }
-
-        VariableIterator it = std::lower_bound(begin, mid, *mid, comp);
-        std::inplace_merge(it, mid, end, comp);
+        _sorter->Sort(begin, end, comp, mode);
     }
 
     template <class RandomAccessIterator, class StrictWeakOrdering>
@@ -446,4 +362,3 @@ public:
 };
 
 #endif
-

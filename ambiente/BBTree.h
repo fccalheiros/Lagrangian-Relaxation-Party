@@ -1,8 +1,6 @@
 #ifndef ARVOREBB_H
 #define ARVOREBB_H
 
-#define _HAS_STD_BYTE 0
-
 #include <vector> 
 #include <iostream>
 #include <string>

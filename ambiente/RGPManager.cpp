@@ -7,13 +7,13 @@
 
 
 
-RGPManager::RGPManager(Configuration* config)
-    : RGPManager(config, nullptr, Direction::MINIMIZE) 
+RGPManager::RGPManager(Configuration* config, std::shared_ptr<ParallelSorter> sorter)
+    : RGPManager(config, nullptr,sorter, Direction::MINIMIZE) 
 {
 }
 
-RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direction):
-  LagrangianManager(config, algo,direction),
+RGPManager::RGPManager(Configuration* config,  Algoritmo* algo, std::shared_ptr<ParallelSorter> sorter, Direction direction) :
+  LagrangianManager(config, algo, sorter, direction),
     _colunas(0),
     _colunas2(0),
     _colunas3(0),
@@ -22,7 +22,6 @@ RGPManager::RGPManager(Configuration* config, Algoritmo * algo, Direction direct
     _numPoints(0),
     _gridSize(0)
 {
-
     _cutoffForPricing = static_cast<float>(config->getIntegerValue("PRICEOUTCUTOFF"));
     if (_cutoffForPricing == 0) _cutoffForPricing = config->PLUS00;
 }

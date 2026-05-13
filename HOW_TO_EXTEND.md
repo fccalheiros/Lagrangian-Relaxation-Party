@@ -87,29 +87,32 @@ If you need more freedom, derive directly from `Algoritmo`.
 
 The most important methods are:
 
-`Relaxacao`
+`SolveRelaxation`
 Solves the Lagrangian subproblem and returns a relaxed solution.
 
-`Heuristica`
+`RunPrimalHeuristic`
 Tries to transform the relaxed solution into a feasible primal solution.
 
 Optional customization points include:
 
-`FixaVariaveis`
+`FixVariables`
 Uses reduced-cost style information to fix variables.
 
-`GeraCortes`
+`GenerateCuts`
 Adds cuts to strengthen the formulation during the Lagrangian solution process.
 
+`ColumnGeneration`
+Can price variables back into the active set when a problem-specific column generation strategy is available.
+
 `Price`
-Is a possible extension point for future pricing strategies, but the framework should not currently be considered ready for generic pricing or column generation.
+Is an older possible extension point for pricing strategies. In the current code, `ColumnGeneration` is the more relevant hook.
 
 `ChooseBranchVariable`
 Defines the branching rule used by Branch-and-Bound.
 
-This is also the place where relax-and-cut strategies can be implemented. In this framework, the method `GeraCortes` allows the algorithm to inspect the current relaxed solution, identify violated inequalities, and add new cuts dynamically. This makes it possible to combine Lagrangian Relaxation with cut generation inside the same iterative solution loop.
+This is also the place where relax-and-cut strategies can be implemented. In this framework, the method `GenerateCuts` allows the algorithm to inspect the current relaxed solution, identify violated inequalities, and add new cuts dynamically. This makes it possible to combine Lagrangian Relaxation with cut generation inside the same iterative solution loop.
 
-By contrast, pricing support is not yet mature as a general framework feature. Although there is a `Price` hook in the algorithm interface, it should be seen as experimental or problem-specific, not as a ready-to-use generic pricing or column generation component.
+By contrast, pricing support is still problem-specific. Although the algorithm interface contains pricing and column generation hooks, they should not yet be treated as ready-to-use generic components.
 
 In this repository, `RGPLagrangianRelaxation` is the example of a specialized algorithm.
 
@@ -123,8 +126,8 @@ In this repository, `RGPLagrangianRelaxation` is the example of a specialized al
 6. Implement `CreateProblem` to enumerate variables and create the constraints.
 7. Implement `InsertVariableIntoConstraint` so each variable knows the constraints it covers.
 8. Create an algorithm derived from `LagrangianRelaxation` or `Algoritmo`.
-9. Implement `Relaxacao` for your Lagrangian subproblem.
-10. Implement `Heuristica` to recover feasible solutions.
+9. Implement `SolveRelaxation` for your Lagrangian subproblem.
+10. Implement `RunPrimalHeuristic` to recover feasible solutions.
 11. Optionally customize cuts, branching, and variable fixing. Pricing can also be explored, but it is not yet a mature generic feature of the framework.
 12. Instantiate your manager and algorithm in `main` and run the tree through `BBTree`.
 
@@ -136,10 +139,13 @@ At a high level, the execution flow is:
 2. Build variables and constraints.
 3. Initialize the algorithm with a manager.
 4. Solve the Lagrangian Relaxation iteratively.
-5. Try to build primal solutions with a heuristic.
-6. Update bounds.
-7. Optionally generate cuts from the current relaxed solution or fix variables.
-8. Branch when needed and continue the search in the tree.
+5. Optionally fix variables using information from the relaxed solution.
+6. Try to build primal solutions with a heuristic.
+7. Update bounds.
+8. Optionally generate cuts from the current relaxed solution.
+9. Update the subgradient and check the stop condition.
+10. Optionally run problem-specific column generation.
+11. Branch when needed and continue the search in the tree.
 
 Because cuts may be added during the iterative process, the framework can be used not only as a plain Lagrangian Relaxation engine, but also as a basis for relax-and-cut approaches.
 

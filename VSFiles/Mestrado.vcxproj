@@ -163,6 +163,7 @@
     <ClInclude Include="..\ambiente\Configuration.h" />
     <ClInclude Include="..\ambiente\grafo.h" />
     <ClInclude Include="..\ambiente\LagrangianRelaxation.h" />
+    <ClInclude Include="..\ambiente\ParallelSort.h" />
     <ClInclude Include="..\ambiente\PartitionedVector.h" />
     <ClInclude Include="..\ambiente\RGPLagrangianRelaxation.h" />
     <ClInclude Include="..\ambiente\main.h" />
@@ -185,6 +186,7 @@
     <ClCompile Include="..\ambiente\Configuration.cpp" />
     <ClCompile Include="..\ambiente\grafo.cpp" />
     <ClCompile Include="..\ambiente\LagrangianRelaxation.cpp" />
+    <ClCompile Include="..\ambiente\ParallelSort.cpp" />
     <ClCompile Include="..\ambiente\RGPLagrangianRelaxation.cpp" />
     <ClCompile Include="..\ambiente\main.cpp" />
     <ClCompile Include="..\ambiente\LagrangianManager.cpp" />

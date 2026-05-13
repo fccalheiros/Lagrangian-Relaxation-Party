@@ -114,7 +114,7 @@ void LagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float
         }
     }
     else {
-        _manager->Ordena2(CompareLagrangian <Variable*> ());
+		_manager->SortActiveVariables(CompareLagrangian <Variable*>(), SortMode::PARALLEL_MERGE);   
         _ordenou = true;
         while ((*vIt)->_valorLag <= 0) {
             sol.push_back(*vIt);

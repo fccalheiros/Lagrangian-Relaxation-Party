@@ -20,7 +20,8 @@ int originalMain (int argc, char * argv[]) {
 
 	Configuration* config = LoadConfig(argv[2]);
     RGPLagrangianRelaxation* algorithm = new RGPLagrangianRelaxation(config);
-    RGPManager *manager = new RGPManager(config, algorithm);
+    auto sorter = std::make_shared<ParallelSorter>();
+    RGPManager *manager = new RGPManager(config, algorithm,sorter);
     algorithm->setLagrangianManager(manager);
     manager->GenerateProblem(argv[1]);
 

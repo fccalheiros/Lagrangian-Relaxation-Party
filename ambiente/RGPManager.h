@@ -1,10 +1,6 @@
 #ifndef _RGPManager_H
 #define _RGPManager_H
 
-#ifndef _HAS_STD_BYTE
-#define _HAS_STD_BYTE 0
-#endif
-
 #include <string>
 
 #include "LagrangianManager.h"
@@ -35,8 +31,8 @@ class RGPManager : public LagrangianManager {
 
     int _numPoints;
 
-    RGPManager(Configuration *config);
-    RGPManager(Configuration* config, Algoritmo *algo, Direction direction = Direction::MINIMIZE);
+    RGPManager(Configuration *config, std::shared_ptr<ParallelSorter> sorter);
+    RGPManager(Configuration* config, Algoritmo *algo, std::shared_ptr<ParallelSorter> sorter, Direction direction = Direction::MINIMIZE);
     RGPManager(RGPManager* m);
     virtual LagrangianManager* CopyAndClean(LagrangianManager* m);
 
@@ -46,10 +42,10 @@ class RGPManager : public LagrangianManager {
 
     virtual void SetVariableForBranch(Variable* v, short int value);
     virtual void Solve(float InitialCost, float KnownBound);
-    inline int Area() { return (_gridSize*_gridSize); }; 
+    inline int Area() const { return (_gridSize*_gridSize); }; 
 
     inline virtual std::string DefaultFilePrefix();
-    int getCardinality() { return _numPoints + 1; };
+    int getCardinality() const { return _numPoints + 1; };
     virtual void PrintSolution(std::string filename);
 
   

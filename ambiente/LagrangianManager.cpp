@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <fstream>
 
-LagrangianManager::LagrangianManager(Configuration* config, Algoritmo * algo, Direction direction, size_t max_sort_depth):
+LagrangianManager::LagrangianManager(Configuration* config, Algoritmo * algo, std::shared_ptr<ParallelSorter> sorter, Direction direction, size_t max_sort_depth ):
     _algo(algo),
     _direction(direction),
     _countConstraints(0),
@@ -17,7 +17,7 @@ LagrangianManager::LagrangianManager(Configuration* config, Algoritmo * algo, Di
     _totalVariaveis(0),
     _config(config),
 	_max_sort_depth(max_sort_depth),
-	_pool(static_cast<size_t>(1) << _max_sort_depth)
+    _sorter(sorter)
 {   
     setLowerBound(_config->MINUS00);
     setUpperBound(_config->PLUS00);
@@ -25,13 +25,13 @@ LagrangianManager::LagrangianManager(Configuration* config, Algoritmo * algo, Di
    
 }
 
-LagrangianManager::LagrangianManager(Configuration* config)
-    : LagrangianManager(config, nullptr) {
+LagrangianManager::LagrangianManager(Configuration* config, std::shared_ptr<ParallelSorter> sorter)
+    : LagrangianManager(config, nullptr, sorter, Direction::MINIMIZE, 4) {
 }
 
 
 LagrangianManager::LagrangianManager(LagrangianManager* m)
-    : LagrangianManager(m->_config, m->_algo, m->_direction, m->_max_sort_depth)
+    : LagrangianManager(m->_config, m->_algo, m->_sorter, m->_direction, m->_max_sort_depth)
 {
     _nonZeroCount = m->_nonZeroCount;
     _totalVariaveis = m->_totalVariaveis; // ajuste específico
@@ -583,7 +583,7 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
     int j;
     bool prim;
     Variable *var;
-    Ordena ( CompareNames <Variable *> () );   
+    SortActiveVariables( CompareNames <Variable *> () , SortMode::PARALLEL_MERGE );   
    
     fprintf(saida,"minimize\n");
 
@@ -705,7 +705,7 @@ std::string LagrangianManager::PrintLP() {
     bool first;
     Variable* var;
 
-    Ordena(CompareNames <Variable*>());
+	SortActiveVariables(CompareNames <Variable*>(), SortMode::PARALLEL_MERGE);
 
     work << "minimize" << std::endl;
 

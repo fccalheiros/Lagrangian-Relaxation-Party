@@ -35,7 +35,7 @@ void RGPLagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, fl
 	int Cardinality = ((RGPManager*)_manager)->getCardinality();
 
 	if (naoOrdena) {
-		_manager->NthElementCustom(4 * Cardinality, CompareLagrangian <Variable*>());
+		_manager->EstOrdemVariaveis2(Cardinality, CompareLagrangian <Variable*>());
 		_ordenou = false;
 	}
 	else {
@@ -245,7 +245,7 @@ void RGPLagrangianRelaxation::Relaxacao2(VariableSet& sol, float& valor, float I
 	float somaArea = 0;
 	ComputeLagrangianCosts(valor);
 	sol.erase(sol.begin(), sol.end());
-	_manager->SortActiveVariables(ComparaArea <Variable*>(),SortMode::PARALLEL_MERGE);
+	_manager->Ordena(ComparaArea <Variable*>());
 
 	while (somaArea < area) {
 		areaVar = (float)((RGPVariable*)_manager->_variables[i])->Area();

@@ -1,10 +1,6 @@
 #ifndef _LAGRANGIAN_RELAXATION_H
 #define _LAGRANGIAN_RELAXATION_H
 
-#ifndef _HAS_STD_BYTE
-#define _HAS_STD_BYTE 0
-#endif
-
 #include "algoritmo.h"
 
 class LagrangianRelaxation : public Algoritmo {

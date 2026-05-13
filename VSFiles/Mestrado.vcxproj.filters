@@ -62,6 +62,9 @@
     <ClInclude Include="..\ambiente\PartitionedVector.h">
       <Filter>Arquivos de Cabe�alho</Filter>
     </ClInclude>
+    <ClInclude Include="..\ambiente\ParallelSort.h">
+      <Filter>Arquivos de Cabe�alho</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Mestrado.rc">
@@ -84,5 +87,6 @@
     <ClCompile Include="..\ambiente\RGPManager.cpp" />
     <ClCompile Include="..\ambiente\Configuration.cpp" />
     <ClCompile Include="..\ambiente\SortThreadPool.cpp" />
+    <ClCompile Include="..\ambiente\ParallelSort.cpp" />
   </ItemGroup>
 </Project>
