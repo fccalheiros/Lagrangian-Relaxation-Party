@@ -23,7 +23,7 @@ class RGPLagrangianRelaxation : public LagrangianRelaxation {
 
   void Relaxacao2(VariableSet& sol, float& valor, float InitialCost);
 
-  virtual Algoritmo* getNew() { return new RGPLagrangianRelaxation(_config); }
+  virtual Solver* getNew() { return new RGPLagrangianRelaxation(_config); }
   
 protected:
 

@@ -1,5 +1,5 @@
-#ifndef _ALGORITMO_H
-#define _ALGORITMO_H
+#ifndef _SOLVER_H
+#define _SOLVER_H
 
 #include <vector>
 
@@ -11,7 +11,7 @@ typedef std::vector<Variable *> VariableSet;
 
 class LagrangianManager;
 
-class Algoritmo {
+class Solver {
   
  protected:
   
@@ -30,8 +30,8 @@ class Algoritmo {
 
   int _iteracoes;
 
-  Algoritmo(Configuration * config);
-  virtual ~Algoritmo();
+  Solver(Configuration * config);
+  virtual ~Solver();
 
   virtual void setLagrangianManager(LagrangianManager * mes);
   virtual void Inicializacao();
@@ -49,7 +49,7 @@ class Algoritmo {
   virtual bool CheckStopCondition() { return true; }
   virtual Variable* ChooseBranchVariable() { return NULL;  }
 
-  virtual Algoritmo* getNew() { return new Algoritmo(_config);  }
+  virtual Solver* getNew() { return new Solver(_config);  }
 
   inline double TotalRunTime() const { return _timer.ElapsedSeconds(); }
 

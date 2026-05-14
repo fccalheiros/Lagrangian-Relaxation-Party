@@ -1,11 +1,11 @@
 #include "LagrangianManager.h"
-#include "algoritmo.h"
+#include "Solver.h"
 #include <sstream>
 #include <iomanip>
 #include <fstream>
 
-LagrangianManager::LagrangianManager(Configuration* config, Algoritmo * algo, std::shared_ptr<ParallelSorter> sorter, Direction direction, size_t max_sort_depth ):
-    _algo(algo),
+LagrangianManager::LagrangianManager(Configuration* config, Solver * solver, std::shared_ptr<ParallelSorter> sorter, Direction direction, size_t max_sort_depth ):
+    _solver(solver),
     _direction(direction),
     _countConstraints(0),
     _countConstraintsND(0),
@@ -31,7 +31,7 @@ LagrangianManager::LagrangianManager(Configuration* config, std::shared_ptr<Para
 
 
 LagrangianManager::LagrangianManager(LagrangianManager* m)
-    : LagrangianManager(m->_config, m->_algo, m->_sorter, m->_direction, m->_max_sort_depth)
+    : LagrangianManager(m->_config, m->_solver, m->_sorter, m->_direction, m->_max_sort_depth)
 {
     _nonZeroCount = m->_nonZeroCount;
     _totalVariaveis = m->_totalVariaveis; // ajuste específico
@@ -46,7 +46,7 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
     {
         m->_upperBound           = _config->PLUS00;
         m->_lowerBound           = _config->MINUS00;
-        m->_algo                 = _algo;
+        m->_solver                 = _solver;
         m->_direction            = _direction;
         m->_countConstraints     = 0;
         m->_countConstraintsND   = 0;
@@ -225,23 +225,23 @@ void LagrangianManager::Solve(float InitialCost, float KnownBound ) {
     float primalValue;
 	float newLowerBound;
       
-    _algo->setLagrangianManager(this);  
-    _algo->Inicializacao();
+    _solver->setLagrangianManager(this);  
+    _solver->Inicializacao();
     setPrimalBound(KnownBound);
 
     while ( ! shouldStop ) {
     
         CleanUp();
         CustomProcessing();
-        _algo->SolveRelaxation(relaxedSolution, relaxedValue, InitialCost);
-        _algo->FixVariables(relaxedSolution, relaxedValue, InitialCost);
-        primalFound = _algo->RunPrimalHeuristic(relaxedSolution, primalSolution, primalValue, InitialCost);
+        _solver->SolveRelaxation(relaxedSolution, relaxedValue, InitialCost);
+        _solver->FixVariables(relaxedSolution, relaxedValue, InitialCost);
+        primalFound = _solver->RunPrimalHeuristic(relaxedSolution, primalSolution, primalValue, InitialCost);
         UpdateBounds(relaxedValue, primalValue, primalSolution, primalFound);
-        _algo->GenerateCuts(relaxedSolution);
+        _solver->GenerateCuts(relaxedSolution);
         
-        _algo->UpdateSubgradient(relaxedSolution);
-        shouldStop = _algo->CheckStopCondition();
-        columnsAdded = _algo->ColumnGeneration(relaxedSolution, newLowerBound, InitialCost);
+        _solver->UpdateSubgradient(relaxedSolution);
+        shouldStop = _solver->CheckStopCondition();
+        columnsAdded = _solver->ColumnGeneration(relaxedSolution, newLowerBound, InitialCost);
         if (columnsAdded) {
             if (newLowerBound > getLowerBound() /2 ) {
                 setDualBound(newLowerBound);
@@ -253,7 +253,7 @@ void LagrangianManager::Solve(float InitialCost, float KnownBound ) {
 		shouldStop = shouldStop && !columnsAdded;  
     }
 
-    _algo->Finalizacao();
+    _solver->Finalizacao();
     std::cout << std::endl << PrintVariableVector(relaxedSolution) << std::endl;
     FinalStats();
 }

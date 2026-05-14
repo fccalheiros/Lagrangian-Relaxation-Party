@@ -8,7 +8,7 @@
 /************ Comeco da LagrangianRelaxation *********************/
 
 LagrangianRelaxation::LagrangianRelaxation(Configuration *config):
-  Algoritmo(config)
+  Solver(config)
 {
     _alfa = (float)config->INI_ALFA;
     _lambda = config->LAMBDA;
@@ -28,11 +28,11 @@ LagrangianRelaxation::~LagrangianRelaxation()
 }
 
 void LagrangianRelaxation::setLagrangianManager(LagrangianManager *mes) {
-    Algoritmo::setLagrangianManager(mes);
+    Solver::setLagrangianManager(mes);
 }
 
 void LagrangianRelaxation::Inicializacao() {
-  Algoritmo::Inicializacao();
+  Solver::Inicializacao();
 }
 
 
@@ -427,7 +427,7 @@ bool LagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newLowe
     return false;
 }
 
-/************* Teste de parada do algoritmo lagrangiano ************/
+/************* Teste de parada do Solver lagrangiano ************/
 bool LagrangianRelaxation::CheckStopCondition() { 
 
     //if  ( ((_manager->getUpperBound() - _manager->getLowerBound()) < (float) _config->STOP_GAP) ||

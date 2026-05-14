@@ -32,7 +32,7 @@ class RGPManager : public LagrangianManager {
     int _numPoints;
 
     RGPManager(Configuration *config, std::shared_ptr<ParallelSorter> sorter);
-    RGPManager(Configuration* config, Algoritmo *algo, std::shared_ptr<ParallelSorter> sorter, Direction direction = Direction::MINIMIZE);
+    RGPManager(Configuration* config, Solver *solver, std::shared_ptr<ParallelSorter> sorter, Direction direction = Direction::MINIMIZE);
     RGPManager(RGPManager* m);
     virtual LagrangianManager* CopyAndClean(LagrangianManager* m);
 

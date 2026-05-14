@@ -38,7 +38,7 @@
     <ClInclude Include="..\ambiente\LagrangianRelaxation.h">
       <Filter>Arquivos de Cabe�alho</Filter>
     </ClInclude>
-    <ClInclude Include="..\ambiente\algoritmo.h">
+    <ClInclude Include="..\ambiente\Solver.h">
       <Filter>Arquivos de Cabe�alho</Filter>
     </ClInclude>
     <ClInclude Include="..\ambiente\Time.h">
@@ -65,6 +65,9 @@
     <ClInclude Include="..\ambiente\ParallelSort.h">
       <Filter>Arquivos de Cabe�alho</Filter>
     </ClInclude>
+    <ClInclude Include="..\ambiente\BBTreeNode.h">
+      <Filter>Arquivos de Cabe�alho</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Mestrado.rc">
@@ -76,7 +79,7 @@
     <ClCompile Include="Mestrado.cpp" />
     <ClCompile Include="..\ambiente\RGPLagrangianRelaxation.cpp" />
     <ClCompile Include="..\ambiente\LagrangianRelaxation.cpp" />
-    <ClCompile Include="..\ambiente\algoritmo.cpp" />
+    <ClCompile Include="..\ambiente\Solver.cpp" />
     <ClCompile Include="..\ambiente\RGPVariable.cpp" />
     <ClCompile Include="..\ambiente\Variable.cpp" />
     <ClCompile Include="..\ambiente\Constraint.cpp" />

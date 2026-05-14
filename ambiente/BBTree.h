@@ -1,117 +1,174 @@
-#ifndef ARVOREBB_H
-#define ARVOREBB_H
+// ============================================================
+// BBTree.h
+// ============================================================
 
-#include <vector> 
-#include <iostream>
+#ifndef BBTREE_H
+#define BBTREE_H
+
+// ============================================================
+// Includes
+// ============================================================
+
+#include <vector>
 #include <string>
 
-#include "algoritmo.h"
+#include "BBTreeNode.h"
 #include "Variable.h"
-#include "LagrangianManager.h"
+#include "Solver.h"
 #include "Configuration.h"
+#include "LagrangianManager.h"
+
+// ============================================================
+// Search strategy
+// ============================================================
 
 enum class SearchAlgorithm { DFS, BFS, NONE };
 
-class BBTreeNode {
-  
-    friend class BBTree;
-
- public: 
-  
-     BBTreeNode();
-     BBTreeNode(Configuration *config);
-     BBTreeNode(const BBTreeNode&);
-    ~BBTreeNode();
-
-    bool hasChild();
-
- protected:
-  
-    short int _father;
-    short int _leftSon;
-    short int _rightSon;
-    short int _index;
-    short int _fantasyNumber;
-
-    float _upperBound;
-    float _lowerBound;
-    float _initialCost;
-    float _originalBound;
-
-    bool _optimalFound; 
-    bool _executed;
-    bool _pruned;
-
-    double _totalRunTime;
-
-    LagrangianManager* _manager;
-    Algoritmo* _algo;
-
-    Variable* _branchVariable;
-    short int _value;
-
-};
-
+// ============================================================
+// BBTree
+// ============================================================
+// Branch-and-Bound tree controller.
+//
+// Responsibilities:
+// - Create and manage tree topology
+// - Execute nodes
+// - Propagate bounds
+// - Prune subtrees
+// - Coordinate branching decisions
+// - Maintain global tree state
+// ============================================================
 
 class BBTree {
 
 public:
 
+    // ========================================================
+    // Constructors / Destructor
+    // ========================================================
+
     BBTree();
-    BBTree(LagrangianManager* manager, Algoritmo* algo, Configuration *config);
-    BBTree(LagrangianManager* manager, Algoritmo* algo, SearchAlgorithm sa, Configuration *config);
+
+    BBTree(LagrangianManager* manager, Solver* solver, Configuration* config);
+
+    BBTree(LagrangianManager* manager, Solver* solver, SearchAlgorithm sa, Configuration* config);
+
     ~BBTree();
 
+    // ========================================================
+    // Tree construction
+    // ========================================================
+
     void populateTreeDFS(int father, int depth);
-    inline void populateTreeBFS(int father, int depth);
 
-    void ExecuteNextNode();
- 
-    inline void setCurrentNodeBranchVariable(Variable* v);
-    inline void setLeftSonValue(short int  value);
-    inline void setRightSonValue(short int  value);
+    void populateTreeBFS(int father, int depth);
 
-    inline float getUpperBound() { return _nodes[0]._upperBound; }
-    inline float getLowerBound() { return _nodes[0]._lowerBound; }
-
-    float evaluateLowerBound(int node);
-    float evaluateUpperBound(int node);
-
+    // ========================================================
+    // Execution
+    // ========================================================
 
     void GO();
 
+    void ExecuteNextNode();
+
+    // ========================================================
+    // Branching control
+    // ========================================================
+
+    inline void setCurrentNodeBranchVariable(Variable* v);
+
+    inline void setLeftSonValue(short int value);
+
+    inline void setRightSonValue(short int value);
+
+    // ========================================================
+    // Bounds
+    // ========================================================
+
+    inline float getUpperBound() {
+        return _nodes[0]._upperBound;
+    }
+
+    inline float getLowerBound() {
+        return _nodes[0]._lowerBound;
+    }
+
+    float evaluateLowerBound(int node);
+
+    float evaluateUpperBound(int node);
+
+    // ========================================================
+    // Output
+    // ========================================================
+
     std::string Print();
+
     void Print(std::string filename);
-    
- protected:
-
-    short int _current;
-    short int _nodesCount;
-    short int _nodesExecuted;
-
-
-    std::vector <BBTreeNode> _nodes;
-    Configuration *_config;
 
 protected:
 
+    // ========================================================
+    // Tree execution control
+    // ========================================================
+
+    short int _current = 0;
+
+    short int _nodesCount = 0;
+
+    short int _nodesExecuted = 0;
+
+    // ========================================================
+    // Tree data
+    // ========================================================
+
+    std::vector<BBTreeNode> _nodes;
+
+    Configuration* _config = nullptr;
+
+protected:
+
+    // ========================================================
+    // Branch-and-bound logic
+    // ========================================================
+
     bool StopTest();
+
     Variable* ChooseBranchVariable();
 
+    // ========================================================
+    // Pruning and bound propagation
+    // ========================================================
+
     inline void pruneSubTree(BBTreeNode* node);
+
     void pruneSubTree(int node);
+
     void reBoundSubtree(int node);
 
+    // ========================================================
+    // Tree navigation
+    // ========================================================
+
     inline short int getFather(int node);
+
     inline BBTreeNode* getFather(BBTreeNode* node);
 
+    // ========================================================
+    // Node lifecycle
+    // ========================================================
+
     inline void createEmptyNode(int father);
+
     inline void cleanUpNode(int node);
+
     inline void cleanUpNode(BBTreeNode* node);
 
-    void PrintBFS(int node, std::string & output);
+    // ========================================================
+    // Output helpers
+    // ========================================================
+
+    void PrintBFS(int node, std::string& output);
+
     void SetFantasyNumber(int node, int& number);
 };
 
 #endif
-

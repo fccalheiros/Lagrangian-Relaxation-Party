@@ -83,7 +83,7 @@ In this repository, `RGPManager` is the example of a specialized manager.
 
 If your problem fits the same general structure, derive from `LagrangianRelaxation`.
 
-If you need more freedom, derive directly from `Algoritmo`.
+If you need more freedom, derive directly from `Solver`.
 
 The most important methods are:
 
@@ -125,7 +125,7 @@ In this repository, `RGPLagrangianRelaxation` is the example of a specialized al
 5. Implement `ReadProblem` to load your instance data.
 6. Implement `CreateProblem` to enumerate variables and create the constraints.
 7. Implement `InsertVariableIntoConstraint` so each variable knows the constraints it covers.
-8. Create an algorithm derived from `LagrangianRelaxation` or `Algoritmo`.
+8. Create an algorithm derived from `LagrangianRelaxation` or `Solver`.
 9. Implement `SolveRelaxation` for your Lagrangian subproblem.
 10. Implement `RunPrimalHeuristic` to recover feasible solutions.
 11. Optionally customize cuts, branching, and variable fixing. Pricing can also be explored, but it is not yet a mature generic feature of the framework.

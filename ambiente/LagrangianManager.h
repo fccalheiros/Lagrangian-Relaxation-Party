@@ -11,7 +11,7 @@
 
 #include "Variable.h"
 #include "Constraint.h"
-#include "algoritmo.h"
+#include "Solver.h"
 #include "ParallelSort.h"
 #include "PartitionedVector.h"
 
@@ -65,7 +65,7 @@ public:
 
     std::vector<Variable*> _incumbentSolution;
 
-    Algoritmo* _algo;
+    Solver* _solver;
 
     // ========================================================
     // Counters
@@ -129,7 +129,7 @@ public:
     LagrangianManager(Configuration* config, std::shared_ptr<ParallelSorter> sorter);
 
     LagrangianManager(Configuration* config,
-        Algoritmo* algo,
+        Solver* solver,
         std::shared_ptr<ParallelSorter> sorter,
         Direction direction = Direction::MINIMIZE,
         size_t max_sort_depth = 4
@@ -141,7 +141,7 @@ public:
 
     virtual ~LagrangianManager();
 
-    inline void SetAlgorithm(Algoritmo* algo) { _algo = algo; }
+    inline void SetSolver(Solver* solver) { _solver = solver; }
 
     // ========================================================
     // Solve
@@ -267,7 +267,7 @@ public:
     void PrintLagrangian();
     virtual void PrintSolution() {};
     virtual void FinalStats();
-    inline double TotalRunTime() const { return _algo->TotalRunTime(); }
+    inline double TotalRunTime() const { return _solver->TotalRunTime(); }
 
     inline virtual std::string DefaultFilePrefix() { return "LagrangianManager"; }
 

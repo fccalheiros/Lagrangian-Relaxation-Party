@@ -1,9 +1,9 @@
-#include "algoritmo.h"
+#include "Solver.h"
 #include <iostream>
 
 
 
-Algoritmo::Algoritmo(Configuration * config) :
+Solver::Solver(Configuration * config) :
 	_manager(0),
 	_tempoInicio(0),
 	_tempoInicioCpu(0),
@@ -13,17 +13,17 @@ Algoritmo::Algoritmo(Configuration * config) :
 	_config(config)
 {}
 
-Algoritmo::~Algoritmo() {}
+Solver::~Solver() {}
 
-void Algoritmo::setLagrangianManager(LagrangianManager *mes){
+void Solver::setLagrangianManager(LagrangianManager *mes){
 	_manager = mes;
 }
 
-void Algoritmo::Inicializacao() { 
+void Solver::Inicializacao() { 
 	_timer.Reset();
 };
 
-void Algoritmo::Finalizacao() {
+void Solver::Finalizacao() {
 	printf("Execution time : %3.2f s\n"
 		   "CPU time       : %3.2f s\n"
 		    "Iterations     : %d\n",

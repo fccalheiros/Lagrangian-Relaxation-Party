@@ -1,9 +1,9 @@
 #ifndef _LAGRANGIAN_RELAXATION_H
 #define _LAGRANGIAN_RELAXATION_H
 
-#include "algoritmo.h"
+#include "Solver.h"
 
-class LagrangianRelaxation : public Algoritmo {
+class LagrangianRelaxation : public Solver {
 
 public:
 
@@ -27,7 +27,7 @@ public:
 
 	void ResetIterations() { _iteracoes = 0;  }
 
-	virtual Algoritmo* getNew() { return new LagrangianRelaxation(_config); }
+	virtual Solver* getNew() { return new LagrangianRelaxation(_config); }
 
 protected:
 

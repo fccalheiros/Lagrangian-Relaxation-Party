@@ -12,8 +12,8 @@ RGPManager::RGPManager(Configuration* config, std::shared_ptr<ParallelSorter> so
 {
 }
 
-RGPManager::RGPManager(Configuration* config,  Algoritmo* algo, std::shared_ptr<ParallelSorter> sorter, Direction direction) :
-  LagrangianManager(config, algo, sorter, direction),
+RGPManager::RGPManager(Configuration* config,  Solver* solver, std::shared_ptr<ParallelSorter> sorter, Direction direction) :
+  LagrangianManager(config, solver, sorter, direction),
     _colunas(0),
     _colunas2(0),
     _colunas3(0),
@@ -414,7 +414,7 @@ void RGPManager::PrintSolution(std::string filename) {
 
 void RGPManager::FinalStats() {
     LagrangianManager::FinalStats();
-    RGPLagrangianRelaxation* l = (RGPLagrangianRelaxation*)_algo;
+    RGPLagrangianRelaxation* l = (RGPLagrangianRelaxation*)_solver;
     std::cout << "Vezes 1  = " << l->_vezes1 << std::endl << "Vezes 2 = " << l->_vezes2 << std::endl;
     std::cout << "Fator Maior = " << l->_maximofator << std::endl;
     std::cout << std::endl << "Best Solution Found: " << std::endl << PrintVariableVector(_incumbentSolution);
