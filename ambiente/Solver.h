@@ -61,13 +61,13 @@ public:
     bool  operator() (Variable* v1, Variable* v2) {
 
         // Deve verificar se v1 e v2 sao "ativas" 
-        float custo1 = v1->_valorLag;
-        float custo2 = v2->_valorLag;
+        float custo1 = v1->_lagrangianCost;
+        float custo2 = v2->_lagrangianCost;
 
         if (custo1 < custo2) return true;
 
         if (custo1 == custo2)
-            if (v1->_nome < v2->_nome) return true;
+            if (v1->_name < v2->_name) return true;
 
         return false;
     }
@@ -79,13 +79,13 @@ public:
 
     bool  operator() (Variable* v1, Variable* v2) {
         // Deve verificar se v1 e v2 sao "ativas" 
-        float custo1 = v1->_valorLag;
-        float custo2 = v2->_valorLag;
+        float custo1 = v1->_lagrangianCost;
+        float custo2 = v2->_lagrangianCost;
 
         if (custo1 > custo2) return true;
 
         if (custo1 == custo2)
-            if (v1->_nome < v2->_nome) return true;
+            if (v1->_name < v2->_name) return true;
 
         return false;
     }
@@ -99,13 +99,13 @@ public:
     bool  operator() (Variable* v1, Variable* v2) {
 
         // Deve verificar se v1 e v2 sao "ativas" 
-        float custo1 = v1->_valorFO;
-        float custo2 = v2->_valorFO;
+        float custo1 = v1->_cost;
+        float custo2 = v2->_cost;
 
         if (custo1 < custo2) return true;
 
         if (custo1 == custo2)
-            if (v1->_nome < v2->_nome) return true;
+            if (v1->_name < v2->_name) return true;
 
         return false;
     }
@@ -117,13 +117,13 @@ public:
 
     bool  operator() (Variable* v1, Variable* v2) {
         // Deve verificar se v1 e v2 sao "ativas" 
-        float custo1 = v1->_valorFO;
-        float custo2 = v2->_valorFO;
+        float custo1 = v1->_cost;
+        float custo2 = v2->_cost;
 
         if (custo1 > custo2) return true;
 
         if (custo1 == custo2)
-            if (v1->_nome < v2->_nome) return true;
+            if (v1->_name < v2->_name) return true;
 
         return false;
     }
@@ -136,8 +136,8 @@ public:
 
     bool  operator() (Variable* v1, Variable* v2) {
         // Deve verificar se v1 e v2 sao "ativas" 
-        float custo1 = v1->_valorLag / v1->_linhasCobertas;
-        float custo2 = v2->_valorLag / v2->_linhasCobertas;
+        float custo1 = v1->_lagrangianCost / v1->_linhasCobertas;
+        float custo2 = v2->_lagrangianCost / v2->_linhasCobertas;
 
         if (custo1 < custo2) {
             if (custo2 > 0)
@@ -147,7 +147,7 @@ public:
             if (custo1 < 0)
                 return true;
         }
-        else if (v1->_nome < v2->_nome)
+        else if (v1->_name < v2->_name)
             return true;
 
         return false;

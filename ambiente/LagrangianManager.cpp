@@ -90,7 +90,7 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
 
         VariableIterator bestSolutionIt = _incumbentSolution.begin();
         for (; bestSolutionIt != _incumbentSolution.end(); bestSolutionIt++)
-            if ((*bestSolutionIt)->_nome == v->_nome) {
+            if ((*bestSolutionIt)->_name == v->_name) {
                 m->_incumbentSolution.push_back(v->CopyAndClean(NULL));
                 break;
             }
@@ -267,7 +267,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
     GetActiveVariablesRange(vBranch, vEnd);
 
     for (; vBranch != vEnd; vBranch++) {
-        if (v->_nome == (*vBranch)->_nome)
+        if (v->_name == (*vBranch)->_name)
             break;
     }
 
@@ -277,7 +277,7 @@ void LagrangianManager::SetVariableForBranch(Variable* v, short int value) {
     vIt = _incumbentSolution.begin();
     vEnd = _incumbentSolution.end();
     for (; vIt != vEnd; vIt++) {
-        if ((*vBranch)->_nome == (*vIt)->_nome) {
+        if ((*vBranch)->_name == (*vIt)->_name) {
             _incumbentSolution.erase(vIt);
             break;
         }
@@ -572,7 +572,7 @@ void LagrangianManager::PrintLagrangian() {
             if ( (j % 12) == 0 )  std::cout << std::endl;
             if ( ! prim )  std::cout << " + ";
                 prim = false;
-            std::cout << var->_valorLag << " x" << _variables[i]->getName();
+            std::cout << var->_lagrangianCost << " x" << _variables[i]->getName();
         }
     }
 }
@@ -615,7 +615,7 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
             if ( ! var->IsFixed() )  {
 	            if ( ! prim ) fprintf(saida," + "); 
 	            prim = false; 
-	            fprintf(saida,"x%d",var->_nome);
+	            fprintf(saida,"x%d",var->_name);
 	            j++;
 	            if ( (j%12) == 0 ) fprintf(saida,"\n");
             }
@@ -631,7 +631,7 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
         var = _variables[j];   
         if ( ! var->IsFixed() ) {
 	        for (i = 0; (int) i < var->_linhasCobertas; i++) {
-	            matriz[var->_constraints[i]->_index].push_back(var->_nome);
+	            matriz[var->_constraints[i]->_index].push_back(var->_name);
 	        }
         }
     }
@@ -658,7 +658,7 @@ void LagrangianManager::ImprimeLP(FILE *saida) {
 	        if ( ! var->IsFixed() )  {
 	            if ( ! prim ) fprintf(saida," + "); 
 	            prim = false; 
-	            fprintf(saida,"x%d",var->_nome);
+	            fprintf(saida,"x%d",var->_name);
 	            j++;
 	            if ( (j%12) == 0 ) fprintf(saida,"\n");
 	        }
@@ -758,7 +758,7 @@ std::string LagrangianManager::PrintLP() {
         var = _variables[j];
         if (!var->IsFixed()) {
             for (i = 0; (int)i < var->_linhasCobertas; i++) {
-                matrix[var->_constraints[i]->_index].push_back(var->_nome);
+                matrix[var->_constraints[i]->_index].push_back(var->_name);
             }
         }
     }

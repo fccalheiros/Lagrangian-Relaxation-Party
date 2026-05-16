@@ -37,8 +37,8 @@ public:
 
     bool  operator() (Variable* v1, Variable* v2) {
         // Deve verificar se v1 e v2 sao "ativas" 
-        float custo1 = v1->_valorLag / ((float)((RGPVariable*)v1)->Area());
-        float custo2 = v2->_valorLag / ((float)((RGPVariable*)v2)->Area());
+        float custo1 = v1->_lagrangianCost / ((float)((RGPVariable*)v1)->Area());
+        float custo2 = v2->_lagrangianCost / ((float)((RGPVariable*)v2)->Area());
 
         if (custo1 < custo2) {
             if (custo2 < 0) return false;
@@ -50,7 +50,7 @@ public:
             return false;
         }
 
-        if (v1->_nome < v2->_nome)
+        if (v1->_name < v2->_name)
             return true;
 
         return false;

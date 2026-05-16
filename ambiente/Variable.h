@@ -17,9 +17,9 @@ class Variable {
 
  public:
 
-	int   _nome;              
-	float _valorFO;
-	float _valorLag;          // Lagrangian cost of the variable in the current iteration. 
+	int   _name;              
+	float _cost;
+	float _lagrangianCost;          // Lagrangian cost of the variable in the current iteration. 
 
 
 	short int _linhasCobertas;
@@ -35,16 +35,16 @@ class Variable {
 
 	virtual ~Variable();
 
-	int    getName() const { return _nome; }
-	float  getCost() const { return _valorFO; }
-	float  getLagrangianCost() const { return _valorLag; }
+	int    getName() const { return _name; }
+	float  getCost() const { return _cost; }
+	float  getLagrangianCost() const { return _lagrangianCost; }
 
-	void setName(int s) { _nome = s; }
-	void setCost(float cost) { _valorFO = cost; }
-	void setLagrangianCost(float cost) { _valorLag = cost; }
+	void setName(int s) { _name = s; }
+	void setCost(float cost) { _cost = cost; }
+	void setLagrangianCost(float cost) { _lagrangianCost = cost; }
 	void addConstraint(Constraint *constraint);
 
-	void initializeLagrangianCost() { _valorLag = _valorFO; }
+	void initializeLagrangianCost() { _lagrangianCost = _cost; }
 
 	void FixToZero() { _isFixedToZero = true; }
 	void UnFix() { _fixa = false; _isFixedToZero = false; }
@@ -69,9 +69,9 @@ class Variable {
 
 	virtual inline bool Intercepta(Variable *varBase) { return false; }
 
-	bool operator==(const Variable& v) { return _nome == v._nome; }
+	bool operator==(const Variable& v) { return _name == v._name; }
 
-	bool operator==(const Variable* v) { return this->_nome == v->_nome; }
+	bool operator==(const Variable* v) { return this->_name == v->_name; }
 
 };
 

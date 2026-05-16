@@ -65,8 +65,8 @@ void LagrangianRelaxation::ComputeLagrangianCosts(float & multiplierSum) {
        for ( rest->ConstraintIterators(rComeco, rFim); rComeco != rFim; rComeco++) {
 	  Variable *var = (*rComeco);
 	  //float coef = 1.0;
-	  //var->_valorLag -= coef*multiplicador;
-	  var->_valorLag -= multiplicador;
+	  //var->_lagrangianCost -= coef*multiplicador;
+	  var->_lagrangianCost -= multiplicador;
        }
     }
   }
@@ -85,7 +85,7 @@ void LagrangianRelaxation::ComputeLagrangianCosts(float & multiplierSum) {
         float multiplicador = rest->getLagrangian();
         multiplierSum += multiplicador * rest->getRHS();
         for ( rest->ConstraintIterators(rComeco, rFim); rComeco != rFim; rComeco++) {  
-	        ((Variable *)(*rComeco))->_valorLag -= multiplicador;        //Está assumindo que o coeficiente da restrição é 1
+	        ((Variable *)(*rComeco))->_lagrangianCost -= multiplicador;        //Está assumindo que o coeficiente da restrição é 1
         }
     }
 
@@ -107,18 +107,18 @@ void LagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, float
     if (naoOrdena) {
         _ordenou = false;
         while (vIt != vEnd) {
-            if ((*vIt)->_valorLag <= 0) {
+            if ((*vIt)->_lagrangianCost <= 0) {
                 sol.push_back(*vIt);
-                valor += (*vIt)->_valorLag;
+                valor += (*vIt)->_lagrangianCost;
             }
         }
     }
     else {
 		_manager->SortActiveVariables(CompareLagrangian <Variable*>(), SortMode::PARALLEL_MERGE);   
         _ordenou = true;
-        while ((*vIt)->_valorLag <= 0) {
+        while ((*vIt)->_lagrangianCost <= 0) {
             sol.push_back(*vIt);
-            valor += (*vIt)->_valorLag;
+            valor += (*vIt)->_lagrangianCost;
         }
         
     }
@@ -332,8 +332,8 @@ bool LagrangianRelaxation::Price(VariableSet& relaxed) {
     float max = _config->MINUS00;
 
     for (; vIt != vEnd; vIt++) {
-        if ((*vIt)->_valorLag > max)
-            max = (*vIt)->_valorLag;
+        if ((*vIt)->_lagrangianCost > max)
+            max = (*vIt)->_lagrangianCost;
     }
 
     _manager->GetActiveVariablesRange(vIt, vEnd);
@@ -362,7 +362,7 @@ void LagrangianRelaxation::ComputeReducedCosts(bool onlyActiveVariables) {
             Variable* var = (*vFirst);
             var->initializeLagrangianCost();
             for (int i = 0; i < var->_linhasCobertas; i++) {
-                var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
+                var->_lagrangianCost -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
             }
             vFirst++;
         }
@@ -375,7 +375,7 @@ void LagrangianRelaxation::ComputeReducedCosts(bool onlyActiveVariables) {
             Variable* var = (*vFirst);
             var->initializeLagrangianCost();
             for (int i = 0; i < var->_linhasCobertas; i++) {
-                var->_valorLag -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
+                var->_lagrangianCost -= var->_constraints[i]->_lagrangian;   //Está assumindo que o coeficiente da restrição é 1
             }
             vFirst++;
         }
@@ -463,8 +463,8 @@ Variable* LagrangianRelaxation::ChooseBranchVariableLowLagrangian() {
     _manager->GetActiveVariablesRange(vIt, vEnd);
 
     for (; vIt != vEnd; vIt++) {
-        if ((*vIt)->_valorLag < MIN) {
-            MIN = (*vIt)->_valorLag;
+        if ((*vIt)->_lagrangianCost < MIN) {
+            MIN = (*vIt)->_lagrangianCost;
             vSelected = vIt;
         }
     }
@@ -487,7 +487,7 @@ Variable* LagrangianRelaxation::ChooseBranchVariableHighIncumbentCost() {
         for (; vIt != vEnd; vIt++) {
             _manager->GetActiveVariablesRange(vItAll, vEndAll);
             for (; vItAll != vEndAll; vItAll++) {
-                if ((*vIt)->_nome == (*vItAll)->_nome)
+                if ((*vIt)->_name == (*vItAll)->_name)
                     return (*vIt)->CopyAndClean(NULL);
             }
         }

@@ -275,7 +275,7 @@ public:
 
     float GetMaxLagrangian(VariableSet sol) {
         VariableIterator it = std::max_element(sol.begin(), sol.end(), CompareLagrangian<Variable*>());
-        return (*it)->_valorLag;
+        return (*it)->_lagrangianCost;
     }
 
 public:

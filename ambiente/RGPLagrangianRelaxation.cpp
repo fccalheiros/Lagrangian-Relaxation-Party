@@ -49,7 +49,7 @@ void RGPLagrangianRelaxation::SolveRelaxation(VariableSet& sol, float& valor, fl
 	for (i = 0; i < Cardinality; i++) {
 		Variable* var = (Variable*)(_manager->_variables[i]);
 		sol.push_back(var);
-		valor += var->_valorLag;
+		valor += var->_lagrangianCost;
 	}
 	std::cout << std::endl;
 }
@@ -86,24 +86,24 @@ bool RGPLagrangianRelaxation::ColumnGeneration(VariableSet& relaxed, float& newL
 
 			var->initializeLagrangianCost();
 			for (int i = 0; i < var->_linhasCobertas; i++) {
-				var->_valorLag -= var->_constraints[i]->_lagrangian;
+				var->_lagrangianCost -= var->_constraints[i]->_lagrangian;
 			}
 
-			if (var->_valorLag < bestRC) {
-				bestRC = var->_valorLag;
+			if (var->_lagrangianCost < bestRC) {
+				bestRC = var->_lagrangianCost;
 				bestVar = vIt;
 			}
 
-			if (var->_valorLag < limit - EPS) {
-				std::cout << "x" << var->getName() << " : " << var->getCost() << " -> " << var->_valorLag << std::endl;
+			if (var->_lagrangianCost < limit - EPS) {
+				std::cout << "x" << var->getName() << " : " << var->getCost() << " -> " << var->_lagrangianCost << std::endl;
 				var->logicalPriceIn();
 				isAnyVariablePricedIn = true;
 			}
 
-			if (var->_valorLag < heap.top()) {
-				RelaxedSolutionCost += var->_valorLag - heap.top();
+			if (var->_lagrangianCost < heap.top()) {
+				RelaxedSolutionCost += var->_lagrangianCost - heap.top();
 				heap.pop();
-				heap.push(var->_valorLag);
+				heap.push(var->_lagrangianCost);
 			}
 		}
 
@@ -189,14 +189,14 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 
 			vTeste = (RGPVariable *) *varTeste;
 			if ( vTeste->IsFixed() ) break; 
-			soma = _somaMultiplicadores + vTeste->_valorLag + InitialCost;
+			soma = _somaMultiplicadores + vTeste->_lagrangianCost + InitialCost;
 			contaVar = 1;
 			vTeste->RetornaSegmentos(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2);
 			_manager->GetActiveVariablesRange(var,varFim);
 			for (; var != varFim; var++ ) {
 				if ( ! ((RGPVariable *)(*var))->Intercepta(veX, veY1, veY2, vdX, vdY1, vdY2, hsY, hsX1, hsX2, hiY ,hiX1, hiX2) ) 
-					if ( (*var)->_nome != vTeste->_nome ) { 
-						soma += (*var)->_valorLag;
+					if ( (*var)->_name != vTeste->_name ) { 
+						soma += (*var)->_lagrangianCost;
 						contaVar++;
 						if ( contaVar == CardinalityRestriction ) break;
 						if ( soma > LS - _config->STOP_GAP ) break;
@@ -210,7 +210,7 @@ void RGPLagrangianRelaxation::FixVariables(VariableSet &solRel, float valor, flo
 			else {
 				if (contaVar != CardinalityRestriction) {
 					std::cout << "Dif2: " ;
-					std::cout << "x" << vTeste->_nome << " ++ " << soma << " ++ " << contaVar << " ++ " << valor << std::endl;
+					std::cout << "x" << vTeste->_name << " ++ " << soma << " ++ " << contaVar << " ++ " << valor << std::endl;
 				}
 				varTeste++;  	
 			}
@@ -253,13 +253,13 @@ void RGPLagrangianRelaxation::Relaxacao2(VariableSet& sol, float& valor, float I
 		//printf("%1.4f ",_manager->_variables[i]->getLagrangianCost() / areaVar);
 		if (somaArea < area) {
 			sol.push_back(_manager->_variables[i]);
-			valor += _manager->_variables[i]->_valorLag;
+			valor += _manager->_variables[i]->_lagrangianCost;
 			i++;
 		}
 		else {
 			_fracionario = _manager->_variables[i];
 			_valorFracionario = ((float)area - somaArea + areaVar) / areaVar;
-			valor += _valorFracionario * _manager->_variables[i]->_valorLag;
+			valor += _valorFracionario * _manager->_variables[i]->_lagrangianCost;
 		}
 	}
 	//std::cout << std::endl;

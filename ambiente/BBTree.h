@@ -74,6 +74,12 @@ public:
     // Branching control
     // ========================================================
 
+	bool MoveToNextOpenNode();
+
+    bool ShouldBranchNode(int node);
+
+    void BranchNode(int node);
+
     inline void setCurrentNodeBranchVariable(Variable* v);
 
     inline void setLeftSonValue(short int value);
@@ -104,13 +110,17 @@ public:
 
     void Print(std::string filename);
 
+    void PrintNodeStart(int node);
+
+    void PrintNodeEnd(int node);
+
 protected:
 
     // ========================================================
     // Tree execution control
     // ========================================================
 
-    short int _current = 0;
+    short int _currentNode = 0;
 
     short int _nodesCount = 0;
 

@@ -82,7 +82,7 @@ public:
 	CompareNames() { }
 
 	bool operator() (Variable* v1, Variable* v2) {
-		if (v1->_nome < v2->_nome)
+		if (v1->_name < v2->_name)
 			return true;
 		return false;
 	}

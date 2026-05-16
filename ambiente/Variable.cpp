@@ -1,9 +1,9 @@
 #include "Variable.h"
 
 Variable::Variable(float coef, int nome, short int coveredConstraints,float valorLag):
-    _nome(nome),
-    _valorFO(coef),
-    _valorLag(valorLag),
+    _name(nome),
+    _cost(coef),
+    _lagrangianCost(valorLag),
     _linhasCobertas(coveredConstraints)
 {}
 
@@ -12,7 +12,7 @@ Variable::Variable() :
 }
 
 Variable::Variable(Variable* v) :
-    Variable(v->_valorFO, v->_nome, v->_linhasCobertas, 0.0f)
+    Variable(v->_cost, v->_name, v->_linhasCobertas, 0.0f)
 {
 }
 
@@ -22,11 +22,11 @@ Variable* Variable::CopyAndClean(Variable* v) {
         v = new Variable(this);
     }
     else {
-        v->_nome = _nome;
-        v->_valorFO = _valorFO;
+        v->_name = _name;
+        v->_cost = _cost;
         v->_linhasCobertas = _linhasCobertas;
 
-        v->_valorLag = 0;
+        v->_lagrangianCost = 0;
         v->_isFixedToZero = false;
         v->_fixa = false;
 		if (_isPricedOut)

@@ -90,7 +90,7 @@ void Constraint::CleanUpConstraint() {
 
 
 void Constraint::InsertVariable(Variable* var, float coef) {
-    _key += var->_nome;
+    _key += var->_name;
     size_t i = _variables.size();
     size_t j = _variables.capacity();
     if (i == j) {
@@ -101,7 +101,7 @@ void Constraint::InsertVariable(Variable* var, float coef) {
 }
 
 void Constraint::RemoveVariable(VariableIterator & it) {
-    //_key -= (*it)->_nome;
+    //_key -= (*it)->_name;
     _variables.erase(it);
 }
 
@@ -137,7 +137,7 @@ float Constraint::getIntercession(std::vector <Variable*>& sol)
     for (ConstraintIterators(begin, end), i = 0; i < solSize; i++) {
         begin = std::lower_bound(begin, end, sol[i], CompareNames <Variable*>());
         if (begin == end) return count;
-        if ((*begin)->_nome == sol[i]->_nome)
+        if ((*begin)->_name == sol[i]->_name)
             count++;
     }
 
@@ -189,7 +189,7 @@ void Constraint::PrintBeasley() {
 
     for (; it != itFim; it++) {
         if ((i % 12) == 0) std::cout << "\n";
-        std::cout << (((*it)->_nome) + 1) << " ";
+        std::cout << (((*it)->_name) + 1) << " ";
         i++;
     }
 }
