@@ -81,12 +81,18 @@ void BBTree::populateTreeBFS(int node, int depth)
 
 void BBTree::GO()
 {
-    while (!StopTest()) {
+    while (true) {
 
         if ( ! MoveToNextOpenNode() )
 			break;
 
         ExecuteNode(_currentNode);
+		
+        ProcessNodeCompletion(_currentNode);
+
+        if ( CheckGlobalOptimality() ) {
+            break;
+		}
 
         if ( ShouldBranchNode(_currentNode) ) {
 			BranchNode(_currentNode);
@@ -197,56 +203,56 @@ Variable* BBTree::ChooseBranchVariable()
 // Stop criteria and bound propagation
 // ============================================================
 
-bool BBTree::StopTest()
-{
-    float UB;
-    float LB;
+void BBTree::ProcessNodeCompletion(int node) {
 
-    BBTreeNode* node = &(_nodes[_currentNode]);
-    BBTreeNode* lastNode;
-
-    if (node->_optimalFound)
+    if (_nodes[node]._optimalFound)
         pruneSubTree(node);
 
-    UB = node->_upperBound;
-    LB = node->_lowerBound;
+	PropagateBoundsToRoot(node);
 
-    if (LB > UB)
-        LB = UB - 0.0001f;
+    if ( ! CheckGlobalOptimality() ) {
+        reBoundSubtree(0); 
+    }
 
-    lastNode = node;
-    node = getFather(node);
+}
 
-    while (node != NULL) {
+void BBTree::PropagateBoundsToRoot(int nodeIndex)
+{
+    BBTreeNode* node = &(_nodes[nodeIndex]);
+    float UB = node->_upperBound;
 
-        if (UB < node->_upperBound) {
+    BBTreeNode* father = getFather(node);
 
-            node->_upperBound = UB;
-            node->_manager->StoreIncumbentfromBranchAndBound(lastNode->_manager->_incumbentSolution);
+    while (father != NULL) {
 
-            if (lastNode->_value == 1)
-                node->_manager->AddToIncumbentfromBranchAndBound(node->_branchVariable);
-            if ((UB - node->_lowerBound) < _config->STOP_GAP) {
-                node->_optimalFound = true;
-                pruneSubTree(node);
-            }
+        UpdateAncestorIncumbent(node, father, UB);
+
+        if ((UB - father->_lowerBound) < _config->STOP_GAP) {
+            father->_optimalFound = true;
+            pruneSubTree(father);
         }
 
-        if (_nodes[node->_leftSon]._optimalFound && _nodes[node->_rightSon]._optimalFound) {
-            node->_optimalFound = true;
+        if (_nodes[father->_leftSon]._optimalFound && _nodes[father->_rightSon]._optimalFound) {
+            father->_optimalFound = true;
         }
-        lastNode = node;
-        node = getFather(node);
+
+        node = father;
+        father = getFather(father);
+    }
+}
+void BBTree::UpdateAncestorIncumbent(BBTreeNode* node, BBTreeNode* father, float UB) {
+
+    if (UB < father->_upperBound) {
+        father->_upperBound = UB;
+        father->_manager->StoreIncumbentfromBranchAndBound(node->_manager->_incumbentSolution);
+        if (node->_value == 1)
+            father->_manager->AddToIncumbentfromBranchAndBound(father->_branchVariable);
     }
 
-    if ((_nodes[0]._upperBound - _nodes[0]._lowerBound) < _config->STOP_GAP) {
-        return true;
-    }
-    else {
-        reBoundSubtree(0);
-    }
+}
 
-    return false;
+bool BBTree::CheckGlobalOptimality() {
+    return ( getUpperBound() - getLowerBound() ) < _config->STOP_GAP;
 }
 
 // ============================================================

@@ -176,7 +176,6 @@
     <ClInclude Include="..\ambiente\Time.h" />
     <ClInclude Include="..\ambiente\Variable.h" />
     <ClInclude Include="..\ambiente\RGPVariable.h" />
-    <ClInclude Include="..\ambiente\SortThreadPool.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Mestrado.rc" />
@@ -196,7 +195,6 @@
     <ClCompile Include="..\ambiente\RGPManager.cpp" />
     <ClCompile Include="..\ambiente\Variable.cpp" />
     <ClCompile Include="..\ambiente\RGPVariable.cpp" />
-    <ClCompile Include="..\ambiente\SortThreadPool.cpp" />
     <ClCompile Include="Mestrado.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

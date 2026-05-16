@@ -71,16 +71,6 @@ public:
 	void ExecuteNode(int node);
 
     // ========================================================
-    // Branching control
-    // ========================================================
-
-	bool MoveToNextOpenNode();
-
-    bool ShouldBranchNode(int node);
-
-    void BranchNode(int node);
-
-    // ========================================================
     // Bounds
     // ========================================================
 
@@ -103,10 +93,6 @@ public:
     std::string Print();
 
     void Print(std::string filename);
-
-    void PrintNodeStart(int node);
-
-    void PrintNodeEnd(int node);
 
 	void PrintBranchAndBoundFinalStats();
 
@@ -133,16 +119,32 @@ protected:
 protected:
 
     // ========================================================
-    // Branch-and-bound logic
+    // Branching control
     // ========================================================
 
-    bool StopTest();
+    bool MoveToNextOpenNode();
+
+    bool ShouldBranchNode(int node);
+
+    void BranchNode(int node);
 
     Variable* ChooseBranchVariable();
+
+    bool CheckGlobalOptimality();
+
+    // ========================================================
+    // Node operations
+    // ========================================================
+
+    void ProcessNodeCompletion(int node);
 
     // ========================================================
     // Pruning and bound propagation
     // ========================================================
+
+    void PropagateBoundsToRoot(int nodeIndex);
+
+	void UpdateAncestorIncumbent(BBTreeNode* node, BBTreeNode* father, float UB);
 
     inline void pruneSubTree(BBTreeNode* node);
 
@@ -171,6 +173,10 @@ protected:
     // ========================================================
     // Output helpers
     // ========================================================
+
+    void PrintNodeStart(int node);
+
+    void PrintNodeEnd(int node);
 
     void PrintBFS(int node, std::string& output);
 
