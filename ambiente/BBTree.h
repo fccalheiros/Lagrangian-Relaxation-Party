@@ -68,7 +68,7 @@ public:
 
     void GO();
 
-    void ExecuteNextNode();
+	void ExecuteNode(int node);
 
     // ========================================================
     // Branching control
@@ -79,12 +79,6 @@ public:
     bool ShouldBranchNode(int node);
 
     void BranchNode(int node);
-
-    inline void setCurrentNodeBranchVariable(Variable* v);
-
-    inline void setLeftSonValue(short int value);
-
-    inline void setRightSonValue(short int value);
 
     // ========================================================
     // Bounds
@@ -113,6 +107,8 @@ public:
     void PrintNodeStart(int node);
 
     void PrintNodeEnd(int node);
+
+	void PrintBranchAndBoundFinalStats();
 
 protected:
 

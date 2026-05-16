@@ -81,98 +81,76 @@ void BBTree::populateTreeBFS(int node, int depth)
 
 void BBTree::GO()
 {
-    Variable* v;
-
     while (!StopTest()) {
 
-        ExecuteNextNode();
+        if ( ! MoveToNextOpenNode() )
+			break;
 
-        if (_currentNode == _nodesCount)
-            break;
+        ExecuteNode(_currentNode);
 
-        if (!_nodes[_currentNode]._optimalFound && _nodes[_currentNode].HasChild()) {
-            v = ChooseBranchVariable();
-            setCurrentNodeBranchVariable(v);
-            setLeftSonValue(1);
-            setRightSonValue(0);
+        if ( ShouldBranchNode(_currentNode) ) {
+			BranchNode(_currentNode);
         }
     }
 
-    std::cout << Print();
-    std::cout << std::endl << std::endl;
-
-    std::cout << "Number of Nodes: " << _nodesExecuted << std::endl;
-
-    if (_nodes[0]._optimalFound) {
-        std::cout << "Branch End - Optimality proved : " << _nodes[0]._upperBound << std::endl;
-    }
-    else {
-        std::cout << "Branch End - Optimality not proved - Best Bound: " << _nodes[0]._upperBound << std::endl;
-        std::cout << "Lower Bound: " << evaluateLowerBound(0) << std::endl;
-    }
+	PrintBranchAndBoundFinalStats();
 }
 
 // ============================================================
 // Node execution
 // ============================================================
 
-void BBTree::ExecuteNextNode()
+void BBTree::ExecuteNode(int node)
 {
     Variable* v = nullptr;
-
-    while (_nodes[_currentNode]._executed || _nodes[_currentNode]._pruned) {
-        _currentNode++;
-        if (_currentNode == _nodesCount)
-            return;
-    }
 
     // ========================================================
     // Create node problem
     // ========================================================
 
-    if (_currentNode != 0) {
+    if (node != 0) {
 
-        int father = getFather(_currentNode);	
+        int father = getFather(node);
         v = _nodes[father]._branchVariable;
-        _nodes[_currentNode]._manager = _nodes[father]._manager->CopyAndClean(NULL);
-        _nodes[_currentNode]._solver  = _nodes[father]._solver->getNew();
-		_nodes[_currentNode]._manager->SetSolver(_nodes[_currentNode]._solver);
-		_nodes[_currentNode]._manager->SetVariableForBranch(v, _nodes[_currentNode]._value);
+        _nodes[node]._manager = _nodes[father]._manager->CopyAndClean(NULL);
+        _nodes[node]._solver = _nodes[father]._solver->getNew();
+        _nodes[node]._manager->SetSolver(_nodes[node]._solver);
+        _nodes[node]._manager->SetVariableForBranch(v, _nodes[node]._value);
     }
 
-	PrintNodeStart(_currentNode);
+    PrintNodeStart(node);
 
     // ========================================================
     // Solve node
     // ========================================================
 
-    _nodes[_currentNode]._manager->Solve(_nodes[_currentNode]._initialCost, getUpperBound());
+    _nodes[node]._manager->Solve(_nodes[node]._initialCost, getUpperBound());
 
     // ========================================================
     // Store node results
     // ========================================================
 
-    _nodes[_currentNode]._executed = true;
+    _nodes[node]._executed = true;
     _nodesExecuted++;
-    _nodes[_currentNode]._lowerBound    = _nodes[_currentNode]._manager->getLowerBound();
-    _nodes[_currentNode]._upperBound    = _nodes[_currentNode]._manager->getUpperBound();
-    _nodes[_currentNode]._optimalFound  = _nodes[_currentNode]._manager->OptimalFound();
-    _nodes[_currentNode]._originalBound = _nodes[_currentNode]._manager->getPrimalBound();
-    _nodes[_currentNode]._totalRunTime  = _nodes[_currentNode]._manager->TotalRunTime();
+    _nodes[node]._lowerBound = _nodes[node]._manager->getLowerBound();
+    _nodes[node]._upperBound = _nodes[node]._manager->getUpperBound();
+    _nodes[node]._optimalFound = _nodes[node]._manager->OptimalFound();
+    _nodes[node]._originalBound = _nodes[node]._manager->getPrimalBound();
+    _nodes[node]._totalRunTime = _nodes[node]._manager->TotalRunTime();
 
     // ========================================================
     // Cleanup parent node
     // ========================================================
 
-    int node = getFather(_currentNode);
+    int father = getFather(node);
 
-    if (node >= 0) {
-        if (_nodes[_nodes[node]._leftSon]._executed && _nodes[_nodes[node]._rightSon]._executed) {
-            cleanUpNode(node);
+    if (father >= 0) {
+        if (_nodes[_nodes[father]._leftSon]._executed && _nodes[_nodes[father]._rightSon]._executed) {
+            cleanUpNode(father);
         }
     }
 
-	PrintNodeEnd(_currentNode);
+    PrintNodeEnd(node);
 }
 
 // ============================================================
@@ -213,31 +191,6 @@ bool BBTree::ShouldBranchNode(int node)
 Variable* BBTree::ChooseBranchVariable()
 {
     return _nodes[_currentNode]._solver->ChooseBranchVariable();
-}
-
-void BBTree::setCurrentNodeBranchVariable(Variable* v)
-{
-    _nodes[_currentNode]._branchVariable = v;
-}
-
-void BBTree::setLeftSonValue(short int value)
-{
-    if (_nodes[_currentNode]._leftSon > 0) {
-        _nodes[_nodes[_currentNode]._leftSon]._value = value;
-        _nodes[_nodes[_currentNode]._leftSon]._initialCost =
-            _nodes[_currentNode]._branchVariable->_cost * value +
-            _nodes[_currentNode]._initialCost;
-    }
-}
-
-void BBTree::setRightSonValue(short int value)
-{
-    if (_nodes[_currentNode]._rightSon > 0) {
-        _nodes[_nodes[_currentNode]._rightSon]._value = value;
-        _nodes[_nodes[_currentNode]._rightSon]._initialCost =
-            _nodes[_currentNode]._branchVariable->_cost * value +
-            _nodes[_currentNode]._initialCost;
-    }
 }
 
 // ============================================================
@@ -407,15 +360,16 @@ float BBTree::evaluateUpperBound(int node)
 // ============================================================
 
 void BBTree::PrintNodeStart(int node) {
-	Variable* v = _nodes[node]._branchVariable;
+	
 	if (node != 0) {
+        Variable* v = _nodes[getFather(node)]._branchVariable;
         std::cout << std::endl << std::endl;
         std::cout << "---------------------------------------------------------------" << std::endl;
         std::cout << "   Starting new node: " << node << std::endl;
         std::cout << "   Father node:       " << _nodes[node]._father << std::endl;
-        std::cout << "   Branch Variable:   " << v->_name << " Cost: " << v->_cost
-                  << "   Branch Value :     " << _nodes[node]._value
-                  << "   Initial Cost:      " << _nodes[node]._initialCost << std::endl;
+        std::cout << "   Branch Variable:   " << v->_name << " Cost: " << v->_cost << std::endl;
+        std::cout << "   Branch Value :     " << _nodes[node]._value << std::endl;
+        std::cout << "   Initial Cost:      " << _nodes[node]._initialCost << std::endl;
         std::cout << "---------------------------------------------------------------" << std::endl;
     }
     else {
@@ -428,11 +382,12 @@ void BBTree::PrintNodeStart(int node) {
 }
 
 void BBTree::PrintNodeEnd(int node) {
-    Variable* v = _nodes[node]._branchVariable;
+    
     std::cout << "---------------------------------------------------------------" << std::endl;
     std::cout << "   End node execution: " << node << std::endl;
 
     if (node != 0) {
+        Variable* v = _nodes[getFather(node)]._branchVariable;
         std::cout << "   Father node: " << _nodes[node]._father << std::endl;
         std::cout << "   Branch Variable: " << v->_name << std::endl
                   << "   Cost: " << v->_cost << std::endl
@@ -442,6 +397,22 @@ void BBTree::PrintNodeEnd(int node) {
     std::cout << "   Upper Bound: " << _nodes[node]._upperBound
               << " --- Lower Bound: " << _nodes[node]._lowerBound << std::endl;
     std::cout << "---------------------------------------------------------------" << std::endl;
+}
+
+void BBTree::PrintBranchAndBoundFinalStats() {
+
+    std::cout << Print();
+    std::cout << std::endl << std::endl;
+    std::cout << "Number of Nodes: " << _nodesExecuted << std::endl;
+
+    if (_nodes[0]._optimalFound) {
+        std::cout << "Branch End - Optimality proved : " << _nodes[0]._upperBound << std::endl;
+    }
+    else {
+        std::cout << "Branch End - Optimality not proved - Best Bound: " << _nodes[0]._upperBound << std::endl;
+        std::cout << "Lower Bound: " << evaluateLowerBound(0) << std::endl;
+    }
+
 }
 
 void BBTree::Print(std::string filename)

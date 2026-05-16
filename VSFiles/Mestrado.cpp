@@ -10,9 +10,10 @@ int main(int argc, char* argv[])
 {
 #ifndef NDEBUG
     argc = 3;
-    std::string str0 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\w500h500n200i55.pt";
+    std::string path = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\source\\repos\\Lagrangian-Relaxation-Party\\Instances\\";
+    std::string str0 = path + "w50h50n36i16.pt";
     argv[1] = &str0[0];
-    std::string str1 = "C:\\Users\\fccal\\iCloudDrive\\Notebook\\Documentos\\Pessoal\\mestrado\\instancias\\Configuration.json";
+    std::string str1 = path + "Configuration.json";
     argv[2] = &str1[0];
 #endif
 
