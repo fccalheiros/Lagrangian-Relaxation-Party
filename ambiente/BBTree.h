@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include <deque>
 
 #include "BBTreeNode.h"
 #include "Variable.h"
@@ -50,17 +51,7 @@ public:
 
     BBTree(LagrangianManager* manager, Solver* solver, Configuration* config);
 
-    BBTree(LagrangianManager* manager, Solver* solver, SearchAlgorithm sa, Configuration* config);
-
     ~BBTree();
-
-    // ========================================================
-    // Tree construction
-    // ========================================================
-
-    void populateTreeDFS(int father, int depth);
-
-    void populateTreeBFS(int father, int depth);
 
     // ========================================================
     // Execution
@@ -108,11 +99,15 @@ protected:
 
     short int _nodesExecuted = 0;
 
+    SearchAlgorithm _branchStrategy = SearchAlgorithm::NONE;
+
     // ========================================================
     // Tree data
     // ========================================================
 
     std::vector<BBTreeNode> _nodes;
+
+    std::deque<int> _openNodes;
 
     Configuration* _config = nullptr;
 
@@ -127,8 +122,10 @@ protected:
     bool ShouldBranchNode(int node);
 
     void BranchNode(int node);
+    
+    void ScheduleChildren(int node);
 
-    Variable* ChooseBranchVariable();
+    Variable* ChooseBranchVariable(int node);
 
     bool CheckGlobalOptimality();
 
@@ -164,7 +161,7 @@ protected:
     // Node lifecycle
     // ========================================================
 
-    inline void createEmptyNode(int father);
+    inline int createEmptyNode(int father);
 
     inline void cleanUpNode(int node);
 
@@ -181,6 +178,11 @@ protected:
     void PrintBFS(int node, std::string& output);
 
     void SetFantasyNumber(int node, int& number);
+
+private: 
+
+    void SetBranchStrategy();
+
 };
 
 #endif

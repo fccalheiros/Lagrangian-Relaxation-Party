@@ -18,61 +18,29 @@ BBTree::BBTree()
 BBTree::BBTree(LagrangianManager* manager, Solver* solver, Configuration* config)
     : _config(config)
 {
-    _nodes.reserve(static_cast<int>(std::pow(2, _config->MAX_DEPTH + 1)));
+    SetBranchStrategy();
+    _nodes.reserve(_config->MAX_NODES);
     createEmptyNode(-1);
-    _nodes[_currentNode]._manager = manager;
-    _nodes[_currentNode]._solver = solver;
+    _nodes[0]._manager = manager;
+    _nodes[0]._solver = solver;
+    _openNodes.push_back(0);
 }
-BBTree::BBTree(LagrangianManager* manager, Solver* solver, SearchAlgorithm sa, Configuration* config)
-    : BBTree(manager, solver, config)
-{
-    if (sa == SearchAlgorithm::BFS)
-        populateTreeBFS(0, _config->MAX_DEPTH);
-    else if (sa == SearchAlgorithm::DFS)
-        populateTreeDFS(0, _config->MAX_DEPTH);
+
+void BBTree::SetBranchStrategy() {
+    std::string upperStrategy = _config->getValue("BRANCHSTRATEGY");
+    for (char& c : upperStrategy) {
+        c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+    }
+    _branchStrategy = SearchAlgorithm::NONE; // default
+    if (upperStrategy == "BFS")   _branchStrategy = SearchAlgorithm::BFS;
+    if (upperStrategy == "DFS")   _branchStrategy = SearchAlgorithm::DFS;
+    if (upperStrategy == "NONE")  _branchStrategy = SearchAlgorithm::NONE;
 }
 
 BBTree::~BBTree()
 {
     _nodes.clear();
-}
-
-// ============================================================
-// Tree construction
-// ============================================================
-
-void BBTree::populateTreeDFS(int node, int depth)
-{
-    if (depth == 0)
-        return;
-
-    createEmptyNode(node);
-    _nodes[node]._leftSon = _nodesCount - 1;
-    populateTreeDFS(_nodes[node]._leftSon, depth - 1);
-
-    createEmptyNode(node);
-    _nodes[node]._rightSon = _nodesCount - 1;
-    populateTreeDFS(_nodes[node]._rightSon, depth - 1);
-}
-
-void BBTree::populateTreeBFS(int node, int depth)
-{
-    int pointer = 0;
-    int lastNode;
-
-    for (int i = 0; i < depth; i++) {
-        lastNode = _nodesCount;
-        while (pointer < lastNode) {
-			
-            createEmptyNode(pointer);
-            _nodes[pointer]._leftSon = _nodesCount - 1;
-
-            createEmptyNode(pointer);
-            _nodes[pointer]._rightSon = _nodesCount - 1;
-
-            pointer++;
-        }
-    }
+	_openNodes.clear();
 }
 
 // ============================================================
@@ -165,38 +133,69 @@ void BBTree::ExecuteNode(int node)
 
 bool BBTree::MoveToNextOpenNode()
 {
-    while (_nodes[_currentNode]._executed || _nodes[_currentNode]._pruned) {
-        _currentNode++;
-        if (_currentNode == _nodesCount)
-            return false;
+    while (!_openNodes.empty()) {
+        int node = _openNodes.front();
+        _openNodes.pop_front();
+        if (_nodes[node]._executed || _nodes[node]._pruned) {
+            continue;
+        }
+        _currentNode = node;
+        return true;
     }
-    return true;
+    return false;
+}
+
+void BBTree::ScheduleChildren(int node) {
+    int left = _nodes[node]._leftSon;
+    int right = _nodes[node]._rightSon;
+
+    if (_branchStrategy == SearchAlgorithm::DFS) {
+        if (right >= 0)  _openNodes.push_front(right);
+        if (left >= 0 )  _openNodes.push_front(left);
+    }
+    else if (_branchStrategy == SearchAlgorithm::BFS) {
+        if (left >= 0)  _openNodes.push_back(left);
+        if (right >= 0) _openNodes.push_back(right);
+    }
 }
 
 void BBTree::BranchNode(int node)
 {
-    Variable* v = _nodes[node]._solver->ChooseBranchVariable();
+    assert(!_nodes[node].HasChild());
+
+    Variable* v = ChooseBranchVariable(node);
     _nodes[node]._branchVariable = v;
 
-    if (_nodes[node]._leftSon > 0) {
-        _nodes[_nodes[node]._leftSon]._value = 1;
-        _nodes[_nodes[node]._leftSon]._initialCost = v->_cost + _nodes[node]._initialCost;
-    }
+    int left = createEmptyNode(node);
+    _nodes[node]._leftSon = left;
+    _nodes[left]._value = 1;
+    _nodes[left]._initialCost = v->_cost + _nodes[node]._initialCost;
 
-    if (_nodes[node]._rightSon > 0) {
-        _nodes[_nodes[node]._rightSon]._value = 0;
-        _nodes[_nodes[node]._rightSon]._initialCost = _nodes[node]._initialCost;
-    }
+    int right = createEmptyNode(node);
+    _nodes[node]._rightSon = right;
+    _nodes[right]._value = 0;
+    _nodes[right]._initialCost = _nodes[node]._initialCost;
+
+	ScheduleChildren(node);
 }
 
 bool BBTree::ShouldBranchNode(int node)
 {
-    return !_nodes[node]._optimalFound && _nodes[node].HasChild();
+    if (_nodes[node]._optimalFound) 
+        return false;
+
+    if (_nodes[node]._depth >= _config->MAX_DEPTH)
+        return false;
+
+    if (_nodesCount + 2 > _config->MAX_NODES)
+        return false;
+
+    return true;
 }
 
-Variable* BBTree::ChooseBranchVariable()
+Variable* BBTree::ChooseBranchVariable(int node)
 {
-    return _nodes[_currentNode]._solver->ChooseBranchVariable();
+    return _nodes[node]._solver->ChooseBranchVariable();
 }
 
 // ============================================================
@@ -276,13 +275,16 @@ short int BBTree::getFather(int node)
 // Tree maintenance
 // ============================================================
 
-void BBTree::createEmptyNode(int father)
+int BBTree::createEmptyNode(int father)
 {
     BBTreeNode n(_config);
     n._father = father;
+    if (father >= 0) 
+        n._depth = _nodes[father]._depth + 1;
     n._index = _nodesCount;
     _nodes.push_back(n);
     _nodesCount++;
+	return _nodesCount - 1;
 }
 
 void BBTree::pruneSubTree(BBTreeNode* node)

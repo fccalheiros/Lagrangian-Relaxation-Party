@@ -20,6 +20,7 @@ public:
 	int STOP_GAP = 2;
 
 	int MAX_DEPTH = 10;
+	int MAX_NODES = 500;
 
 	bool RESTART = false;
 	int RESTART_ITERATIONS = 1001;

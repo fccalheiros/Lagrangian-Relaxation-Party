@@ -25,8 +25,7 @@ int originalMain (int argc, char * argv[]) {
     algorithm->setLagrangianManager(manager);
     manager->GenerateProblem(argv[1]);
 
-    SearchAlgorithm sa = ParseBranchStrategy(config->getValue("BRANCHSTRATEGY"));
-    BBTree bbTree(manager, algorithm, sa, config);
+    BBTree bbTree(manager, algorithm, config);
 
     if ( argc == 3 ) { 
         StartStats();
@@ -91,17 +90,6 @@ static bool CheckUsage(int argc, char* argv[])
     }
 
     return ok;
-}
-
-SearchAlgorithm ParseBranchStrategy(const std::string& strategy) {
-    std::string upperStrategy = strategy;
-    for (char& c : upperStrategy) {
-        c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
-    }
-	if (upperStrategy == "BFS")   return SearchAlgorithm::BFS;
-    if (upperStrategy == "DFS")   return SearchAlgorithm::DFS;
-	if (upperStrategy == "NONE")  return SearchAlgorithm::NONE;
-    return SearchAlgorithm::NONE; // default
 }
 
 Configuration* LoadConfig(const char* configFile) {
