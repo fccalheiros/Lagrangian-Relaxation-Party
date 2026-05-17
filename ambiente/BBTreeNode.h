@@ -23,6 +23,13 @@ class Solver;
 // - Keep tree topology information
 // ============================================================
 
+enum class NodeState {
+    OPEN,
+    EXECUTING,
+    EXECUTED,
+    PRUNED
+};
+
 class BBTreeNode {
 
     friend class BBTree;
@@ -37,8 +44,8 @@ public:
 	
 	explicit BBTreeNode(Configuration* config)
 	{
-    _lowerBound = config->MINUS00;
-    _upperBound = config->PLUS00;
+        _lowerBound = config->MINUS00;
+        _upperBound = config->PLUS00;
 	}
 
     BBTreeNode(const BBTreeNode&) = default;
@@ -52,6 +59,10 @@ public:
     inline bool HasChild() const {
         return (_leftSon != -1 || _rightSon != -1);
     }
+
+    bool ReachedFinalState() const {
+        return _state == NodeState::EXECUTED || _state == NodeState::PRUNED;
+	}
 
 protected:
 
@@ -84,8 +95,8 @@ protected:
     // ========================================================
 
     bool _optimalFound = false;
-    bool _executed = false;
-    bool _pruned = false;
+
+	NodeState _state = NodeState::OPEN;
 
     // ========================================================
     // Statistics

@@ -163,9 +163,9 @@ protected:
 
     inline int createEmptyNode(int father);
 
-    inline void cleanUpNode(int node);
+    inline void ReleaseNodeRuntime(int node);
 
-    inline void cleanUpNode(BBTreeNode* node);
+    inline void ReleaseNodeRuntime(BBTreeNode* node);
 
     // ========================================================
     // Output helpers

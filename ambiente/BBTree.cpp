@@ -77,6 +77,7 @@ void BBTree::GO()
 void BBTree::ExecuteNode(int node)
 {
     Variable* v = nullptr;
+	_nodes[node]._state = NodeState::EXECUTING;
 
     // ========================================================
     // Create node problem
@@ -104,7 +105,7 @@ void BBTree::ExecuteNode(int node)
     // Store node results
     // ========================================================
 
-    _nodes[node]._executed = true;
+	_nodes[node]._state = NodeState::EXECUTED;
     _nodesExecuted++;
     _nodes[node]._lowerBound = _nodes[node]._manager->getLowerBound();
     _nodes[node]._upperBound = _nodes[node]._manager->getUpperBound();
@@ -113,14 +114,15 @@ void BBTree::ExecuteNode(int node)
     _nodes[node]._totalRunTime = _nodes[node]._manager->TotalRunTime();
 
     // ========================================================
-    // Cleanup parent node
+    // Releasing parent node runtime resources
     // ========================================================
 
     int father = getFather(node);
 
     if (father >= 0) {
-        if (_nodes[_nodes[father]._leftSon]._executed && _nodes[_nodes[father]._rightSon]._executed) {
-            cleanUpNode(father);
+        if (_nodes[_nodes[father]._leftSon].ReachedFinalState() 
+            && _nodes[_nodes[father]._rightSon].ReachedFinalState()) {
+            ReleaseNodeRuntime(father);
         }
     }
 
@@ -136,7 +138,7 @@ bool BBTree::MoveToNextOpenNode()
     while (!_openNodes.empty()) {
         int node = _openNodes.front();
         _openNodes.pop_front();
-        if (_nodes[node]._executed || _nodes[node]._pruned) {
+        if (_nodes[node].ReachedFinalState()) {
             continue;
         }
         _currentNode = node;
@@ -295,10 +297,11 @@ void BBTree::pruneSubTree(BBTreeNode* node)
 void BBTree::pruneSubTree(int node)
 {
     if (node > 0) {
-        if (_nodes[node]._pruned)
+        if (_nodes[node]._state == NodeState::PRUNED)
             return;
-        _nodes[node]._pruned = true;
-        cleanUpNode(node);
+        if (_nodes[node]._state != NodeState::EXECUTED)
+		    _nodes[node]._state = NodeState::PRUNED;    
+        ReleaseNodeRuntime(node);
         pruneSubTree(_nodes[node]._leftSon);
         pruneSubTree(_nodes[node]._rightSon);
     }
@@ -320,19 +323,19 @@ void BBTree::reBoundSubtree(int node)
     }
 }
 
-void BBTree::cleanUpNode(int node)
+void BBTree::ReleaseNodeRuntime(int node)
 {
     if (node >= 0) {
         if (_nodes[node]._manager == NULL)
             return;
-        _nodes[node]._manager->FreeMemory();
+        _nodes[node]._manager->ReleaseRuntimeResources();
     }
 }
 
-void BBTree::cleanUpNode(BBTreeNode* node)
+void BBTree::ReleaseNodeRuntime(BBTreeNode* node)
 {
     if (node != NULL)
-        cleanUpNode(node->_index);
+        ReleaseNodeRuntime(node->_index);
 }
 
 // ============================================================
@@ -445,7 +448,7 @@ void BBTree::PrintBFS(int node, std::string& output)
     if (node < 0)
         return;
 
-    if (!_nodes[node]._executed)
+    if ( _nodes[node]._state != NodeState::EXECUTED)
         return;
 
     std::stringstream work;
@@ -466,10 +469,10 @@ void BBTree::PrintBFS(int node, std::string& output)
     work << "UB: "  << _nodes[node]._originalBound  << std::endl;
     work << "LB: "  << _nodes[node]._lowerBound     << std::endl;
 
-    work << "Optimal found: " << _nodes[node]._optimalFound  << std::endl;
-    work << "Executed: "      << _nodes[node]._executed      << std::endl;
-    work << "Pruned: "        << _nodes[node]._pruned        << std::endl;
-    work << "Run Time: "      << _nodes[node]._totalRunTime  << std::endl;
+    work << "Optimal found: " << _nodes[node]._optimalFound                    << std::endl;
+    work << "Executed: "      << (_nodes[node]._state == NodeState::EXECUTED)  << std::endl;
+    work << "Pruned: "        << (_nodes[node]._state == NodeState::PRUNED)    << std::endl;
+    work << "Run Time: "      << _nodes[node]._totalRunTime                    << std::endl;
     work << "------------------------------------------------------" << std::endl;
 
     output = work.str();
@@ -484,7 +487,7 @@ void BBTree::SetFantasyNumber(int node, int& number)
         number--;
         return;
     }
-    if (!_nodes[node]._executed) {
+    if (_nodes[node]._state != NodeState::EXECUTED) {
         number--;
         return;
     }

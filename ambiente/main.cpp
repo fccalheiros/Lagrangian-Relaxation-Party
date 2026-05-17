@@ -19,13 +19,13 @@ int originalMain (int argc, char * argv[]) {
     srand(13);
 
 	Configuration* config = LoadConfig(argv[2]);
-    RGPLagrangianRelaxation* algorithm = new RGPLagrangianRelaxation(config);
+    RGPLagrangianRelaxation* solver = new RGPLagrangianRelaxation(config);
     auto sorter = std::make_shared<ParallelSorter>();
-    RGPManager *manager = new RGPManager(config, algorithm,sorter);
-    algorithm->setLagrangianManager(manager);
+    RGPManager *manager = new RGPManager(config, solver,sorter);
+    solver->setLagrangianManager(manager);
     manager->GenerateProblem(argv[1]);
 
-    BBTree bbTree(manager, algorithm, config);
+    BBTree bbTree(manager, solver, config);
 
     if ( argc == 3 ) { 
         StartStats();
@@ -54,6 +54,9 @@ int originalMain (int argc, char * argv[]) {
         return 0;
     }
  
+    delete solver;
+    delete manager;
+    delete config;
     return 0;
 
 }

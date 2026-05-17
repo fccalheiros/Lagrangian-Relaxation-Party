@@ -105,10 +105,10 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
 }
 
 LagrangianManager::~LagrangianManager() {
-    FreeMemory();
+    ReleaseRuntimeResources();
 }
 
-void LagrangianManager::FreeMemory() {
+void LagrangianManager::ReleaseRuntimeResources() {
 
     VariableIterator varIni, varFim, varLixo;
     ConstraintIterator proIni, proFim, proLixo;

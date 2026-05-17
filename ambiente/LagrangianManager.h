@@ -247,7 +247,7 @@ public:
     // ========================================================
     // Memory / lifecycle
     // ========================================================
-    void FreeMemory();
+    void ReleaseRuntimeResources();
     void GenerateProblem(char* arq);
 
     void CleanupDeletedConstraints();
