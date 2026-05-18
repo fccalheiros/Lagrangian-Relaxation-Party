@@ -9,14 +9,16 @@
 // Constructors / Destructor
 // ============================================================
 
-BBTree::BBTree()
+BBTree::BBTree() :
+    _priorityOpenNodes(NodePriorityComparator(this))
 {
     _nodes.reserve(static_cast<int>(std::pow(2, 5)));
     createEmptyNode(-1);
 }
 
 BBTree::BBTree(LagrangianManager* manager, Solver* solver, Configuration* config)
-    : _config(config)
+    : _config(config),
+      _priorityOpenNodes(NodePriorityComparator(this))
 {
     SetBranchStrategy();
     _nodes.reserve(_config->MAX_NODES);
@@ -32,15 +34,21 @@ void BBTree::SetBranchStrategy() {
         c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
     }
     _branchStrategy = SearchAlgorithm::NONE; // default
-    if (upperStrategy == "BFS")   _branchStrategy = SearchAlgorithm::BFS;
-    if (upperStrategy == "DFS")   _branchStrategy = SearchAlgorithm::DFS;
-    if (upperStrategy == "NONE")  _branchStrategy = SearchAlgorithm::NONE;
+    if (upperStrategy == "BFS")        _branchStrategy = SearchAlgorithm::BFS;
+    if (upperStrategy == "DFS")        _branchStrategy = SearchAlgorithm::DFS;
+    if (upperStrategy == "BEST_BOUND") _branchStrategy = SearchAlgorithm::BEST_BOUND;
+    if (upperStrategy == "NONE")       _branchStrategy = SearchAlgorithm::NONE;
 }
 
 BBTree::~BBTree()
 {
+    for (auto& node : _nodes) {
+        delete node._manager;
+        node._manager = nullptr;
+    }
+
     _nodes.clear();
-	_openNodes.clear();
+    _openNodes.clear();
 }
 
 // ============================================================
@@ -91,6 +99,7 @@ void BBTree::ExecuteNode(int node)
         _nodes[node]._solver = _nodes[father]._solver->getNew();
         _nodes[node]._manager->SetSolver(_nodes[node]._solver);
         _nodes[node]._manager->SetVariableForBranch(v, _nodes[node]._value);
+		ReleaseNodeRuntime(father);
     }
 
     PrintNodeStart(node);
@@ -113,38 +122,49 @@ void BBTree::ExecuteNode(int node)
     _nodes[node]._originalBound = _nodes[node]._manager->getPrimalBound();
     _nodes[node]._totalRunTime = _nodes[node]._manager->TotalRunTime();
 
+    PrintNodeEnd(node);
+
     // ========================================================
     // Releasing parent node runtime resources
     // ========================================================
-
-    int father = getFather(node);
-
-    if (father >= 0) {
-        if (_nodes[_nodes[father]._leftSon].ReachedFinalState() 
-            && _nodes[_nodes[father]._rightSon].ReachedFinalState()) {
-            ReleaseNodeRuntime(father);
-        }
-    }
-
-    PrintNodeEnd(node);
+    
+    ReleaseNodeRuntime(node);  // in case optimal found.
+	ReleaseNodeRuntime(getFather(node)); // in case two sons were executed
 }
 
 // ============================================================
 // Branching control
 // ============================================================
 
-bool BBTree::MoveToNextOpenNode()
+bool BBTree::MoveToNextOpenNode() 
 {
-    while (!_openNodes.empty()) {
-        int node = _openNodes.front();
-        _openNodes.pop_front();
-        if (_nodes[node].ReachedFinalState()) {
-            continue;
+    if (_branchStrategy == SearchAlgorithm::BEST_BOUND) {
+       
+        while (!_priorityOpenNodes.empty()) {
+            int node = _priorityOpenNodes.top();
+            _priorityOpenNodes.pop();
+            if (_nodes[node]._state != NodeState::OPEN) {
+                continue;
+            }
+            _currentNode = node;
+            return true;
         }
-        _currentNode = node;
-        return true;
+        return false;
+	}
+    else if (_branchStrategy == SearchAlgorithm::DFS || _branchStrategy == SearchAlgorithm::BFS) {
+
+        while (!_openNodes.empty()) {
+            int node = _openNodes.front();
+            _openNodes.pop_front();
+            if (_nodes[node]._state != NodeState::OPEN) {
+                continue;
+            }
+            _currentNode = node;
+            return true;
+        }
+        return false;
     }
-    return false;
+	return false;
 }
 
 void BBTree::ScheduleChildren(int node) {
@@ -159,6 +179,10 @@ void BBTree::ScheduleChildren(int node) {
         if (left >= 0)  _openNodes.push_back(left);
         if (right >= 0) _openNodes.push_back(right);
     }
+    else if (_branchStrategy == SearchAlgorithm::BEST_BOUND) {
+        if (left >= 0)  _priorityOpenNodes.push(left);
+        if (right >= 0) _priorityOpenNodes.push(right);
+	}
 }
 
 void BBTree::BranchNode(int node)
@@ -256,6 +280,16 @@ bool BBTree::CheckGlobalOptimality() {
     return ( getUpperBound() - getLowerBound() ) < _config->STOP_GAP;
 }
 
+void BBTree::UpdateNodePriority(int node) {
+	
+    int father = getFather(node);
+	float priority = 0.0f;
+    if (father >= 0) {
+		priority = _nodes[father]._lowerBound;
+    }
+    _nodes[node]._priority = priority + 0.001f * _nodes[node]._depth;
+}
+
 // ============================================================
 // Tree navigation
 // ============================================================
@@ -286,6 +320,7 @@ int BBTree::createEmptyNode(int father)
     n._index = _nodesCount;
     _nodes.push_back(n);
     _nodesCount++;
+    UpdateNodePriority(n._index);
 	return _nodesCount - 1;
 }
 
@@ -328,7 +363,16 @@ void BBTree::ReleaseNodeRuntime(int node)
     if (node >= 0) {
         if (_nodes[node]._manager == NULL)
             return;
-        _nodes[node]._manager->ReleaseRuntimeResources();
+        if (_nodes[node]._optimalFound) {
+			_nodes[node]._manager->ReleaseRuntimeResources();
+            return;
+		}
+        if ( (_nodes[node]._leftSon > 0) && (_nodes[node]._rightSon > 0) ) {
+            if (_nodes[_nodes[node]._leftSon]._state != NodeState::OPEN
+                && _nodes[_nodes[node]._rightSon]._state != NodeState::OPEN) {
+                _nodes[node]._manager->ReleaseRuntimeResources();
+            }
+        }
     }
 }
 

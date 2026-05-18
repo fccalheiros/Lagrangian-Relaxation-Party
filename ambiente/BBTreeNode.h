@@ -50,7 +50,7 @@ public:
 
     BBTreeNode(const BBTreeNode&) = default;
 
-    ~BBTreeNode() = default;
+    ~BBTreeNode() = default; 
 
     // ========================================================
     // State helpers
@@ -89,6 +89,8 @@ protected:
 
     float _initialCost = 0.0f;
     float _originalBound = 0.0f;
+
+	float _priority = 0.0f;
 
     // ========================================================
     // Execution state

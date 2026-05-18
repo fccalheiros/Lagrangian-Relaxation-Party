@@ -16,7 +16,6 @@ void Cuts(LagrangianManager* prob, FILE* output);
 static void StartStats();
 static void EndStats();
 static bool CheckUsage(int argc, char* argv[]);
-SearchAlgorithm ParseBranchStrategy(const std::string& strategy);
 Configuration* LoadConfig(const char* configFile);
 
 template<class T> struct  Imprime  {

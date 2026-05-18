@@ -106,6 +106,9 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
 
 LagrangianManager::~LagrangianManager() {
     ReleaseRuntimeResources();
+    for (Variable* var : _incumbentSolution) {
+        delete var;
+	}
 }
 
 void LagrangianManager::ReleaseRuntimeResources() {

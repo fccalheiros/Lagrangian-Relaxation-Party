@@ -23,7 +23,8 @@
 // Search strategy
 // ============================================================
 
-enum class SearchAlgorithm { DFS, BFS, NONE };
+enum class SearchAlgorithm { DFS, BFS, BEST_BOUND, NONE };
+
 
 // ============================================================
 // BBTree
@@ -40,6 +41,23 @@ enum class SearchAlgorithm { DFS, BFS, NONE };
 // ============================================================
 
 class BBTree {
+
+private:
+
+    struct NodePriorityComparator {
+
+        const BBTree* tree = nullptr;
+
+        NodePriorityComparator() = default;
+
+        NodePriorityComparator(BBTree* t)
+            : tree(t) {
+        }
+
+        bool operator()(int a, int b) const {
+            return tree->_nodes[a]._priority > tree->_nodes[b]._priority;
+        }
+    };
 
 public:
 
@@ -108,6 +126,7 @@ protected:
     std::vector<BBTreeNode> _nodes;
 
     std::deque<int> _openNodes;
+    std::priority_queue<int,std::vector<int>, NodePriorityComparator > _priorityOpenNodes;
 
     Configuration* _config = nullptr;
 
@@ -128,6 +147,8 @@ protected:
     Variable* ChooseBranchVariable(int node);
 
     bool CheckGlobalOptimality();
+
+    void UpdateNodePriority(int node);
 
     // ========================================================
     // Node operations
