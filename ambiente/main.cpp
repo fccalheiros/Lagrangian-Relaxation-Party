@@ -56,6 +56,7 @@ int originalMain (int argc, char * argv[]) {
  
     delete manager;
     delete config;
+	delete solver;
     return 0;
 
 }

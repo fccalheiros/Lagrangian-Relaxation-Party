@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <string>
 #include <sstream>
+#include <algorithm>
 
 #include "Variable.h"
 #include "Constraint.h"
@@ -243,6 +244,10 @@ public:
     void StoreIncumbentfromBranchAndBound(VariableSet& set) { StoreIncumbent(set); }
     void AddToIncumbentfromBranchAndBound(Variable* var) { AddToIncumbent(var); }
     virtual void SetVariableForBranch(Variable* v, short int value);
+	virtual float ComputeChildPriority(Variable* v, short int value) const { 
+		float priority = value == 0 ?  (std::max)(- v->_lagrangianCost, 0.0f) : (std::max)(v->_lagrangianCost, 0.0f);
+        return ( getLowerBound() + priority ); 
+    }
 
     // ========================================================
     // Memory / lifecycle

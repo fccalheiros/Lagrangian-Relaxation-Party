@@ -11,7 +11,6 @@
 
 #include <vector>
 #include <string>
-#include <deque>
 
 #include "BBTreeNode.h"
 #include "Variable.h"
@@ -23,7 +22,7 @@
 // Search strategy
 // ============================================================
 
-enum class SearchAlgorithm { DFS, BFS, BEST_BOUND, NONE };
+enum class SearchAlgorithm { DFS, BFS, BEST_BOUND, CUSTOM, NONE };
 
 
 // ============================================================
@@ -125,7 +124,6 @@ protected:
 
     std::vector<BBTreeNode> _nodes;
 
-    std::deque<int> _openNodes;
     std::priority_queue<int,std::vector<int>, NodePriorityComparator > _priorityOpenNodes;
 
     Configuration* _config = nullptr;

@@ -46,7 +46,7 @@ LagrangianManager* LagrangianManager::CopyAndClean(LagrangianManager* m) {
     {
         m->_upperBound           = _config->PLUS00;
         m->_lowerBound           = _config->MINUS00;
-        m->_solver                 = _solver;
+        m->_solver               = _solver;
         m->_direction            = _direction;
         m->_countConstraints     = 0;
         m->_countConstraintsND   = 0;

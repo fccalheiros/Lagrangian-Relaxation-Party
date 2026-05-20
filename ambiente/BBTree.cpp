@@ -25,7 +25,7 @@ BBTree::BBTree(LagrangianManager* manager, Solver* solver, Configuration* config
     createEmptyNode(-1);
     _nodes[0]._manager = manager;
     _nodes[0]._solver = solver;
-    _openNodes.push_back(0);
+	_priorityOpenNodes.push(0);
 }
 
 void BBTree::SetBranchStrategy() {
@@ -37,18 +37,24 @@ void BBTree::SetBranchStrategy() {
     if (upperStrategy == "BFS")        _branchStrategy = SearchAlgorithm::BFS;
     if (upperStrategy == "DFS")        _branchStrategy = SearchAlgorithm::DFS;
     if (upperStrategy == "BEST_BOUND") _branchStrategy = SearchAlgorithm::BEST_BOUND;
+    if (upperStrategy == "CUSTOM")     _branchStrategy = SearchAlgorithm::CUSTOM;
     if (upperStrategy == "NONE")       _branchStrategy = SearchAlgorithm::NONE;
 }
 
 BBTree::~BBTree()
 {
-    for (auto& node : _nodes) {
-        delete node._manager;
-        node._manager = nullptr;
+    for (size_t i = 1; i < _nodes.size(); i++) {
+        delete _nodes[i]._manager;
+		_nodes[i]._manager = nullptr;
+
+        delete _nodes[i]._solver;
+        _nodes[i]._solver = nullptr;
     }
 
     _nodes.clear();
-    _openNodes.clear();
+    std::priority_queue<int, std::vector<int>, NodePriorityComparator> empty(NodePriorityComparator(this));
+	_priorityOpenNodes.swap(empty);
+
 }
 
 // ============================================================
@@ -138,7 +144,7 @@ void BBTree::ExecuteNode(int node)
 
 bool BBTree::MoveToNextOpenNode() 
 {
-    if (_branchStrategy == SearchAlgorithm::BEST_BOUND) {
+    if (_branchStrategy != SearchAlgorithm::NONE) {
        
         while (!_priorityOpenNodes.empty()) {
             int node = _priorityOpenNodes.top();
@@ -151,19 +157,6 @@ bool BBTree::MoveToNextOpenNode()
         }
         return false;
 	}
-    else if (_branchStrategy == SearchAlgorithm::DFS || _branchStrategy == SearchAlgorithm::BFS) {
-
-        while (!_openNodes.empty()) {
-            int node = _openNodes.front();
-            _openNodes.pop_front();
-            if (_nodes[node]._state != NodeState::OPEN) {
-                continue;
-            }
-            _currentNode = node;
-            return true;
-        }
-        return false;
-    }
 	return false;
 }
 
@@ -171,15 +164,8 @@ void BBTree::ScheduleChildren(int node) {
     int left = _nodes[node]._leftSon;
     int right = _nodes[node]._rightSon;
 
-    if (_branchStrategy == SearchAlgorithm::DFS) {
-        if (right >= 0)  _openNodes.push_front(right);
-        if (left >= 0 )  _openNodes.push_front(left);
-    }
-    else if (_branchStrategy == SearchAlgorithm::BFS) {
-        if (left >= 0)  _openNodes.push_back(left);
-        if (right >= 0) _openNodes.push_back(right);
-    }
-    else if (_branchStrategy == SearchAlgorithm::BEST_BOUND) {
+	// NONE means no B&B at all, so we do not schedule children.
+    if (_branchStrategy != SearchAlgorithm::NONE) {
         if (left >= 0)  _priorityOpenNodes.push(left);
         if (right >= 0) _priorityOpenNodes.push(right);
 	}
@@ -281,13 +267,33 @@ bool BBTree::CheckGlobalOptimality() {
 }
 
 void BBTree::UpdateNodePriority(int node) {
-	
-    int father = getFather(node);
-	float priority = 0.0f;
-    if (father >= 0) {
-		priority = _nodes[father]._lowerBound;
+    if (_branchStrategy == SearchAlgorithm::BFS) {
+        _nodes[node]._priority = static_cast<float>(_nodes[node]._depth + _nodesCount / 1E6f);
+        return;
     }
-    _nodes[node]._priority = priority + 0.001f * _nodes[node]._depth;
+    if ( _branchStrategy == SearchAlgorithm::DFS) {
+        _nodes[node]._priority = static_cast<float>(-(_nodes[node]._depth + 1/(_nodesCount+1))) ;
+        return;
+	}
+    if ( _branchStrategy == SearchAlgorithm::BEST_BOUND) {
+        int father = getFather(node);
+        float priority = 0.0f;
+        if (father >= 0) {
+            priority = _nodes[father]._lowerBound;
+        }
+        _nodes[node]._priority = priority + 0.001f * static_cast<float>(_nodes[node]._depth);
+        return;
+	}
+    if (_branchStrategy == SearchAlgorithm::CUSTOM) {
+        int father = getFather(node);
+        if (father >= 0) {
+            Variable* v = _nodes[father]._branchVariable;
+            short int value = _nodes[node]._value;
+            _nodes[node]._priority = _nodes[father]._manager->ComputeChildPriority(v, value);
+            return;
+        }
+    }
+    _nodes[node]._priority = 0.0f;
 }
 
 // ============================================================
